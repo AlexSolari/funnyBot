@@ -1,0 +1,6 @@
+token.test
+node_modules/
+package-lock.json
+.vscode/
+token.prod
+storage/
