@@ -1,6 +1,6 @@
 const TeleBot = require('telebot');
 const BotApiHelper = require('../helpers/botApi');
-const storage = require('../services/storage');
+const pioneerChat = -1001572054460;
 
 class Bot {
     constructor() {
@@ -10,7 +10,7 @@ class Bot {
         this.triggers = [];
         this.commandQueue = [];
 
-        this.broadcastPool = [-1001572054460];
+        this.broadcastPool = [pioneerChat];
     }
 
     addCommand(command) {
@@ -61,13 +61,13 @@ class Bot {
 
     runTriggers(){
         this.broadcastPool.forEach(chat => {
-            this.triggers.forEach(trig => trig.exec(this.api, chat));
+            this.triggers.forEach(async trig => await trig.exec(this.api, chat));
         });
     }
 
     dequeue(msg) {
-        this.commands.forEach(cmd => {
-            cmd.exec(msg.text, this.api, msg);
+        this.commands.forEach(async cmd => {
+            await cmd.exec(msg.text, this.api, msg);
         });
     }
 }

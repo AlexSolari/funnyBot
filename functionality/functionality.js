@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-module.exports = function(){
+module.exports = (function(){
     console.log("Loading functionality...");
 
     const normalizedCommandsPath = path.join(__dirname, "commands");
@@ -25,4 +25,4 @@ module.exports = function(){
         commands,
         triggers
     }
-};
+})();

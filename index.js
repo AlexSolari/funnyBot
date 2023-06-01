@@ -1,12 +1,12 @@
 const fs = require('fs');
 const Bot = require('./entities/bot');
-const loadFunctionality = require('./functionality/functionality');
 const CommandBuilder = require('./helpers/commandBuilder');
+const functionality = require('./functionality/functionality');
+const chz = 65947221;
 
 console.log("Initializing bot...");
 
 const bot = new Bot();
-const functionality = loadFunctionality();
 
 functionality.commands.forEach(cmd => bot.addCommand(cmd));
 functionality.triggers.forEach(cmd => bot.addTrigger(cmd));
@@ -14,7 +14,7 @@ functionality.triggers.forEach(cmd => bot.addTrigger(cmd));
 const devLoad = new CommandBuilder("Dev.Load")
     .on(/add (?<name>\w+)/i)
     .do((api, msg, result) => {
-        if (msg.from.id != 65947221){
+        if (msg.from.id != chz){
             return;
         }
         
@@ -31,12 +31,12 @@ const devLoad = new CommandBuilder("Dev.Load")
 const devUnload = new CommandBuilder("Dev.Unload")
     .on(/remove (?<name>\w+)/i)
     .do((api, msg, result) => {
-        if (msg.from.id != 65947221){
+        if (msg.from.id != chz){
             return;
         }
         
         const commandName = `Reaction.${result.groups.name}`;
-        console.log(`Unoading command [${commandName}]...`);
+        console.log(`Unloading command [${commandName}]...`);
 
         bot.removeCommand(commandName);
 
@@ -51,7 +51,6 @@ fs.readFile('token.prod', 'utf8', (err, data) => {
     if (err) {
         console.error(err);
     } else {
-        console.log("Bot started.");
         bot.start(data);
     }
 });

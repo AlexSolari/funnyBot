@@ -15,14 +15,14 @@ class Trigger{
         return `trigger:${this.name.replace('.', '-')}`;
     }
 
-    exec(api, chatId){
+    async exec(api, chatId){
         if (!this.active)
             return;
 
         if (this.shouldTrigger()){
             console.log(` - Executing [${this.name}]`);
             const t0 = performance.now();
-            this.handler(api, chatId);
+            await this.handler(api, chatId);
             const t1 = performance.now();
             console.log(` - [${this.name}] took ${(t1 - t0).toFixed(3)} ms.`);
 

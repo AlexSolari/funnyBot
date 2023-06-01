@@ -17,7 +17,7 @@ class Command{
         return `command:${this.name.replace('.', '-')}`;
     }
 
-    exec(message, api, botMessage){
+    async exec(message, api, botMessage){
         if (!this.active)
             return;
 
@@ -37,7 +37,7 @@ class Command{
         if (shouldTrigger && this.condition(botMessage)){
             console.log(` - Executing [${this.name}] with arguments ${JSON.stringify(matchResult)}`);
             const t0 = performance.now();
-            this.handler(api, botMessage, matchResult);
+            await this.handler(api, botMessage, matchResult);
             const t1 = performance.now();
             console.log(` - [${this.name}] took ${(t1 - t0).toFixed(3)} ms.`);
 

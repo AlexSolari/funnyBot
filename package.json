@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "moment": "^2.29.4",
+    "node-fetch": "^2.6.11",
+    "telebot": "^1.4.1"
+  }
+}
