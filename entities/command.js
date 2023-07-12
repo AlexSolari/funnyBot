@@ -4,13 +4,14 @@ const {
   const storage = require('../services/storage');
 
 class Command{
-    constructor(trigger, condition, handler, name, active, cooldown){
+    constructor(trigger, condition, handler, name, active, cooldown, chatsBlacklist){
         this.trigger = trigger;
         this.condition = condition;
         this.handler = handler;
         this.name = name;
         this.cooldown = cooldown;
         this.active = active;
+        this.chatsBlacklist = chatsBlacklist;
     }
 
     get key(){
@@ -18,7 +19,7 @@ class Command{
     }
 
     async exec(message, api, botMessage){
-        if (!this.active)
+        if (!this.active || this.chatsBlacklist.indexOf(botMessage.chat.id) != -1)
             return;
 
         let shouldTrigger = false;

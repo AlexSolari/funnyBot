@@ -6,4 +6,5 @@ module.exports = new CommandBuilder("Reaction.Kalitas")
         api.image("kalitas", msg.chat.id, msg.message_id);
     })
     .cooldown(7200)
+    .disabled()
     .build();

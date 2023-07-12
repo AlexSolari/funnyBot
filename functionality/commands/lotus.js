@@ -15,4 +15,5 @@ module.exports = new CommandBuilder("Reaction.Lotus")
         api.image(imageName, msg.chat.id, msg.message_id);
     })
     .cooldown(7200)
+    .disabled()
     .build();

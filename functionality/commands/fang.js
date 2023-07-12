@@ -21,4 +21,5 @@ module.exports = new CommandBuilder("Reaction.Fang")
         }
     })
     .cooldown(7200)
+    .disabled()
     .build();

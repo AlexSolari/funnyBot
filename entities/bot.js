@@ -1,6 +1,6 @@
 const TeleBot = require('telebot');
 const BotApiHelper = require('../helpers/botApi');
-const pioneerChat = -1001572054460;
+const chatIds = require('../helpers/chatIds');
 
 class Bot {
     constructor() {
@@ -10,7 +10,7 @@ class Bot {
         this.triggers = [];
         this.commandQueue = [];
 
-        this.broadcastPool = [pioneerChat];
+        this.broadcastPool = [chatIds.pioneerChat, chatIds.modernChat];
     }
 
     addCommand(command) {

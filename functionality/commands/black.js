@@ -6,4 +6,5 @@ module.exports = new CommandBuilder("Reaction.Black")
         api.image("monoB", msg.chat.id, msg.message_id);
     })
     .cooldown(7200)
+    .disabled()
     .build();

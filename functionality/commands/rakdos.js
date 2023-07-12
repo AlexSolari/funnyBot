@@ -6,4 +6,5 @@ module.exports = new CommandBuilder("Reaction.Rakdos")
         api.image("rakdos", msg.chat.id, msg.message_id);
     })
     .cooldown(7200)
+    .disabled()
     .build();

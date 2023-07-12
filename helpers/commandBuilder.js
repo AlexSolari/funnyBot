@@ -8,6 +8,7 @@ class CommandBuilder{
         this.cooldownSeconds = 0;
         this.condition = () => true;
         this.handler = () => {};
+        this.blacklist = [];
     }
 
     on(trigger){
@@ -40,8 +41,14 @@ class CommandBuilder{
         return this;
     }
 
+    ignoreChat(chatId){
+        this.blacklist.push(chatId);
+
+        return this;
+    }
+
     build(){
-        return new Command(this.trigger, this.condition, this.handler, this.name, this.active, this.cooldownSeconds);
+        return new Command(this.trigger, this.condition, this.handler, this.name, this.active, this.cooldownSeconds, this.blacklist);
     }
 }
 
