@@ -28,7 +28,6 @@ module.exports = new TriggerBuilder("Trigger.LowCount")
                     return;
             }
 
-
             const data = await response.json();
             const target = data.slots.map(x => x.date_slots.map(ds => ds.slots.find(dss => dss.gt.service.name == serviceName))).flat(Infinity).filter(x => x)[0];
 

@@ -1,7 +1,5 @@
-const {
-    performance
-  } = require('perf_hooks');
-  const storage = require('../services/storage');
+const { performance } = require('perf_hooks');
+const storage = require('../services/storage');
 
 class Command{
     constructor(trigger, condition, handler, name, active, cooldown, chatsBlacklist){
@@ -22,6 +20,7 @@ class Command{
         if (!this.active || this.chatsBlacklist.indexOf(botMessage.chat.id) != -1)
             return;
 
+        const storedData = storage.load(this.key) || {};
         let shouldTrigger = false;
         let matchResult = null;
         
@@ -30,7 +29,7 @@ class Command{
         }
 
         this.trigger.forEach(t => {
-            const check = this.checkTrigger(message, t);
+            const check = this.checkTrigger(message, t, storedData[botMessage.chat.id]);
             shouldTrigger = shouldTrigger || check.shouldTrigger;
             matchResult = check.matchResult || matchResult
         });
@@ -42,16 +41,18 @@ class Command{
             const t1 = performance.now();
             console.log(` - [${this.name}] took ${(t1 - t0).toFixed(3)} ms.`);
 
-            storage.save({
-                triggerDate: new Date().getTime()
-            }, this.key);
+            storedData[botMessage.chat.id] = {
+                triggerDate: new Date().setHours(0, 0, 0, 0)
+            };
+
+            storage.save(storedData, this.key);
         }
     }
 
-    checkTrigger(message, trigger){
+    checkTrigger(message, trigger, storedData){
         let shouldTrigger = false;
         let matchResult = null;
-        const lastTriggerInfo = storage.load(this.key) || { triggerDate: 0 };
+        const lastTriggerInfo = storedData || { triggerDate: 0 };
         const cooldownMilliseconds = this.cooldown * 1000;
 
         if (new Date().getTime() - lastTriggerInfo.triggerDate >= cooldownMilliseconds){
