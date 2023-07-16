@@ -5,7 +5,7 @@ const chatIds = require('../../helpers/chatIds');
 
 module.exports = new TriggerBuilder("Trigger.LowCount")
     .at(11) //15:00 Kiev time
-    .do(async (api, chatId) => {
+    .do(async (ctx) => {
         const currentWeek = getCurrentWeek();
         const today = new Date().getDay();
 
@@ -15,7 +15,7 @@ module.exports = new TriggerBuilder("Trigger.LowCount")
             let prefix = '';
             let serviceName = '';
 
-            switch (chatId) {
+            switch (ctx.chatId) {
                 case chatIds.pioneerChat:
                     prefix = 'pioneer_';
                     serviceName = 'Піонер'
@@ -38,9 +38,9 @@ module.exports = new TriggerBuilder("Trigger.LowCount")
                 return;
 
             if (target.gt.used_space == 7 || target.gt.used_space == 9) {
-                api.image(`${prefix}${target.gt.used_space}people`, chatId, null);
+                ctx.image(`${prefix}${target.gt.used_space}people`);
             } else if (target.gt.used_space <= 6) {
-                api.image(`${prefix}nopeople`, chatId, null);
+                ctx.image(`${prefix}nopeople`, chatId);
             }
 
         }

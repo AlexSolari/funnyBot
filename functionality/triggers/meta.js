@@ -6,13 +6,13 @@ const chatIds = require('../../helpers/chatIds');
 
 module.exports = new TriggerBuilder("Trigger.Meta")
     .at(20) //20:00 Kiev time
-    .do(async (api, chatId) => {
+    .do(async (ctx) => {
         const today = new Date();
         const yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
 
         let formatName = '';
-        switch (chatId) {
+        switch (ctx.chatId) {
             case chatIds.pioneerChat:
                 formatName = 'pioneer';
                 break;
@@ -34,6 +34,6 @@ module.exports = new TriggerBuilder("Trigger.Meta")
         if (!parsedData)
             return;
 
-        api.send(`⚔️ Свежие турики ⚔️\n\n${parsedData}`, chatId, false);
+        ctx.send(`⚔️ Свежие турики ⚔️\n\n${parsedData}`);
     })
     .build();

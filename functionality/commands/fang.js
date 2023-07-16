@@ -3,18 +3,18 @@ const randomInteger = require('../../helpers/randomInt');
 
 module.exports = new CommandBuilder("Reaction.Fang")
     .on(/(фанг|мотом[иы]ш)/i)
-    .do((api, msg, result) => {
+    .do((ctx) => {
         const i = randomInteger(0, 2);
 
         switch (i) {
             case 0:
-                api.image("fangAbzan", msg.chat.id, msg.message_id);
+                ctx.imageReply("fangAbzan");
                 break;
             case 1:
-                api.image("fangEsper", msg.chat.id, msg.message_id);
+                ctx.imageReply("fangEsper");
                 break;
             case 2:
-                api.image("fangLove", msg.chat.id, msg.message_id);
+                ctx.imageReply("fangLove");
                 break;
             default:
                 break;

@@ -6,19 +6,12 @@ class CommandBuilder{
         this.trigger = null;
         this.active = true;
         this.cooldownSeconds = 0;
-        this.condition = () => true;
         this.handler = () => {};
         this.blacklist = [];
     }
 
     on(trigger){
         this.trigger = trigger;
-
-        return this;
-    }
-
-    when(condition){
-        this.condition = condition;
 
         return this;
     }
@@ -48,7 +41,7 @@ class CommandBuilder{
     }
 
     build(){
-        return new Command(this.trigger, this.condition, this.handler, this.name, this.active, this.cooldownSeconds, this.blacklist);
+        return new Command(this.trigger, this.handler, this.name, this.active, this.cooldownSeconds, this.blacklist);
     }
 }
 

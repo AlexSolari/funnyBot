@@ -2,9 +2,8 @@ const { performance } = require('perf_hooks');
 const storage = require('../services/storage');
 
 class Command{
-    constructor(trigger, condition, handler, name, active, cooldown, chatsBlacklist){
+    constructor(trigger, handler, name, active, cooldown, chatsBlacklist){
         this.trigger = trigger;
-        this.condition = condition;
         this.handler = handler;
         this.name = name;
         this.cooldown = cooldown;
@@ -16,8 +15,8 @@ class Command{
         return `command:${this.name.replace('.', '-')}`;
     }
 
-    async exec(message, api, botMessage){
-        if (!this.active || this.chatsBlacklist.indexOf(botMessage.chat.id) != -1)
+    async exec(ctx){
+        if (!this.active || this.chatsBlacklist.indexOf(ctx.chatId) != -1)
             return;
 
         const storedData = storage.load(this.key) || {};
@@ -29,19 +28,19 @@ class Command{
         }
 
         this.trigger.forEach(t => {
-            const check = this.checkTrigger(message, t, storedData[botMessage.chat.id]);
+            const check = this.checkTrigger(ctx.text, t, storedData[ctx.chatId]);
             shouldTrigger = shouldTrigger || check.shouldTrigger;
             matchResult = check.matchResult || matchResult
         });
 
-        if (shouldTrigger && this.condition(botMessage)){
+        if (shouldTrigger){
             console.log(` - Executing [${this.name}] with arguments ${JSON.stringify(matchResult)}`);
             const t0 = performance.now();
-            await this.handler(api, botMessage, matchResult);
+            await this.handler(ctx);
             const t1 = performance.now();
             console.log(` - [${this.name}] took ${(t1 - t0).toFixed(3)} ms.`);
 
-            storedData[botMessage.chat.id] = {
+            storedData[ctx.chatId] = {
                 triggerDate: new Date().setHours(0, 0, 0, 0)
             };
 

@@ -13,20 +13,20 @@ class Trigger{
         return `trigger:${this.name.replace('.', '-')}`;
     }
 
-    async exec(api, chatId){
+    async exec(ctx){
         if (!this.active)
             return;
 
         const storedData = storage.load(this.key) || {};
 
-        if (this.shouldTrigger(storedData[chatId])){
+        if (this.shouldTrigger(storedData[ctx.chatId])){
             console.log(` - Executing [${this.name}]`);
             const t0 = performance.now();
-            await this.handler(api, chatId);
+            await this.handler(ctx);
             const t1 = performance.now();
             console.log(` - [${this.name}] took ${(t1 - t0).toFixed(3)} ms.`);
 
-            storedData[chatId] = {
+            storedData[ctx.chatId] = {
                 triggerDate: new Date().setHours(0, 0, 0, 0)
             };
 

@@ -3,7 +3,7 @@ const randomInteger = require('../../helpers/randomInt');
 
 module.exports = new CommandBuilder("Reaction.Lotus")
     .on(/лотус/i)
-    .do((api, msg, result) => {
+    .do((ctx) => {
         let imageName = randomInteger(0, 1)
             ? "dampingSphere_funny"
             : "dampingSphere";
@@ -12,7 +12,7 @@ module.exports = new CommandBuilder("Reaction.Lotus")
             imageName += randomInteger(1, 3);
         }
 
-        api.image(imageName, msg.chat.id, msg.message_id);
+        ctx.imageReply(imageName);
     })
     .cooldown(7200)
     .disabled()

@@ -1,5 +1,5 @@
 const TeleBot = require('telebot');
-const BotApiHelper = require('../helpers/botApi');
+const BotApiService = require('../services/botApi');
 const chatIds = require('../helpers/chatIds');
 
 class Bot {
@@ -36,7 +36,7 @@ class Bot {
             }
         });
         
-        this.api = new BotApiHelper(this.bot);
+        this.api = new BotApiService(this.bot);
 
         this.bot.on('text', (msg) => {
             console.log(`${msg.chat.title ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from.first_name} (${msg.from.id}): ${msg.text}`);
@@ -60,14 +60,14 @@ class Bot {
     }
 
     runTriggers(){
-        this.broadcastPool.forEach(chat => {
-            this.triggers.forEach(trig => trig.exec(this.api, chat));
+        this.broadcastPool.forEach(chatId => {
+            this.triggers.forEach(trig => trig.exec(this.api.usingChat(chatId)));
         });
     }
 
     dequeue(msg) {
         this.commands.forEach(cmd => {
-            cmd.exec(msg.text, this.api, msg);
+            cmd.exec(this.api.usingMessage(msg));
         });
     }
 }

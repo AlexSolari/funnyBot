@@ -6,13 +6,13 @@ const chatIds = require('../../helpers/chatIds');
 
 module.exports = new CommandBuilder("Reaction.Registration")
     .on(["рега", "Рега"])
-    .do(async (api, msg, result) => {
+    .do(async (ctx) => {
         const currentWeek = getCurrentWeek();
         const response = await fetch(`https://api.wlaunch.net/v1/company/7ea091e0-359a-11eb-86df-9f45a44f29bd/branch/7ea10724-359a-11eb-86df-9f45a44f29bd/slot/gt/resource?start=${currentWeek.firstDay}&end=${currentWeek.lastDay}&source=WIDGET&withDiscounts=true&preventBookingEnabled=true`);
 
         let serviceName = '';
 
-        switch (msg.chat.id) {
+        switch (ctx.chatId) {
             case chatIds.pioneerChat:
                 serviceName = 'Піонер'
                 break;
@@ -27,7 +27,7 @@ module.exports = new CommandBuilder("Reaction.Registration")
         const target = data.slots.map(x => x.date_slots.map(ds => ds.slots.find(dss => dss.gt.service.name == serviceName))).flat(Infinity).filter(x => x)[0];
 
         if (!target) {
-            api.reply(`пока нема`, msg.chat.id, msg.message_id);
+            ctx.reply(`пока нема`);
             return;
         }
 
@@ -50,7 +50,7 @@ module.exports = new CommandBuilder("Reaction.Registration")
                 break;
         }
 
-        api.reply(`${mock}\n\nhttps://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${target.id}`, msg.chat.id, msg.message_id);
+        ctx.reply(`${mock}\n\nhttps://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${target.id}`);
 
     })
     .cooldown(30)
