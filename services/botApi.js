@@ -1,4 +1,5 @@
-const MessageContext = require("../entities/messageContext");
+const MessageContext = require("../entities/context/messageContext");
+const ChatContext = require("../entities/context/chatContext");
 const ImageMessage = require("../entities/replyMessages/imageMessage");
 const TextMessage = require("../entities/replyMessages/textMessage");
 
@@ -31,16 +32,16 @@ class BotApiService {
         }
     }
 
-    queue(response){
+    enqueue(response){
         this.messageQueue.push(response);
     }
 
     usingMessage(botMessage) {
-        return new MessageContext(this, botMessage.chat.id, botMessage.message_id, botMessage.text);
+        return new MessageContext(this.enqueue, botMessage.chat.id, botMessage.message_id, botMessage.text);
     }
 
     usingChat(chatId) {
-        return new MessageContext(this, chatId, undefined, undefined);
+        return new ChatContext(this.enqueue, chatId);
     }
 }
 

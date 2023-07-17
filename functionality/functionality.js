@@ -15,7 +15,6 @@ module.exports = (function(){
             const command = require("./commands/" + file);
             commands.push(command);
         });
-
     });
     console.log("Loaded commands...");
 
