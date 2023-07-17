@@ -1,5 +1,5 @@
-const { performance } = require('perf_hooks');
 const storage = require('../services/storage');
+const measureExecutionTime = require('../helpers/executionTimeTracker');
 
 class Trigger{
     constructor(name, handler, timeinHours, active){
@@ -20,12 +20,10 @@ class Trigger{
         const storedData = storage.load(this.key) || {};
 
         if (this.shouldTrigger(storedData[ctx.chatId])){
-            console.log(` - Executing [${this.name}]`);
-            const t0 = performance.now();
-            await this.handler(ctx);
-            const t1 = performance.now();
-            console.log(` - [${this.name}] took ${(t1 - t0).toFixed(3)} ms.`);
-
+            measureExecutionTime(this.name, async () => {
+                await this.handler(ctx);
+            });
+            
             storedData[ctx.chatId] = {
                 triggerDate: new Date().setHours(0, 0, 0, 0)
             };

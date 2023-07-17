@@ -1,5 +1,5 @@
-const { performance } = require('perf_hooks');
 const storage = require('../services/storage');
+const measureExecutionTime = require('../helpers/executionTimeTracker');
 
 class Command{
     constructor(trigger, handler, name, active, cooldown, chatsBlacklist){
@@ -34,11 +34,9 @@ class Command{
         });
 
         if (shouldTrigger){
-            console.log(` - Executing [${this.name}] with arguments ${JSON.stringify(matchResult)}`);
-            const t0 = performance.now();
-            await this.handler(ctx);
-            const t1 = performance.now();
-            console.log(` - [${this.name}] took ${(t1 - t0).toFixed(3)} ms.`);
+            measureExecutionTime(this.name, async () => {
+                await this.handler(ctx);                
+            })
 
             storedData[ctx.chatId] = {
                 triggerDate: new Date().setHours(0, 0, 0, 0)

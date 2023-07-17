@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const measureExecutionTime = require('../helpers/executionTimeTracker');
 
 module.exports = (function(){
     console.log("Loading functionality...");
@@ -10,14 +11,19 @@ module.exports = (function(){
     const triggers = [];
 
     fs.readdirSync(normalizedCommandsPath).forEach(function(file) {
-        const command = require("./commands/" + file);
-        commands.push(command);
+        measureExecutionTime(`Loading command ${file}`, () => {
+            const command = require("./commands/" + file);
+            commands.push(command);
+        });
+
     });
     console.log("Loaded commands...");
 
     fs.readdirSync(normalizedTriggersPath).forEach(function(file) {
-        const trigger = require("./triggers/" + file);
-        triggers.push(trigger);
+        measureExecutionTime(`Loading trigger ${file}`, () => {
+            const trigger = require("./triggers/" + file);
+            triggers.push(trigger);
+        });
     });
     console.log("Loaded triggers...");
 
