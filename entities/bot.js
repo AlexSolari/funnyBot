@@ -1,6 +1,7 @@
 const TeleBot = require('telebot');
 const BotApiService = require('../services/botApi');
 const chatIds = require('../helpers/chatIds');
+const taskScheduler = require('../services/taskScheduler');
 
 class Bot {
     constructor() {
@@ -45,7 +46,7 @@ class Bot {
 
         this.bot.start();
 
-        setInterval(async () => {
+        taskScheduler.createTask("MessageProcessing", async () => {
             while (this.commandQueue.length > 0) {
                 const queuedMsg = this.commandQueue.shift();
                 this.dequeue(queuedMsg);
@@ -54,7 +55,7 @@ class Bot {
         }, 500);
 
         this.runTriggers();
-        setInterval(() => {
+        taskScheduler.createTask("TriggerProcessing", () => {
             this.runTriggers();
         }, 1000 * 60 * 30); //30 minutes
     }

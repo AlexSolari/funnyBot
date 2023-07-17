@@ -2,13 +2,14 @@ const MessageContext = require("../entities/context/messageContext");
 const ChatContext = require("../entities/context/chatContext");
 const ImageMessage = require("../entities/replyMessages/imageMessage");
 const TextMessage = require("../entities/replyMessages/textMessage");
+const taskScheduler = require('../services/taskScheduler');
 
 class BotApiService {
     constructor(bot) {
         this.bot = bot;
         this.messageQueue = [];
 
-        setInterval(() => {
+        taskScheduler.createTask("MessageSending", () => {
             this._dequeueMessage();
         }, 35);
     }
