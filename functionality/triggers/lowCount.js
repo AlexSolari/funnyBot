@@ -40,7 +40,7 @@ module.exports = new TriggerBuilder("Trigger.LowCount")
             if (target.gt.used_space == 7 || target.gt.used_space == 9) {
                 ctx.image(`${prefix}${target.gt.used_space}people`);
             } else if (target.gt.used_space <= 6) {
-                ctx.image(`${prefix}nopeople`, chatId);
+                ctx.image(`${prefix}nopeople`);
             }
 
         }
