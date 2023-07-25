@@ -9,7 +9,7 @@ class Bot {
         this.api = null;
         this.commands = [];
         this.triggers = [];
-        this.commandQueue = [];
+        this.messageQueue = [];
 
         this.broadcastPool = [chatIds.pioneerChat, chatIds.modernChat];
     }
@@ -39,13 +39,13 @@ class Bot {
 
         this.bot.on('text', (msg) => {
             console.log(`${msg.chat.title ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from.first_name} (${msg.from.id}): ${msg.text}`);
-            this.commandQueue.push(msg);
+            this.messageQueue.push(msg);
         });
 
         this.bot.start();
 
         taskScheduler.createTask("MessageProcessing", () => {
-            while (this.commandQueue.length > 0) {
+            while (this.messageQueue.length > 0) {
                 this.dequeue();
             }
         }, 500);
