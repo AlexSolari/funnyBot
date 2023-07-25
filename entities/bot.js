@@ -27,8 +27,6 @@ class Bot {
     }
 
     start(token) {
-        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
         this.bot = new TeleBot({
             token: token,
             polling: {
@@ -46,11 +44,9 @@ class Bot {
 
         this.bot.start();
 
-        taskScheduler.createTask("MessageProcessing", async () => {
+        taskScheduler.createTask("MessageProcessing", () => {
             while (this.commandQueue.length > 0) {
-                const queuedMsg = this.commandQueue.shift();
-                this.dequeue(queuedMsg);
-                await sleep(50);
+                this.dequeue();
             }
         }, 500);
 
@@ -66,7 +62,9 @@ class Bot {
         });
     }
 
-    dequeue(msg) {
+    dequeue() {
+        const msg = this.messageQueue.pop();
+
         this.commands.forEach(cmd => {
             cmd.exec(this.api.usingMessage(msg));
         });
