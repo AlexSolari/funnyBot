@@ -36,7 +36,7 @@ class Command{
             })
 
             storedData[ctx.chatId] = {
-                triggerDate: new Date()
+                triggerDate: new Date().getTime()
             };
 
             storage.save(storedData, this.key);
