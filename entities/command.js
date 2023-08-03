@@ -36,7 +36,7 @@ class Command{
             })
 
             storedData[ctx.chatId] = {
-                triggerDate: new Date().setHours(0, 0, 0, 0)
+                triggerDate: new Date()
             };
 
             storage.save(storedData, this.key);
@@ -48,7 +48,7 @@ class Command{
         const lastTriggerInfo = storedData || { triggerDate: 0 };
         const cooldownMilliseconds = this.cooldown * 1000;
 
-        if (new Date().getTime() - lastTriggerInfo.triggerDate >= cooldownMilliseconds){
+        if ((new Date().getTime() - lastTriggerInfo.triggerDate) >= cooldownMilliseconds){
             if (typeof(trigger) == "string"){
                 shouldTrigger = message.toLowerCase() == trigger;
             } else{
