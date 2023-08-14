@@ -1,5 +1,6 @@
 const ImageMessage = require("../replyMessages/imageMessage");
 const TextMessage = require("../replyMessages/textMessage");
+const VideoMessage = require("../replyMessages/videoMessage");
 const ChatContext = require("./chatContext");
 
 class MessageContext extends ChatContext {
@@ -8,6 +9,7 @@ class MessageContext extends ChatContext {
 
         this.messageId = messageId;
         this.text = text;
+        this.matchResult = null;
     }
 
     reply(text){
@@ -19,6 +21,13 @@ class MessageContext extends ChatContext {
     imageReply(name) {
         const path = `./content/${name}.png`;
         this.enqueue(new ImageMessage(path, 
+            this.chatId,
+            this.messageId))
+    }
+
+    videoReply(name) {
+        const path = `./content/${name}.png`;
+        this.enqueue(new VideoMessage(path, 
             this.chatId,
             this.messageId))
     }

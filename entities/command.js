@@ -21,16 +21,22 @@ class Command{
 
         const storedData = storage.load(this.key) || {};
         let shouldTrigger = false;
+        let matchResult = null;
         
         if (!Array.isArray(this.trigger)){
             this.trigger = [this.trigger];
         }
 
         this.trigger.forEach(t => {
-            shouldTrigger = shouldTrigger || this.checkTrigger(ctx.text, t, storedData[ctx.chatId]);
+            const validationResult = this.checkTrigger(ctx.text, t, storedData[ctx.chatId]);
+
+            shouldTrigger = shouldTrigger || validationResult.shouldTrigger;
+            matchResult = matchResult || validationResult.matchResult;
         });
 
         if (shouldTrigger){
+            ctx.matchResult = matchResult;
+
             measureExecutionTime(this.name, async () => {
                 await this.handler(ctx);                
             })
@@ -45,6 +51,7 @@ class Command{
 
     checkTrigger(message, trigger, storedData){
         let shouldTrigger = false;
+        let matchResult = null;
         const lastTriggerInfo = storedData || { triggerDate: 0 };
         const cooldownMilliseconds = this.cooldown * 1000;
 
@@ -52,12 +59,12 @@ class Command{
             if (typeof(trigger) == "string"){
                 shouldTrigger = message.toLowerCase() == trigger;
             } else{
-                let matchResult = trigger.exec(message);
+                matchResult = trigger.exec(message);
                 shouldTrigger = matchResult && matchResult.length > 0;
             }
         }
 
-        return shouldTrigger;
+        return { shouldTrigger, matchResult };
     }
 }
 

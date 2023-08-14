@@ -2,6 +2,7 @@ const MessageContext = require("../entities/context/messageContext");
 const ChatContext = require("../entities/context/chatContext");
 const ImageMessage = require("../entities/replyMessages/imageMessage");
 const TextMessage = require("../entities/replyMessages/textMessage");
+const VideoMessage = require("../entities/replyMessages/videoMessage");
 const taskScheduler = require('../services/taskScheduler');
 
 class BotApiService {
@@ -25,7 +26,10 @@ class BotApiService {
                     break;
                 case ImageMessage:
                     this.bot.sendPhoto(message.chatId, message.imagePath, message.replyId ? { replyToMessage: message.replyId } : undefined)
-                        .catch(e => console.error(e))
+                        .catch(e => console.error(e));
+                case VideoMessage:
+                    this.bot.sendVideo(message.chatId, message.videoPath, message.replyId ? { replyToMessage: message.replyId } : undefined)
+                        .catch(e => console.error(e));
                 default:
                     break;
             }
