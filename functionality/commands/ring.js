@@ -1,5 +1,6 @@
 const CommandBuilder = require('../../helpers/commandBuilder');
 const randomInteger = require('../../helpers/randomInt');
+const chatIds = require('../../helpers/chatIds');
 
 module.exports = new CommandBuilder("Reaction.Ring")
     .on(/кольц/i)
@@ -19,4 +20,5 @@ module.exports = new CommandBuilder("Reaction.Ring")
         }
     })
     .cooldown(7200)
+    .ignoreChat(chatIds.lvivChat)
     .build();

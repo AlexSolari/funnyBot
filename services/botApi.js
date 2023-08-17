@@ -42,7 +42,7 @@ class BotApiService {
     }
 
     usingMessage(botMessage) {
-        return new MessageContext((response) => this.enqueue(response), botMessage.chat.id, botMessage.message_id, botMessage.text);
+        return new MessageContext((response) => this.enqueue(response), botMessage.chat.id, botMessage.message_id, botMessage.text, botMessage.from.id);
     }
 
     usingChat(chatId) {

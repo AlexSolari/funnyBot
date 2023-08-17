@@ -6,6 +6,9 @@ const chatIds = require('../../helpers/chatIds');
 module.exports = new TriggerBuilder("Trigger.LowCount")
     .at(11) //15:00 Kiev time
     .do(async (ctx) => {
+        if (ctx.chatId == chatIds.lvivChat)
+            return;
+
         const currentWeek = getCurrentWeek();
         const today = new Date().getDay();
 

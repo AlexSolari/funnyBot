@@ -2,17 +2,22 @@ const fs = require('fs');
 const Bot = require('./entities/bot');
 const functionality = require('./functionality/functionality');
 
-console.log("Initializing bot...");
+startBot("main", 'token.prod');
+startBot("lviv", 'token.lviv');
 
-const bot = new Bot();
+function startBot(name, tokenFile) {
+    console.log(`Initializing bot [${name}]...`);
 
-functionality.commands.forEach(cmd => bot.addCommand(cmd));
-functionality.triggers.forEach(cmd => bot.addTrigger(cmd));
+    const bot = new Bot(name);
 
-fs.readFile('token.prod', 'utf8', (err, data) => {
-    if (err) {
-        console.error(err);
-    } else {
-        bot.start(data);
-    }
-});
+    functionality.commands.forEach(cmd => bot.addCommand(cmd));
+    functionality.triggers.forEach(cmd => bot.addTrigger(cmd));
+
+    fs.readFile(tokenFile, 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+        } else {
+            bot.start(data);
+        }
+    });
+}

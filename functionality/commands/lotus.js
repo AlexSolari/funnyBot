@@ -1,5 +1,6 @@
 const CommandBuilder = require('../../helpers/commandBuilder');
 const randomInteger = require('../../helpers/randomInt');
+const chatIds = require('../../helpers/chatIds');
 
 module.exports = new CommandBuilder("Reaction.Lotus")
     .on(/лотус/i)
@@ -15,5 +16,6 @@ module.exports = new CommandBuilder("Reaction.Lotus")
         ctx.imageReply(imageName);
     })
     .cooldown(7200)
+    .ignoreChat(chatIds.lvivChat)
     .disabled()
     .build();

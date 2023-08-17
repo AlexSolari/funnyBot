@@ -4,7 +4,8 @@ const chatIds = require('../helpers/chatIds');
 const taskScheduler = require('../services/taskScheduler');
 
 class Bot {
-    constructor() {
+    constructor(name) {
+        this.name = name;
         this.bot = null;
         this.api = null;
         this.commands = [];

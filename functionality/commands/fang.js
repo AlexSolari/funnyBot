@@ -1,5 +1,6 @@
 const CommandBuilder = require('../../helpers/commandBuilder');
 const randomInteger = require('../../helpers/randomInt');
+const chatIds = require('../../helpers/chatIds');
 
 module.exports = new CommandBuilder("Reaction.Fang")
     .on(/(фанг|мотом[иы]ш)/i)
@@ -21,5 +22,6 @@ module.exports = new CommandBuilder("Reaction.Fang")
         }
     })
     .cooldown(7200)
+    .ignoreChat(chatIds.lvivChat)
     .disabled()
     .build();

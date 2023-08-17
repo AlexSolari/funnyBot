@@ -1,5 +1,6 @@
 const CommandBuilder = require('../../helpers/commandBuilder');
 const randomInteger = require('../../helpers/randomInt');
+const chatIds = require('../../helpers/chatIds');
 
 module.exports = new CommandBuilder("Reaction.Rating")
     .on(/youtube\.com\/watch\?/i)
@@ -9,4 +10,5 @@ module.exports = new CommandBuilder("Reaction.Rating")
         }
     })
     .cooldown(7200)
+    .ignoreChat(chatIds.lvivChat)
     .build();

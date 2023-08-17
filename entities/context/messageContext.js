@@ -4,12 +4,13 @@ const VideoMessage = require("../replyMessages/videoMessage");
 const ChatContext = require("./chatContext");
 
 class MessageContext extends ChatContext {
-    constructor(enqueueMethod, chatId, messageId, text){
+    constructor(enqueueMethod, chatId, messageId, text, fromUserId){
         super(enqueueMethod, chatId);
 
         this.messageId = messageId;
         this.text = text;
         this.matchResult = null;
+        this.fromUserId = fromUserId;
     }
 
     reply(text){
