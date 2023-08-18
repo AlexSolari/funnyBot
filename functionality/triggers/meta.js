@@ -48,10 +48,10 @@ module.exports = new TriggerBuilder("Trigger.Meta")
                     ctx.send(`⚔️ Свіжі турніри ⚔️\n\n Модерн: \n\n${modernTournaments}\n\n Піонер: \n\n${pioneerTournaments}`);
                 }
                 else{
-                    if (pioneerTournaments > 0){
+                    if (pioneerTournaments.length > 0){
                         ctx.send(`⚔️ Свіжі турніри ⚔️\n\n Піонер: \n\n${pioneerTournaments}`);
                     }
-                    else{
+                    else if (modernTournaments.length > 0){
                         ctx.send(`⚔️ Свіжі турніри ⚔️\n\n Модерн: \n\n${modernTournaments}`);
                     }
                 }
