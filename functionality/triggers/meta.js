@@ -29,14 +29,14 @@ module.exports = new TriggerBuilder("Trigger.Meta")
                 tournaments = await loadTournaments('pioneer');
 
                 if (tournaments.length > 0){
-                    ctx.send(`⚔️ Свежие турики ⚔️\n\n${parsedData}`);
+                    ctx.send(`⚔️ Свежие турики ⚔️\n\n${tournaments}`);
                 }
                 break;
             case chatIds.modernChat:
                 tournaments = await loadTournaments('modern');
                 
                 if (tournaments.length > 0){
-                    ctx.send(`⚔️ Свежие турики ⚔️\n\n${parsedData}`);
+                    ctx.send(`⚔️ Свежие турики ⚔️\n\n${tournaments}`);
                 }
 
                 break;

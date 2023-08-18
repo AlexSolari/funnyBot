@@ -12,7 +12,7 @@ class Bot {
         this.triggers = [];
         this.messageQueue = [];
 
-        this.broadcastPool = [chatIds.pioneerChat, chatIds.modernChat];
+        this.broadcastPool = [chatIds.pioneerChat, chatIds.modernChat, chatIds.lvivChat];
     }
 
     addCommand(command) {
