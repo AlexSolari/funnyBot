@@ -4,7 +4,7 @@ const chatIds = require('../helpers/chatIds');
 const taskScheduler = require('../services/taskScheduler');
 
 class Bot {
-    constructor(name) {
+    constructor(name, broadcastPool) {
         this.name = name;
         this.bot = null;
         this.api = null;
@@ -12,7 +12,7 @@ class Bot {
         this.triggers = [];
         this.messageQueue = [];
 
-        this.broadcastPool = [chatIds.pioneerChat, chatIds.modernChat, chatIds.lvivChat];
+        this.broadcastPool = broadcastPool;
     }
 
     addCommand(command) {

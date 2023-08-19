@@ -1,14 +1,15 @@
 const fs = require('fs');
 const Bot = require('./entities/bot');
 const functionality = require('./functionality/functionality');
+const chatIds = require('./helpers/chatIds');
 
-startBot("main", 'token.prod');
-startBot("lviv", 'token.lviv');
+startBot("main", 'token.prod', [chatIds.modernChat, chatIds.pioneerChat]);
+startBot("lviv", 'token.lviv', [chatIds.lvivChat]);
 
-function startBot(name, tokenFile) {
+function startBot(name, tokenFile, broadcastPool) {
     console.log(`Initializing bot [${name}]...`);
 
-    const bot = new Bot(name);
+    const bot = new Bot(name, broadcastPool);
 
     functionality.commands.forEach(cmd => bot.addCommand(cmd));
     functionality.triggers.forEach(cmd => bot.addTrigger(cmd));
