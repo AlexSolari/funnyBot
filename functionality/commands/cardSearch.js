@@ -15,7 +15,7 @@ module.exports = new CommandBuilder("Reaction.CardSearch")
             ? data.card_faces[0]
             : data;
         const oracle = hasMultipleFaces 
-            ? data.card_faces.map(x => x.oracle_text).join('\n\n///////////////\n\n')
+            ? data.card_faces.map(x => x.oracle_text).join('\n\n➡️➡️➡️➡️➡️⤵️\n\n')
             : card.oracle_text;
         const cardText = `${card.name}   ${card.mana_cost.replaceAll(/[{}]/gi, '')}\n\n`
             + `${card.image_uris.normal}\n\n`
