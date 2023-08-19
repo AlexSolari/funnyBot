@@ -10,10 +10,17 @@ module.exports = new CommandBuilder("Reaction.CardSearch")
         if (data.status == 404)
             return;
 
-        const cardText = `${data.name}   ${data.mana_cost.replaceAll(/[{}]/gi, '')}\n\n`
-            + `${data.image_uris.normal}\n\n`
-            + `${data.type_line}\n\n`
-            + data.oracle_text;
+        const hasMultipleFaces = !!data.card_faces;
+        const card = hasMultipleFaces 
+            ? data.card_faces[0]
+            : data;
+        const oracle = hasMultipleFaces 
+            ? data.card_faces.map(x => x.oracle_text).join('\n\n///////////////\n\n')
+            : card.oracle_text;
+        const cardText = `${card.name}   ${card.mana_cost.replaceAll(/[{}]/gi, '')}\n\n`
+            + `${card.image_uris.normal}\n\n`
+            + `${card.type_line}\n\n`
+            + oracle;
 
         ctx.reply(cardText);
     })
