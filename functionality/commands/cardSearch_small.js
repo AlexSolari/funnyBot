@@ -7,6 +7,9 @@ module.exports = new CommandBuilder("Reaction.CardSearch_Small")
             return `${card.image_uris.normal}`;
         }
 
+        if (ctx.text.indexOf('[[') != -1)
+            return; 
+
         const response = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${ctx.matchResult[1]}`)
         const json = await response.text();
         const data = JSON.parse(json);
