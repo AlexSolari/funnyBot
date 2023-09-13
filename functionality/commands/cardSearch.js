@@ -3,9 +3,11 @@ const CommandBuilder = require('../../helpers/commandBuilder');
 module.exports = new CommandBuilder("Reaction.CardSearch")
     .on(/\[\[(.+)\]\]/i)
     .do(async (ctx) => {
-        function getCardText(card){
+        function getCardText(card, fallback){
+            var images = card.image_uris || fallback;
+
             return `${card.name}   ${card.mana_cost.replaceAll(/[{}]/gi, '')}\n\n`
-            + `${card.image_uris.normal}\n\n`
+            + `${images.normal}\n\n`
             + `${card.type_line}\n\n`
             + card.oracle_text;
         }
@@ -20,7 +22,7 @@ module.exports = new CommandBuilder("Reaction.CardSearch")
         const cards = data.card_faces 
             ? data.card_faces
             : [data];
-        const text = cards.map(x => getCardText(x)).join('\n\n➡️➡️➡️➡️➡️⤵️\n\n');
+        const text = cards.map(x => getCardText(x, data.image_uris)).join('\n\n➡️➡️➡️➡️➡️⤵️\n\n');
 
         ctx.reply(text);
     })
