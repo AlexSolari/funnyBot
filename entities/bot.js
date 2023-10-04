@@ -59,7 +59,13 @@ class Bot {
 
     runTriggers(){
         this.broadcastPool.forEach(chatId => {
-            this.triggers.forEach(trig => trig.exec(this.api.usingChat(chatId)));
+            this.triggers.forEach(trig => {
+                try {
+                    trig.exec(this.api.usingChat(chatId))
+                } catch (error) {
+                    console.error(error);
+                }
+            });
         });
     }
 
@@ -67,7 +73,11 @@ class Bot {
         const msg = this.messageQueue.pop();
 
         this.commands.forEach(cmd => {
-            cmd.exec(this.api.usingMessage(msg));
+            try {
+                cmd.exec(this.api.usingMessage(msg));
+            } catch (error) {
+                console.error(error);
+            }
         });
     }
 }
