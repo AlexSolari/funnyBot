@@ -6,6 +6,13 @@ class TriggerBuilder{
         this.active = true;
         this.time = 0;
         this.handler = () => {};
+        this.whitelist = [];
+    }
+
+    allowIn(whitelist){
+        this.whitelist = whitelist;
+
+        return this;
     }
 
     at(time){
@@ -27,7 +34,7 @@ class TriggerBuilder{
     }
 
     build(){
-        return new Trigger(this.name, this.handler, this.time, this.active);
+        return new Trigger(this.name, this.handler, this.time, this.active, this.whitelist);
     }
 }
 

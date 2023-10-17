@@ -5,6 +5,7 @@ const chatIds = require('../../helpers/chatIds');
 
 module.exports = new TriggerBuilder("Trigger.LowCount")
     .at(11) //15:00 Kiev time
+    .allowIn([chatIds.modernChat, chatIds.pioneerChat])
     .do(async (ctx) => {
         if (ctx.chatId == chatIds.lvivChat)
             return;

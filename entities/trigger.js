@@ -2,11 +2,12 @@ const storage = require('../services/storage');
 const measureExecutionTime = require('../helpers/executionTimeTracker');
 
 class Trigger{
-    constructor(name, handler, timeinHours, active){
+    constructor(name, handler, timeinHours, active, whitelist){
         this.name = name;
         this.handler = handler;
         this.timeinHours = timeinHours;
         this.active = active;
+        this.chatsWhitelist = whitelist;
     }
 
     get key(){
@@ -14,7 +15,7 @@ class Trigger{
     }
 
     async exec(ctx){
-        if (!this.active)
+        if (!this.active || this.chatsWhitelist.indexOf(ctx.chatId) == -1)
             return;
 
         const storedData = storage.load(this.key) || {};

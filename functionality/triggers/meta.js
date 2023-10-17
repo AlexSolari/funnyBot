@@ -6,6 +6,7 @@ const chatIds = require('../../helpers/chatIds');
 
 module.exports = new TriggerBuilder("Trigger.Meta")
     .at(20) //20:00 Kiev time
+    .allowIn([chatIds.modernChat, chatIds.pioneerChat])
     .do(async (ctx) => {
         const loadTournaments = async function (formatName) {
             const response = await fetch(`https://www.mtggoldfish.com/tournament_searches/create?utf8=%E2%9C%93&tournament_search%5Bname%5D=&tournament_search%5Bformat%5D=${formatName}&tournament_search%5Bdate_range%5D=${formatDate(yesterday)}+-+${formatDate(today)}&commit=Search`)
