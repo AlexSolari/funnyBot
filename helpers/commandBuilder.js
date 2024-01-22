@@ -1,4 +1,5 @@
 const Command = require("../entities/command");
+const MessageContext = require("../entities/context/messageContext")
 
 class CommandBuilder{
     constructor(name){
@@ -10,12 +11,20 @@ class CommandBuilder{
         this.blacklist = [];
     }
 
+    /**
+     * @param {string | RegExp} trigger 
+     * @returns {CommandBuilder}
+     */
     on(trigger){
         this.trigger = trigger;
 
         return this;
     }
 
+    /**
+     * @param {function(MessageContext): void} handler 
+     * @returns {CommandBuilder}
+     */
     do(handler){
         this.handler = handler;
 

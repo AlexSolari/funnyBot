@@ -4,7 +4,7 @@ const chatIds = require('../../helpers/chatIds');
 module.exports = new CommandBuilder("Reaction.Kalitas")
     .on(/калитас/i)
     .do((ctx) => {
-        ctx.imageReply("kalitas");
+        ctx.replyWithImage("kalitas");
     })
     .cooldown(7200)
     .ignoreChat(chatIds.lvivChat)

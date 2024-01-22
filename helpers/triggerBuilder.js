@@ -1,3 +1,4 @@
+const ChatContext = require("../entities/context/chatContext");
 const Trigger = require("../entities/trigger");
 
 class TriggerBuilder{
@@ -21,6 +22,10 @@ class TriggerBuilder{
         return this;
     }
 
+    /**
+     * @param {function(ChatContext)} handler 
+     * @returns {TriggerBuilder}
+     */
     do(handler){
         this.handler = handler;
 

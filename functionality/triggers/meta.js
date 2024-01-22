@@ -30,14 +30,14 @@ module.exports = new TriggerBuilder("Trigger.Meta")
                 tournaments = await loadTournaments('pioneer');
 
                 if (tournaments.length > 0){
-                    ctx.send(`⚔️ Свежие турики ⚔️\n\n${tournaments}`);
+                    ctx.sendTextToChat(`⚔️ Свежие турики ⚔️\n\n${tournaments}`);
                 }
                 break;
             case chatIds.modernChat:
                 tournaments = await loadTournaments('modern');
                 
                 if (tournaments.length > 0){
-                    ctx.send(`⚔️ Свежие турики ⚔️\n\n${tournaments}`);
+                    ctx.sendTextToChat(`⚔️ Свежие турики ⚔️\n\n${tournaments}`);
                 }
 
                 break;
@@ -46,14 +46,14 @@ module.exports = new TriggerBuilder("Trigger.Meta")
                 const modernTournaments = await loadTournaments('modern');
 
                 if (pioneerTournaments.length > 0 && modernTournaments.length > 0){
-                    ctx.send(`⚔️ Свіжі турніри ⚔️\n\n Модерн: \n\n${modernTournaments}\n\n Піонер: \n\n${pioneerTournaments}`);
+                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n Модерн: \n\n${modernTournaments}\n\n Піонер: \n\n${pioneerTournaments}`);
                 }
                 else{
                     if (pioneerTournaments.length > 0){
-                        ctx.send(`⚔️ Свіжі турніри ⚔️\n\n Піонер: \n\n${pioneerTournaments}`);
+                        ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n Піонер: \n\n${pioneerTournaments}`);
                     }
                     else if (modernTournaments.length > 0){
-                        ctx.send(`⚔️ Свіжі турніри ⚔️\n\n Модерн: \n\n${modernTournaments}`);
+                        ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n Модерн: \n\n${modernTournaments}`);
                     }
                 }
             default:

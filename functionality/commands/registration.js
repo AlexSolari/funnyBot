@@ -8,7 +8,7 @@ module.exports = new CommandBuilder("Reaction.Registration")
     .on(["рега", "Рега"])
     .do(async (ctx) => {
         if (ctx.from == 405833560){
-            ctx.reply("Посмотри в закрепе 👀");
+            ctx.replyWithText("Посмотри в закрепе 👀");
             return;
         }
 
@@ -29,10 +29,10 @@ module.exports = new CommandBuilder("Reaction.Registration")
         }
 
         const data = await response.json();
-        const target = data.slots.map(x => x.date_slots.map(ds => ds.slots.find(dss => dss.gt.service.name == serviceName))).flat(Infinity).filter(x => x)[0];
+        const target = data.slots.map(x => x.date_slots.map(ds => ds.slots.find(dss => dss.gt.service.name.indexOf(serviceName) != -1))).flat(Infinity).filter(x => x)[0];
 
         if (!target) {
-            ctx.reply(`пока нема`);
+            ctx.replyWithText(`пока нема`);
             return;
         }
 
@@ -55,7 +55,7 @@ module.exports = new CommandBuilder("Reaction.Registration")
                 break;
         }
 
-        ctx.reply(`${mock}\n\nhttps://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${target.id}`);
+        ctx.replyWithText(`${mock}\n\nhttps://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${target.id}`);
 
     })
     .cooldown(30)
