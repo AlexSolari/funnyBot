@@ -9,13 +9,13 @@ module.exports = new CommandBuilder("Reaction.Fang")
 
         switch (i) {
             case 0:
-                ctx.imageReply("fangAbzan");
+                ctx.replyWithImage("fangAbzan");
                 break;
             case 1:
-                ctx.imageReply("fangEsper");
+                ctx.replyWithImage("fangEsper");
                 break;
             case 2:
-                ctx.imageReply("fangLove");
+                ctx.replyWithImage("fangLove");
                 break;
             default:
                 break;

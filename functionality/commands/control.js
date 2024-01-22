@@ -4,7 +4,7 @@ const chatIds = require('../../helpers/chatIds');
 module.exports = new CommandBuilder("Reaction.Control")
     .on(/контроль/i)
     .do((ctx) => {
-        ctx.imageReply("control");
+        ctx.replyWithImage("control");
     })
     .cooldown(7200)
     .ignoreChat(chatIds.lvivChat)

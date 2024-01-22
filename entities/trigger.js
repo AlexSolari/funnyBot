@@ -1,5 +1,6 @@
 const storage = require('../services/storage');
 const measureExecutionTime = require('../helpers/executionTimeTracker');
+const ChatContext = require('./context/chatContext');
 
 class Trigger{
     constructor(name, handler, timeinHours, active, whitelist){
@@ -14,6 +15,11 @@ class Trigger{
         return `trigger:${this.name.replace('.', '-')}`;
     }
 
+    /**
+     * 
+     * @param {ChatContext} ctx 
+     * @returns 
+     */
     async exec(ctx){
         if (!this.active || this.chatsWhitelist.indexOf(ctx.chatId) == -1)
             return;

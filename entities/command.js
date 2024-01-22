@@ -1,5 +1,6 @@
 const storage = require('../services/storage');
 const measureExecutionTime = require('../helpers/executionTimeTracker');
+const MessageContext = require('./context/messageContext');
 
 class Command{
     constructor(trigger, handler, name, active, cooldown, chatsBlacklist){
@@ -15,6 +16,11 @@ class Command{
         return `command:${this.name.replace('.', '-')}`;
     }
 
+    /**
+     * 
+     * @param {MessageContext} ctx 
+     * @returns 
+     */
     async exec(ctx){
         if (!this.active || this.chatsBlacklist.indexOf(ctx.chatId) != -1)
             return;
@@ -28,7 +34,7 @@ class Command{
         }
 
         this.trigger.forEach(t => {
-            const validationResult = this.checkTrigger(ctx.text, t, storedData[ctx.chatId]);
+            const validationResult = this.checkTrigger(ctx.messageText, t, storedData[ctx.chatId]);
 
             shouldTrigger = shouldTrigger || validationResult.shouldTrigger;
             matchResult = matchResult || validationResult.matchResult;
@@ -49,12 +55,18 @@ class Command{
         }
     }
 
+    /**
+     * @param {string} message 
+     * @param {RegExp | String} trigger 
+     * @param {any} storedData 
+     * @returns {{shouldTrigger: boolean, matchResult: RegExpExecArray | null}}
+     */
     checkTrigger(message, trigger, storedData){
         let shouldTrigger = false;
         let matchResult = null;
         const lastTriggerInfo = storedData || { triggerDate: 0 };
         const cooldownMilliseconds = this.cooldown * 1000;
-
+        
         if ((new Date().getTime() - lastTriggerInfo.triggerDate) >= cooldownMilliseconds){
             if (typeof(trigger) == "string"){
                 shouldTrigger = message.toLowerCase() == trigger;

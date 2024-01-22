@@ -18,6 +18,7 @@ class MessageContext extends ChatContext {
 
         this.messageId = messageId;
         this.messageText = messageText;
+        /** @type {RegExpExecArray | null} */
         this.matchResult = null;
         this.fromUserId = fromUserId;
     }

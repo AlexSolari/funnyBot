@@ -6,7 +6,7 @@ module.exports = new CommandBuilder("Reaction.Rating")
     .on(/youtube\.com\/watch\?/i)
     .do((ctx) => {
         if (randomInteger(0, 1) == 0) {
-            ctx.imageReply("bad");
+            ctx.replyWithImage("bad");
         }
     })
     .cooldown(7200)

@@ -24,7 +24,7 @@ module.exports = new CommandBuilder("Reaction.CardSearch")
             : [data];
         const text = cards.map(x => getCardText(x, data.image_uris)).join('\n\n➡️➡️➡️➡️➡️⤵️\n\n');
 
-        ctx.reply(text);
+        ctx.replyWithText(text);
     })
     .cooldown(0)
     .build();

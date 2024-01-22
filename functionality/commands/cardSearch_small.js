@@ -12,7 +12,7 @@ module.exports = new CommandBuilder("Reaction.CardSearch_Small")
             return card.oracle_text;
         }
 
-        if (ctx.text.indexOf('[[') != -1)
+        if (ctx.messageText.indexOf('[[') != -1)
             return; 
 
         const response = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${ctx.matchResult[1]}`)
@@ -27,7 +27,7 @@ module.exports = new CommandBuilder("Reaction.CardSearch_Small")
             : [data];
         const images = cards.map(x => getCardText(x, data.image_uris));
 
-        ctx.reply(images[0]);
+        ctx.replyWithText(images[0]);
     })
     .cooldown(0)
     .build();
