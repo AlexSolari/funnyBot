@@ -3,31 +3,49 @@ const TextMessage = require("../replyMessages/textMessage");
 const VideoMessage = require("../replyMessages/videoMessage");
 const ChatContext = require("./chatContext");
 
+/**@class Context used to reply to specific message that triggered a command*/
 class MessageContext extends ChatContext {
-    constructor(enqueueMethod, chatId, messageId, text, fromUserId){
+    /**
+     * @extends ChatContext
+     * @param {function(TextMessage | ImageMessage | VideoMessage):void} enqueueMethod
+     * @param {Number} chatId
+     * @param {Number} messageId 
+     * @param {Number} fromUserId 
+     * @param {String} messageText 
+     */
+    constructor(enqueueMethod, chatId, messageId, messageText, fromUserId){
         super(enqueueMethod, chatId);
 
         this.messageId = messageId;
-        this.text = text;
+        this.messageText = messageText;
         this.matchResult = null;
         this.fromUserId = fromUserId;
     }
 
-    reply(text){
+    /** 
+     * @method
+     * @param {String} text */
+    replyWithText(text){
         this.enqueue(new TextMessage(text, 
             this.chatId, 
             this.messageId));
     }
     
-    imageReply(name) {
+    /** 
+     * @method
+     * @param {String} name */
+    replyWithImage(name) {
         const path = `./content/${name}.png`;
         this.enqueue(new ImageMessage(path, 
             this.chatId,
             this.messageId))
     }
 
-    videoReply(name) {
-        const path = `./content/${name}.png`;
+    /** 
+     * @method
+     * @param {String} name */
+    replyWithVideo(name) {
+        const path = `./content/${name}.mp4`;
         this.enqueue(new VideoMessage(path, 
             this.chatId,
             this.messageId))
