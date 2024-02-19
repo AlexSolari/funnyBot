@@ -1,5 +1,9 @@
 const moment = require("moment");
 
+/**
+ * 
+ * @returns {{firstDay: String, lastDay: String}} first and last date of current week
+ */
 function getCurrentWeek() {
   const currentDate = moment();
 

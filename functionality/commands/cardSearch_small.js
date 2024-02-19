@@ -27,7 +27,7 @@ module.exports = new CommandBuilder("Reaction.CardSearch_Small")
             : [data];
         const images = cards.map(x => getCardText(x, data.image_uris));
 
-        ctx.replyWithText(images[0]);
+        ctx.replyWithText(`[\\.](${images[0]})`);
     })
     .cooldown(0)
     .build();

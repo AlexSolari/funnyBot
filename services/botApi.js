@@ -4,8 +4,12 @@ const ImageMessage = require("../entities/replyMessages/imageMessage");
 const TextMessage = require("../entities/replyMessages/textMessage");
 const VideoMessage = require("../entities/replyMessages/videoMessage");
 const taskScheduler = require('../services/taskScheduler');
+const telebot = require("telebot");
 
-class BotApiService {
+class BotApiService {    
+    /**
+    * @param {telebot} bot
+    */
     constructor(bot) {
         this.bot = bot;
         this.messageQueue = [];
@@ -21,7 +25,7 @@ class BotApiService {
         if (message){
             switch (message.constructor) {
                 case TextMessage:
-                    this.bot.sendMessage(message.chatId, message.text, { replyToMessage: message.replyId })
+                    this.bot.sendMessage(message.chatId, message.text, { replyToMessage: message.replyId, parseMode: "MarkdownV2" })
                         .catch(e => console.error(e));
                     break;
                 case ImageMessage:

@@ -14,7 +14,7 @@ module.exports = new TriggerBuilder("Trigger.Meta")
             const $ = cheerio.load(text);
             const $links = $('.table-responsive td a').toArray();
             const parsedData = $links
-                .map(link => `${link.children[0].data} - https://www.mtggoldfish.com${link.attribs.href}`)
+                .map(link => `[${link.children[0].data}](https://www.mtggoldfish.com${link.attribs.href})`)
                 .join('\n');
 
             return parsedData || "";

@@ -1,5 +1,10 @@
 const { performance } = require('perf_hooks');
 
+/**
+ * 
+ * @param {String} name 
+ * @param {Function} action 
+ */
 module.exports = (name, action) => {
     console.log(` - Executing [${name}]`);
     const t0 = performance.now();

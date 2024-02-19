@@ -1,3 +1,8 @@
+/**
+ * 
+ * @param {Date} date 
+ * @returns {string} formatted date
+ */
 function formatDate(date) {
     // Get the month, day, and year from the date object
     const month = date.getMonth() + 1;
