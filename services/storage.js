@@ -37,7 +37,7 @@ class Storage {
     }
 
     _buidPathFromKey(key){
-        return '.\\storage\\' + key.replace(new RegExp(':', 'g'), '\\') + ".json";
+        return 'storage/' + key.replace(new RegExp(':', 'g'), '/') + ".json";
     }
 }
 

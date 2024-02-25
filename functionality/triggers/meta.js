@@ -3,6 +3,7 @@ const formatDate = require('../../helpers/formatDate');
 const cheerio = require('cheerio');
 const fetch = require('node-fetch');
 const chatIds = require('../../helpers/chatIds');
+const escape = require('markdown-escape');
 
 module.exports = new TriggerBuilder("Trigger.Meta")
     .at(20) //20:00 Kiev time
@@ -14,7 +15,7 @@ module.exports = new TriggerBuilder("Trigger.Meta")
             const $ = cheerio.load(text);
             const $links = $('.table-responsive td a').toArray();
             const parsedData = $links
-                .map(link => `[${link.children[0].data}](https://www.mtggoldfish.com${link.attribs.href})`)
+                .map(link => `[${escape(link.children[0].data).replaceAll('-', '\\-')}](https://www.mtggoldfish.com${link.attribs.href})`)
                 .join('\n');
 
             return parsedData || "";

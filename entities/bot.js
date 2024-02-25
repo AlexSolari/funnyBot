@@ -39,7 +39,7 @@ class Bot {
         this.api = new BotApiService(this.bot);
 
         this.bot.on('text', (msg) => {
-            console.log(`${msg.chat.title ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from.first_name} (${msg.from.id}): ${msg.text}`);
+            console.log(`${msg.chat.title ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from?.first_name ?? "Unknown"} (${msg.from?.id ?? "Unknown"}): ${msg.text}`);
             this.messageQueue.push(msg);
         });
 
@@ -54,7 +54,7 @@ class Bot {
         this.runTriggers();
         taskScheduler.createTask("TriggerProcessing", () => {
             this.runTriggers();
-        }, 1000 * 60 * 30); //30 minutes
+        }, 1000 * 60 * 30, true); //30 minutes
     }
 
     runTriggers(){

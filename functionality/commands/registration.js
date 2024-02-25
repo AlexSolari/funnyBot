@@ -55,7 +55,7 @@ module.exports = new CommandBuilder("Reaction.Registration")
                 break;
         }
 
-        ctx.replyWithText(`${mock}\n\nhttps://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${target.id}`);
+        ctx.replyWithText(`[${mock}](https://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${target.id})`);
 
     })
     .cooldown(30)
