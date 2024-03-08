@@ -50,7 +50,6 @@ class Bot {
             }
         }, 500);
 
-        this.runTriggers();
         taskScheduler.createTask("TriggerProcessing", () => {
             this.runTriggers();
         }, 1000 * 60 * 30, true); //30 minutes
