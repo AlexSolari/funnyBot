@@ -6,6 +6,10 @@ const chatIds = require('../../helpers/chatIds');
 const escape = require('markdown-escape');
 
 async function loadTournaments(formatName) {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
     const response = await fetch(`https://www.mtggoldfish.com/tournament_searches/create?utf8=%E2%9C%93&tournament_search%5Bname%5D=&tournament_search%5Bformat%5D=${formatName}&tournament_search%5Bdate_range%5D=${formatDate(yesterday)}+-+${formatDate(today)}&commit=Search`)
     const text = await response.text();
     const $ = cheerio.load(text);
@@ -21,24 +25,19 @@ module.exports = new TriggerBuilder("Trigger.Meta")
     .at(20) //20:00 Kiev time
     .allowIn([chatIds.modernChat, chatIds.pioneerChat, chatIds.lvivChat])
     .do(async (ctx) => {
-        const today = new Date();
-        const yesterday = new Date(today);
-        yesterday.setDate(today.getDate() - 1);
-
-        let tournaments = [];
         switch (ctx.chatId) {
             case chatIds.pioneerChat:
-                tournaments = await loadTournaments('pioneer');
+                const pioneer = await loadTournaments('pioneer');
 
-                if (tournaments.length > 0){
-                    ctx.sendTextToChat(`⚔️ Свежие турики ⚔️\n\n${tournaments}`);
+                if (pioneer.length > 0){
+                    ctx.sendTextToChat(`⚔️ Свежие турики ⚔️\n\n${pioneer}`);
                 }
                 break;
             case chatIds.modernChat:
-                tournaments = await loadTournaments('modern');
+                const modern = await loadTournaments('modern');
                 
-                if (tournaments.length > 0){
-                    ctx.sendTextToChat(`⚔️ Свежие турики ⚔️\n\n${tournaments}`);
+                if (modern.length > 0){
+                    ctx.sendTextToChat(`⚔️ Свежие турики ⚔️\n\n${modern}`);
                 }
 
                 break;
