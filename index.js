@@ -3,8 +3,8 @@ const Bot = require('./entities/bot');
 const functionality = require('./functionality/functionality');
 const chatIds = require('./helpers/chatIds');
 
-await startBot("main", 'token.prod', [chatIds.modernChat, chatIds.pioneerChat, chatIds.spellSeeker]);
-await startBot("lviv", 'token.lviv', [chatIds.lvivChat]);
+startBot("main", 'token.prod', [chatIds.modernChat, chatIds.pioneerChat, chatIds.spellSeeker]);
+startBot("lviv", 'token.lviv', [chatIds.lvivChat]);
 
 async function startBot(name, tokenFile, broadcastPool) {
     console.log(`Initializing bot [${name}]...`);
