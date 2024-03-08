@@ -43,7 +43,7 @@ class Command{
         if (shouldTrigger){
             ctx.matchResult = matchResult;
 
-            measureExecutionTime(this.name, async () => {
+            await measureExecutionTime(this.name, async () => {
                 await this.handler(ctx);                
             })
 

@@ -1,17 +1,17 @@
 const CommandBuilder = require('../../helpers/commandBuilder');
 
+function getCardText(card, fallback){
+    const images = card.image_uris || fallback;
+    
+    if (images)
+        return `${images.normal}`;
+
+    return card.oracle_text;
+}
+
 module.exports = new CommandBuilder("Reaction.CardSearch_Small")
     .on(/\[(.+)\]/i)
     .do(async (ctx) => {
-        function getCardText(card, fallback){
-            var images = card.image_uris || fallback;
-            
-            if (images)
-                return `${images.normal}`;
-
-            return card.oracle_text;
-        }
-
         if (ctx.messageText.indexOf('[[') != -1)
             return; 
 

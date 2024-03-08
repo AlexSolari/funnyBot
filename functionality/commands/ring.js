@@ -5,7 +5,7 @@ const chatIds = require('../../helpers/chatIds');
 module.exports = new CommandBuilder("Reaction.Ring")
     .on(/кольц/i)
     .do((ctx) => {
-        var seed = randomInteger(0, 2);
+        const seed = randomInteger(0, 2);
 
         switch (seed) {
             case 0:

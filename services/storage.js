@@ -7,11 +7,7 @@ class Storage {
     }
 
     load(key){
-        let result = null;
-
-        if (this.cache[key]){
-            result = this.cache[key];
-        } else {
+        if (!this.cache[key]){
             const targetPath = this._buidPathFromKey(key);
             if (!existsSync(targetPath)) {
                 return null;
@@ -19,10 +15,10 @@ class Storage {
 
             const data = JSON.parse(readFileSync(targetPath));
 
-            result = this.cache[key] = data;
+            this.cache[key] = data;
         }
 
-        return result;
+        return this.cache[key];
     }
 
     save(data, key){

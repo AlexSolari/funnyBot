@@ -27,7 +27,7 @@ class Trigger{
         const storedData = storage.load(this.key) || {};
 
         if (this.shouldTrigger(storedData[ctx.chatId])){
-            measureExecutionTime(this.name, async () => {
+            await measureExecutionTime(this.name, async () => {
                 await this.handler(ctx);
             });
             

@@ -1,6 +1,5 @@
 const TeleBot = require('telebot');
 const BotApiService = require('../services/botApi');
-const chatIds = require('../helpers/chatIds');
 const taskScheduler = require('../services/taskScheduler');
 
 class Bot {
@@ -59,9 +58,9 @@ class Bot {
 
     runTriggers(){
         this.broadcastPool.forEach(chatId => {
-            this.triggers.forEach(trig => {
+            this.triggers.forEach(async (trig) => {
                 try {
-                    trig.exec(this.api.usingChat(chatId))
+                    await trig.exec(this.api.usingChat(chatId));
                 } catch (error) {
                     console.error(error);
                 }
@@ -72,9 +71,9 @@ class Bot {
     dequeue() {
         const msg = this.messageQueue.pop();
 
-        this.commands.forEach(cmd => {
+        this.commands.forEach(async (cmd) => {
             try {
-                cmd.exec(this.api.usingMessage(msg));
+                await cmd.exec(this.api.usingMessage(msg));
             } catch (error) {
                 console.error(error);
             }

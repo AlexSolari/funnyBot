@@ -12,6 +12,10 @@ class BotApiService {
     */
     constructor(bot) {
         this.bot = bot;
+
+        /**
+         * @type {Array<TextMessage | ImageMessage | VideoMessage>}
+         */
         this.messageQueue = [];
 
         taskScheduler.createTask("MessageSending", () => {
