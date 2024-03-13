@@ -51,7 +51,7 @@ module.exports = new CommandBuilder("Reaction.Registration")
                 mock = "заебали"
                 break;
             default:
-                mock = "";
+                mock = "вот";
                 break;
         }
 
