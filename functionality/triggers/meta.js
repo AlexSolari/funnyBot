@@ -44,17 +44,26 @@ module.exports = new TriggerBuilder("Trigger.Meta")
             case chatIds.lvivChat:
                 const pioneerTournaments = await loadTournaments('pioneer');
                 const modernTournaments = await loadTournaments('modern');
+                const standardTournaments = await loadTournaments('standard');
 
-                if (pioneerTournaments.length > 0 && modernTournaments.length > 0){
-                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n Модерн: \n\n${modernTournaments}\n\n Піонер: \n\n${pioneerTournaments}`);
+                let pioneerString = '';
+                let modernString = '';
+                let standardString = '';
+
+                if (pioneerTournaments.length > 0){
+                    pioneerString = `Піонер: \n\n${pioneerTournaments}\n\n`;
                 }
-                else{
-                    if (pioneerTournaments.length > 0){
-                        ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n Піонер: \n\n${pioneerTournaments}`);
-                    }
-                    else if (modernTournaments.length > 0){
-                        ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n Модерн: \n\n${modernTournaments}`);
-                    }
+                if (modernTournaments.length > 0){
+                    modernString = `Модерн: \n\n${modernTournaments}\n\n`;
+                }
+                if (standardTournaments.length > 0){
+                    standardString = `Стандарт: \n\n${standardTournaments}`;
+                }
+
+                if (pioneerString.length > 0
+                    && modernString.length > 0
+                    && standardString.length > 0){
+                        ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n ${modernString} ${pioneerString} ${standardString}`);
                 }
             default:
                 return;
