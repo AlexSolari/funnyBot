@@ -1,6 +1,5 @@
 const CommandBuilder = require('../../helpers/commandBuilder');
 const getCurrentWeek = require('../../helpers/getWeek');
-const randomInteger = require('../../helpers/randomInt');
 const fetch = require('node-fetch');
 const chatIds = require('../../helpers/chatIds');
 
@@ -36,26 +35,7 @@ module.exports = new CommandBuilder("Reaction.Registration")
             return;
         }
 
-        const rnd = randomInteger(0, 5);
-
-        let mock = '';
-
-        switch (rnd) {
-            case 0:
-                mock = "пора бы самому научиться искать уже 💀";
-                break;
-            case 1:
-                mock = "держи"
-                break;
-            case 2:
-                mock = "заебали"
-                break;
-            default:
-                mock = "вот";
-                break;
-        }
-
-        ctx.replyWithText(`[${mock}](https://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${target.id})`);
+        ctx.replyWithText(`[${serviceName}](https://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${target.id})`);
 
     })
     .cooldown(30)

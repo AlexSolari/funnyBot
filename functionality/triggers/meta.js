@@ -30,14 +30,14 @@ module.exports = new TriggerBuilder("Trigger.Meta")
                 const pioneer = await loadTournaments('pioneer');
 
                 if (pioneer.length > 0){
-                    ctx.sendTextToChat(`⚔️ Свежие турики ⚔️\n\n${pioneer}`);
+                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${pioneer}`);
                 }
                 break;
             case chatIds.modernChat:
                 const modern = await loadTournaments('modern');
                 
                 if (modern.length > 0){
-                    ctx.sendTextToChat(`⚔️ Свежие турики ⚔️\n\n${modern}`);
+                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${modern}`);
                 }
 
                 break;
