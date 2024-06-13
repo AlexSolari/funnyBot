@@ -11,5 +11,4 @@ module.exports = new CommandBuilder("Reaction.Ihor")
         ctx.replyWithImage("ihor");
     })
     .cooldown(7200)
-    .ignoreChat(chatIds.lvivChat)
     .build();
