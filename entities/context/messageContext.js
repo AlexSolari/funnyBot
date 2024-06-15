@@ -21,6 +21,7 @@ class MessageContext extends ChatContext {
         /** @type {RegExpExecArray | null} */
         this.matchResult = null;
         this.fromUserId = fromUserId;
+        this.startCooldown = true;
     }
 
     /** 

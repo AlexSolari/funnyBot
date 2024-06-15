@@ -47,11 +47,13 @@ class Command{
                 await this.handler(ctx);                
             })
 
-            storedData[ctx.chatId] = {
-                triggerDate: new Date().getTime()
-            };
-
-            storage.save(storedData, this.key);
+            if (ctx.startCooldown) {
+                storedData[ctx.chatId] = {
+                    triggerDate: new Date().getTime()
+                };
+    
+                storage.save(storedData, this.key);
+            }
         }
     }
 
