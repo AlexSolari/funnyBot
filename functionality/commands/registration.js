@@ -6,8 +6,9 @@ const chatIds = require('../../helpers/chatIds');
 module.exports = new CommandBuilder("Reaction.Registration")
     .on(["рега", "Рега"])
     .do(async (ctx) => {
-        if (ctx.from == 405833560){
+        if (ctx.fromUserId == 405833560){
             ctx.replyWithText("Посмотри в закрепе 👀");
+            ctx.startCooldown = false;
             return;
         }
 

@@ -16,5 +16,4 @@ module.exports = new CommandBuilder("Reaction.Lotus")
         ctx.replyWithImage(imageName);
     })
     .cooldown(7200)
-    .ignoreChat(chatIds.lvivChat)
     .build();
