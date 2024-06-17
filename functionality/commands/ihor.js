@@ -6,7 +6,7 @@ module.exports = new CommandBuilder("Reaction.Ihor")
     .do(async (ctx) => {
         console.log("[Ihor] triggered by " + ctx.fromUserId)
 
-        if (ctx.fromUserId != 381992977){
+        if (ctx.fromUserId != 381992977 || ctx.chatId != chatIds.lvivChat){
             ctx.startCooldown = false;
             return;
         }
