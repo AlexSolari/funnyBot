@@ -15,6 +15,6 @@ async function startBot(name, tokenFile, broadcastPool) {
     functionality.triggers.forEach(cmd => bot.addTrigger(cmd));
 
     const data = await fs.readFile(tokenFile, 'utf8');
-    
+
     bot.start(data);
 }

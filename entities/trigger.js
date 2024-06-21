@@ -2,8 +2,8 @@ const storage = require('../services/storage');
 const measureExecutionTime = require('../helpers/executionTimeTracker');
 const ChatContext = require('./context/chatContext');
 
-class Trigger{
-    constructor(name, handler, timeinHours, active, whitelist){
+class Trigger {
+    constructor(name, handler, timeinHours, active, whitelist) {
         this.name = name;
         this.handler = handler;
         this.timeinHours = timeinHours;
@@ -11,7 +11,7 @@ class Trigger{
         this.chatsWhitelist = whitelist;
     }
 
-    get key(){
+    get key() {
         return `trigger:${this.name.replace('.', '-')}`;
     }
 
@@ -20,17 +20,17 @@ class Trigger{
      * @param {ChatContext} ctx 
      * @returns 
      */
-    async exec(ctx){
+    async exec(ctx) {
         if (!this.active || this.chatsWhitelist.indexOf(ctx.chatId) == -1)
             return;
 
         const storedData = storage.load(this.key) || {};
 
-        if (this.shouldTrigger(storedData[ctx.chatId])){
+        if (this.shouldTrigger(storedData[ctx.chatId])) {
             await measureExecutionTime(this.name, async () => {
                 await this.handler(ctx);
             });
-            
+
             storedData[ctx.chatId] = {
                 triggerDate: new Date().setHours(0, 0, 0, 0)
             };
@@ -39,7 +39,7 @@ class Trigger{
         }
     }
 
-    shouldTrigger(storedData){
+    shouldTrigger(storedData) {
         const today = new Date();
         const yesterday = new Date(today);
         const lastTriggerInfo = storedData || { triggerDate: 0 };

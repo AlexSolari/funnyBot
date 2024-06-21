@@ -1,9 +1,9 @@
 class TaskScheduler {
-    constructor(){
+    constructor() {
         this.activeTasks = [];
     }
 
-    createTask(name, action, interval, executeRightAway){
+    createTask(name, action, interval, executeRightAway) {
         executeRightAway = executeRightAway || false;
         const taskId = setInterval(action, interval);
         const task = {
@@ -12,7 +12,7 @@ class TaskScheduler {
             interval
         };
 
-        if (executeRightAway){
+        if (executeRightAway) {
             setTimeout(action, 1000);
         }
 

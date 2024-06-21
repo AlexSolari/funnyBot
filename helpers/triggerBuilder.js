@@ -1,22 +1,22 @@
 const ChatContext = require("../entities/context/chatContext");
 const Trigger = require("../entities/trigger");
 
-class TriggerBuilder{
-    constructor(name){
+class TriggerBuilder {
+    constructor(name) {
         this.name = name;
         this.active = true;
         this.time = 0;
-        this.handler = () => {};
+        this.handler = () => { };
         this.whitelist = [];
     }
 
-    allowIn(whitelist){
+    allowIn(whitelist) {
         this.whitelist = whitelist;
 
         return this;
     }
 
-    at(time){
+    at(time) {
         this.time = time;
 
         return this;
@@ -26,19 +26,19 @@ class TriggerBuilder{
      * @param {function(ChatContext)} handler 
      * @returns {TriggerBuilder}
      */
-    do(handler){
+    do(handler) {
         this.handler = handler;
 
         return this;
     }
 
-    disabled(){
+    disabled() {
         this.active = false;
 
         return this;
     }
 
-    build(){
+    build() {
         return new Trigger(this.name, this.handler, this.time, this.active, this.whitelist);
     }
 }

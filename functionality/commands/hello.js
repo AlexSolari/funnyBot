@@ -7,4 +7,5 @@ module.exports = new CommandBuilder("Reaction.Hello")
         ctx.replyWithText("hello");
     })
     .cooldown(7200)
+    .ignoreChat(chatIds.lvivChat)
     .build();

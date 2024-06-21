@@ -2,12 +2,12 @@ const { readFileSync, writeFileSync, mkdirSync, existsSync } = require("fs");
 const path = require('path');
 
 class Storage {
-    constructor(){
+    constructor() {
         this.cache = {};
     }
 
-    load(key){
-        if (!this.cache[key]){
+    load(key) {
+        if (!this.cache[key]) {
             const targetPath = this._buidPathFromKey(key);
             if (!existsSync(targetPath)) {
                 return null;
@@ -21,18 +21,18 @@ class Storage {
         return this.cache[key];
     }
 
-    save(data, key){
+    save(data, key) {
         delete this.cache[key];
 
         const targetPath = this._buidPathFromKey(key);
         const dirname = path.dirname(targetPath);
         if (!existsSync(dirname)) {
-          mkdirSync(dirname, { recursive: true });
+            mkdirSync(dirname, { recursive: true });
         }
-        writeFileSync(targetPath, JSON.stringify(data), {flag: 'w+'});
+        writeFileSync(targetPath, JSON.stringify(data), { flag: 'w+' });
     }
 
-    _buidPathFromKey(key){
+    _buidPathFromKey(key) {
         return 'storage/' + key.replace(new RegExp(':', 'g'), '/') + ".json";
     }
 }

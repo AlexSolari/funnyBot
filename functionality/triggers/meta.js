@@ -29,14 +29,14 @@ module.exports = new TriggerBuilder("Trigger.Meta")
             case chatIds.pioneerChat:
                 const pioneer = await loadTournaments('pioneer');
 
-                if (pioneer.length > 0){
+                if (pioneer.length > 0) {
                     ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${pioneer}`);
                 }
                 break;
             case chatIds.modernChat:
                 const modern = await loadTournaments('modern');
-                
-                if (modern.length > 0){
+
+                if (modern.length > 0) {
                     ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${modern}`);
                 }
 
@@ -50,20 +50,20 @@ module.exports = new TriggerBuilder("Trigger.Meta")
                 let modernString = '';
                 let standardString = '';
 
-                if (pioneerTournaments.length > 0){
+                if (pioneerTournaments.length > 0) {
                     pioneerString = `Піонер: \n\n${pioneerTournaments}\n\n`;
                 }
-                if (modernTournaments.length > 0){
+                if (modernTournaments.length > 0) {
                     modernString = `Модерн: \n\n${modernTournaments}\n\n`;
                 }
-                if (standardTournaments.length > 0){
+                if (standardTournaments.length > 0) {
                     standardString = `Стандарт: \n\n${standardTournaments}`;
                 }
 
                 if (pioneerString.length > 0
                     && modernString.length > 0
-                    && standardString.length > 0){
-                        ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n ${modernString} ${pioneerString} ${standardString}`);
+                    && standardString.length > 0) {
+                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n ${modernString} ${pioneerString} ${standardString}`);
                 }
             default:
                 return;

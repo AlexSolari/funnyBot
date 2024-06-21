@@ -18,7 +18,7 @@ class Bot {
         this.commands.push(command);
     }
 
-    removeCommand(commandName){
+    removeCommand(commandName) {
         this.commands = this.commands.filter(x => x.name != commandName);
     }
 
@@ -34,7 +34,7 @@ class Bot {
                 limit: 10,
             }
         });
-        
+
         this.api = new BotApiService(this.bot);
 
         this.bot.on('text', (msg) => {
@@ -44,39 +44,43 @@ class Bot {
 
         this.bot.start();
 
-        taskScheduler.createTask("MessageProcessing", () => {
+        taskScheduler.createTask("MessageProcessing", async () => {
             while (this.messageQueue.length > 0) {
-                this.dequeue();
+                await this.dequeue();
             }
-        }, 500);
+        }, 500); //Half of a second
 
-        taskScheduler.createTask("TriggerProcessing", () => {
+        taskScheduler.createTask("TriggerProcessing", async () => {
             this.runTriggers();
         }, 1000 * 60 * 30, true); //30 minutes
     }
 
-    runTriggers(){
-        this.broadcastPool.forEach(chatId => {
-            this.triggers.forEach(async (trig) => {
+    runTriggers() {
+        for (let chatId of this.broadcastPool) {
+            for (let trig of this.triggers) {
                 try {
-                    await trig.exec(this.api.usingChat(chatId));
-                } catch (error) {
+                    // Trigger.exec is async, but we dont need to await for result, so just fire and forget
+                    trig.exec(this.api.usingChat(chatId));
+                }
+                catch (error) {
                     console.error(error);
                 }
-            });
-        });
+            }
+        }
     }
 
-    dequeue() {
+    async dequeue() {
         const msg = this.messageQueue.pop();
 
-        this.commands.forEach(async (cmd) => {
+        for (let cmd of this.commands) {
             try {
+                // For commands however, we have cooldowns, so we need to wait for the command to finish running
                 await cmd.exec(this.api.usingMessage(msg));
-            } catch (error) {
+            }
+            catch (error) {
                 console.error(error);
             }
-        });
+        }
     }
 }
 

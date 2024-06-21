@@ -1,8 +1,8 @@
 const CommandBuilder = require('../../helpers/commandBuilder');
 
-function getCardText(card, fallback){
+function getCardText(card, fallback) {
     const images = card.image_uris || fallback;
-    
+
     if (images)
         return `${images.normal}`;
 
@@ -13,7 +13,7 @@ module.exports = new CommandBuilder("Reaction.CardSearch_Small")
     .on(/\[(.+)\]/i)
     .do(async (ctx) => {
         if (ctx.messageText.indexOf('[[') != -1)
-            return; 
+            return;
 
         const response = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${ctx.matchResult[1]}`)
         const json = await response.text();
@@ -22,7 +22,7 @@ module.exports = new CommandBuilder("Reaction.CardSearch_Small")
         if (data.status == 404)
             return;
 
-        const cards = data.card_faces 
+        const cards = data.card_faces
             ? data.card_faces
             : [data];
         const images = cards.map(x => getCardText(x, data.image_uris));

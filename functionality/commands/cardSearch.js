@@ -1,12 +1,12 @@
 const CommandBuilder = require('../../helpers/commandBuilder');
 
-function getCardText(card, fallback){
+function getCardText(card, fallback) {
     const images = card.image_uris || fallback;
 
     return `${card.name}   ${card.mana_cost.replaceAll(/[{}]/gi, '')}\n\n`
-    + `${images.normal}\n\n`
-    + `${card.type_line}\n\n`
-    + card.oracle_text;
+        + `${images.normal}\n\n`
+        + `${card.type_line}\n\n`
+        + card.oracle_text;
 }
 
 module.exports = new CommandBuilder("Reaction.CardSearch")
@@ -19,7 +19,7 @@ module.exports = new CommandBuilder("Reaction.CardSearch")
         if (data.status == 404)
             return;
 
-        const cards = data.card_faces 
+        const cards = data.card_faces
             ? data.card_faces
             : [data];
         const text = cards.map(x => getCardText(x, data.image_uris)).join('\n\n➡️➡️➡️➡️➡️⤵️\n\n');

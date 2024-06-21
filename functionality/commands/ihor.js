@@ -6,11 +6,11 @@ module.exports = new CommandBuilder("Reaction.Ihor")
     .do(async (ctx) => {
         console.log("[Ihor] triggered by " + ctx.fromUserId)
 
-        if (ctx.fromUserId != 381992977 || ctx.chatId != chatIds.lvivChat){
+        if (ctx.fromUserId != 381992977 || ctx.chatId != chatIds.lvivChat) {
             ctx.startCooldown = false;
             return;
         }
-        
+
         ctx.replyWithImage("ihor");
     })
     .cooldown(7200)

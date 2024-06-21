@@ -6,7 +6,7 @@ const VideoMessage = require("../entities/replyMessages/videoMessage");
 const taskScheduler = require('../services/taskScheduler');
 const telebot = require("telebot");
 
-class BotApiService {    
+class BotApiService {
     /**
     * @param {telebot} bot
     */
@@ -23,10 +23,10 @@ class BotApiService {
         }, 35);
     }
 
-    _dequeueMessage(){
+    _dequeueMessage() {
         const message = this.messageQueue.pop();
 
-        if (message){
+        if (message) {
             switch (message.constructor) {
                 case TextMessage:
                     this.bot.sendMessage(message.chatId, message.text, { replyToMessage: message.replyId, parseMode: "MarkdownV2" })
@@ -45,7 +45,7 @@ class BotApiService {
         }
     }
 
-    enqueue(response){
+    enqueue(response) {
         this.messageQueue.push(response);
     }
 

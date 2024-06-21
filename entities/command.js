@@ -2,8 +2,8 @@ const storage = require('../services/storage');
 const measureExecutionTime = require('../helpers/executionTimeTracker');
 const MessageContext = require('./context/messageContext');
 
-class Command{
-    constructor(trigger, handler, name, active, cooldown, chatsBlacklist){
+class Command {
+    constructor(trigger, handler, name, active, cooldown, chatsBlacklist) {
         this.trigger = trigger;
         this.handler = handler;
         this.name = name;
@@ -12,7 +12,7 @@ class Command{
         this.chatsBlacklist = chatsBlacklist;
     }
 
-    get key(){
+    get key() {
         return `command:${this.name.replace('.', '-')}`;
     }
 
@@ -21,15 +21,15 @@ class Command{
      * @param {MessageContext} ctx 
      * @returns 
      */
-    async exec(ctx){
+    async exec(ctx) {
         if (!this.active || this.chatsBlacklist.indexOf(ctx.chatId) != -1)
             return;
 
         const storedData = storage.load(this.key) || {};
         let shouldTrigger = false;
         let matchResult = null;
-        
-        if (!Array.isArray(this.trigger)){
+
+        if (!Array.isArray(this.trigger)) {
             this.trigger = [this.trigger];
         }
 
@@ -40,18 +40,18 @@ class Command{
             matchResult = matchResult || validationResult.matchResult;
         });
 
-        if (shouldTrigger){
+        if (shouldTrigger) {
             ctx.matchResult = matchResult;
 
             await measureExecutionTime(this.name, async () => {
-                await this.handler(ctx);                
+                await this.handler(ctx);
             })
 
             if (ctx.startCooldown) {
                 storedData[ctx.chatId] = {
                     triggerDate: new Date().getTime()
                 };
-    
+
                 storage.save(storedData, this.key);
             }
         }
@@ -63,16 +63,16 @@ class Command{
      * @param {any} storedData 
      * @returns {{shouldTrigger: boolean, matchResult: RegExpExecArray | null}}
      */
-    checkTrigger(message, trigger, storedData){
+    checkTrigger(message, trigger, storedData) {
         let shouldTrigger = false;
         let matchResult = null;
         const lastTriggerInfo = storedData || { triggerDate: 0 };
         const cooldownMilliseconds = this.cooldown * 1000;
-        
-        if ((new Date().getTime() - lastTriggerInfo.triggerDate) >= cooldownMilliseconds){
-            if (typeof(trigger) == "string"){
+
+        if ((new Date().getTime() - lastTriggerInfo.triggerDate) >= cooldownMilliseconds) {
+            if (typeof (trigger) == "string") {
                 shouldTrigger = message.toLowerCase() == trigger;
-            } else{
+            } else {
                 matchResult = trigger.exec(message);
                 shouldTrigger = matchResult && matchResult.length > 0;
             }

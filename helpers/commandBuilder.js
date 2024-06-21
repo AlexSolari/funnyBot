@@ -1,13 +1,13 @@
 const Command = require("../entities/command");
 const MessageContext = require("../entities/context/messageContext")
 
-class CommandBuilder{
-    constructor(name){
+class CommandBuilder {
+    constructor(name) {
         this.name = name;
         this.trigger = null;
         this.active = true;
         this.cooldownSeconds = 0;
-        this.handler = () => {};
+        this.handler = () => { };
         this.blacklist = [];
     }
 
@@ -15,7 +15,7 @@ class CommandBuilder{
      * @param {string | RegExp} trigger 
      * @returns {CommandBuilder}
      */
-    on(trigger){
+    on(trigger) {
         this.trigger = trigger;
 
         return this;
@@ -25,31 +25,31 @@ class CommandBuilder{
      * @param {function(MessageContext): void} handler 
      * @returns {CommandBuilder}
      */
-    do(handler){
+    do(handler) {
         this.handler = handler;
 
         return this;
     }
 
-    disabled(){
+    disabled() {
         this.active = false;
 
         return this;
     }
 
-    cooldown(seconds){
+    cooldown(seconds) {
         this.cooldownSeconds = seconds;
 
         return this;
     }
 
-    ignoreChat(chatId){
+    ignoreChat(chatId) {
         this.blacklist.push(chatId);
 
         return this;
     }
 
-    build(){
+    build() {
         return new Command(this.trigger, this.handler, this.name, this.active, this.cooldownSeconds, this.blacklist);
     }
 }
