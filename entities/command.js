@@ -36,8 +36,8 @@ class Command {
         this.trigger.forEach(t => {
             const validationResult = this.checkTrigger(ctx.messageText, t, storedData[ctx.chatId]);
 
-            shouldTrigger = shouldTrigger ?? validationResult.shouldTrigger;
-            matchResult = matchResult ?? validationResult.matchResult;
+            shouldTrigger = shouldTrigger || validationResult.shouldTrigger;
+            matchResult = matchResult || validationResult.matchResult;
         });
 
         if (shouldTrigger) {
@@ -66,7 +66,7 @@ class Command {
     checkTrigger(message, trigger, storedData) {
         let shouldTrigger = false;
         let matchResult = null;
-        const lastTriggerInfo = storedData || { triggerDate: 0 };
+        const lastTriggerInfo = storedData ?? { triggerDate: 0 };
         const cooldownMilliseconds = this.cooldown * 1000;
 
         if ((new Date().getTime() - lastTriggerInfo.triggerDate) >= cooldownMilliseconds) {

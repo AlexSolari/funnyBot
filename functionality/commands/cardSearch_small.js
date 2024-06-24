@@ -1,7 +1,7 @@
 const CommandBuilder = require('../../helpers/commandBuilder');
 
 function getCardText(card, fallback) {
-    const images = card.image_uris || fallback;
+    const images = card.image_uris ?? fallback;
 
     if (images)
         return `${images.normal}`;

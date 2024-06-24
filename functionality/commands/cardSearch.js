@@ -1,7 +1,7 @@
 const CommandBuilder = require('../../helpers/commandBuilder');
 
 function getCardText(card, fallback) {
-    const images = card.image_uris || fallback;
+    const images = card.image_uris ?? fallback;
 
     return `${card.name}   ${card.mana_cost.replaceAll(/[{}]/gi, '')}\n\n`
         + `${images.normal}\n\n`

@@ -4,7 +4,7 @@ class TaskScheduler {
     }
 
     createTask(name, action, interval, executeRightAway) {
-        executeRightAway = executeRightAway || false;
+        executeRightAway = executeRightAway ?? false;
         const taskId = setInterval(action, interval);
         const task = {
             name,

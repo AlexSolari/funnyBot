@@ -5,5 +5,11 @@
     "moment": "^2.29.4",
     "node-fetch": "^2.6.11",
     "telebot": "^1.4.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.21.5"
+  },  
+  "scripts": {
+    "build": "esbuild index.js --bundle --platform=node --outfile=build/index.js --ignore-annotations --minify --legal-comments=none"
   }
 }

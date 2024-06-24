@@ -18,7 +18,7 @@ async function loadTournaments(formatName) {
         .map(link => `[${escape(link.children[0].data).replaceAll('-', '\\-')}](https://www.mtggoldfish.com${link.attribs.href})`)
         .join('\n');
 
-    return parsedData || "";
+    return parsedData ?? "";
 }
 
 module.exports = new TriggerBuilder("Trigger.Meta")

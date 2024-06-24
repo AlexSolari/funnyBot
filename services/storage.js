@@ -4,7 +4,7 @@ const path = require('path');
 
 class Storage {
     constructor() {
-        this.cache = new WeakMap();
+        this.cache = new Map();
     }
 
     async load(key) {

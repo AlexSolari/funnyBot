@@ -33,8 +33,8 @@ module.exports = new CommandBuilder("Reaction.Registration")
         const eventInfos = resources.map(x => ({
             name: x.gt.name ?? x.gt.service?.name ?? serviceName,
             id: x.id,
-            spaces: x.space,
-            usedSpaces: x.used_space
+            spaces: x.gt.space,
+            usedSpaces: x.gt.used_space
         }));
 
         let text = eventInfos.length == 1
@@ -42,7 +42,7 @@ module.exports = new CommandBuilder("Reaction.Registration")
             : '';
 
         eventInfos.forEach((x, i) => {
-            text += `[${x.name}](https://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${x.id}) (${x.usedSpaces} уже в резі)`;
+            text += `[${x.name}](https://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${x.id}) \\(${x.usedSpaces} уже в резі\\)`;
 
             if ((i + 1) < eventInfos.length)
                 text += '\n';

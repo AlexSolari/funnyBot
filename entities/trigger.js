@@ -42,7 +42,7 @@ class Trigger {
     shouldTrigger(storedData) {
         const today = new Date();
         const yesterday = new Date(today);
-        const lastTriggerInfo = storedData || { triggerDate: 0 };
+        const lastTriggerInfo = storedData ?? { triggerDate: 0 };
         yesterday.setDate(today.getDate() - 1);
         yesterday.setHours(0, 0, 0, 0);
 

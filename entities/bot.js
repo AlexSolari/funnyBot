@@ -32,7 +32,9 @@ class Bot {
             polling: {
                 interval: 50,
                 limit: 10,
-            }
+            },
+            usePlugins: [],
+            buildInPlugins: []
         });
 
         this.api = new BotApiService(this.bot);
