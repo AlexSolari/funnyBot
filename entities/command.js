@@ -25,7 +25,7 @@ class Command {
         if (!this.active || this.chatsBlacklist.indexOf(ctx.chatId) != -1)
             return;
 
-        const storedData = storage.load(this.key) || {};
+        const storedData = await storage.load(this.key) ?? {};
         let shouldTrigger = false;
         let matchResult = null;
 
@@ -36,8 +36,8 @@ class Command {
         this.trigger.forEach(t => {
             const validationResult = this.checkTrigger(ctx.messageText, t, storedData[ctx.chatId]);
 
-            shouldTrigger = shouldTrigger || validationResult.shouldTrigger;
-            matchResult = matchResult || validationResult.matchResult;
+            shouldTrigger = shouldTrigger ?? validationResult.shouldTrigger;
+            matchResult = matchResult ?? validationResult.matchResult;
         });
 
         if (shouldTrigger) {
@@ -52,7 +52,7 @@ class Command {
                     triggerDate: new Date().getTime()
                 };
 
-                storage.save(storedData, this.key);
+                await storage.save(storedData, this.key);
             }
         }
     }

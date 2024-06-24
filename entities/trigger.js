@@ -24,7 +24,7 @@ class Trigger {
         if (!this.active || this.chatsWhitelist.indexOf(ctx.chatId) == -1)
             return;
 
-        const storedData = storage.load(this.key) || {};
+        const storedData = await storage.load(this.key) ?? {};
 
         if (this.shouldTrigger(storedData[ctx.chatId])) {
             await measureExecutionTime(this.name, async () => {
@@ -35,7 +35,7 @@ class Trigger {
                 triggerDate: new Date().setHours(0, 0, 0, 0)
             };
 
-            storage.save(storedData, this.key);
+            await storage.save(storedData, this.key);
         }
     }
 

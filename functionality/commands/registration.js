@@ -6,12 +6,6 @@ const chatIds = require('../../helpers/chatIds');
 module.exports = new CommandBuilder("Reaction.Registration")
     .on(["рега", "Рега"])
     .do(async (ctx) => {
-        if (ctx.fromUserId == 405833560) {
-            ctx.replyWithText("Посмотри в закрепе 👀");
-            ctx.startCooldown = false;
-            return;
-        }
-
         const currentWeek = getCurrentWeek();
         const response = await fetch(`https://api.wlaunch.net/v1/company/7ea091e0-359a-11eb-86df-9f45a44f29bd/branch/7ea10724-359a-11eb-86df-9f45a44f29bd/slot/gt/resource?start=${currentWeek.firstDay}&end=${currentWeek.lastDay}&source=WIDGET&withDiscounts=true&preventBookingEnabled=true`);
 
@@ -29,14 +23,32 @@ module.exports = new CommandBuilder("Reaction.Registration")
         }
 
         const data = await response.json();
-        const target = data.slots.map(x => x.date_slots.map(ds => ds.slots.find(dss => dss.gt.service.name.indexOf(serviceName) != -1))).flat(Infinity).filter(x => x)[0];
+        const resources = data.slots.map(x => x.date_slots.map(ds => ds.slots.find(dss => dss.gt.service.name.indexOf(serviceName) != -1))).flat(Infinity).filter(x => x);
 
-        if (!target) {
-            ctx.replyWithText(`пока нема`);
+        if (!resources || resources.length == 0) {
+            ctx.replyWithText(`поки нема`);
             return;
         }
 
-        ctx.replyWithText(`[${serviceName}](https://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${target.id})`);
+        const eventInfos = resources.map(x => ({
+            name: x.gt.name ?? x.gt.service?.name ?? serviceName,
+            id: x.id,
+            spaces: x.space,
+            usedSpaces: x.used_space
+        }));
+
+        let text = eventInfos.length == 1
+            ? 'Регістрації на цю неділю:\n\n'
+            : '';
+
+        eventInfos.forEach((x, i) => {
+            text += `[${x.name}](https://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${x.id}) (${x.usedSpaces} уже в резі)`;
+
+            if ((i + 1) < eventInfos.length)
+                text += '\n';
+        });
+
+        ctx.replyWithText(text);
 
     })
     .cooldown(30)

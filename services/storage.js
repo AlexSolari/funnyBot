@@ -1,35 +1,39 @@
-const { readFileSync, writeFileSync, mkdirSync, existsSync } = require("fs");
+const { readFile, writeFile, mkdir } = require("fs").promises;
+const { existsSync } = require("fs");
 const path = require('path');
 
 class Storage {
     constructor() {
-        this.cache = {};
+        this.cache = new WeakMap();
     }
 
-    load(key) {
-        if (!this.cache[key]) {
+    async load(key) {
+        if (!this.cache.has(key)) {
             const targetPath = this._buidPathFromKey(key);
             if (!existsSync(targetPath)) {
                 return null;
             }
 
-            const data = JSON.parse(readFileSync(targetPath));
+            const file = await readFile(targetPath, 'utf8');
+            const data = JSON.parse(file);
 
-            this.cache[key] = data;
+            this.cache.set(key, data);
         }
 
-        return this.cache[key];
+        return this.cache.get(key);
     }
 
-    save(data, key) {
-        delete this.cache[key];
+    async save(data, key) {
+        this.cache.delete(key);
 
         const targetPath = this._buidPathFromKey(key);
         const dirname = path.dirname(targetPath);
+
         if (!existsSync(dirname)) {
-            mkdirSync(dirname, { recursive: true });
+            await mkdir(dirname, { recursive: true });
         }
-        writeFileSync(targetPath, JSON.stringify(data), { flag: 'w+' });
+
+        await writeFile(targetPath, JSON.stringify(data), { flag: 'w+' });
     }
 
     _buidPathFromKey(key) {
