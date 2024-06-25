@@ -31,7 +31,7 @@ class BotApiService {
                 case TextMessage:
                     await this.bot.telegram.sendMessage(message.chatId, 
                         message.text, 
-                        { reply_to_message_id: message.replyId, parse_Mode: "MarkdownV2" });
+                        { reply_to_message_id: message.replyId, parse_mode: "MarkdownV2" });
                     break;
                 case ImageMessage:
                     await this.bot.telegram.sendPhoto(
