@@ -31,19 +31,19 @@ class BotApiService {
                 case TextMessage:
                     await this.bot.telegram.sendMessage(message.chatId, 
                         message.text, 
-                        { replyToMessage: message.replyId, parseMode: "MarkdownV2" });
+                        { reply_to_message_id: message.replyId, parse_Mode: "MarkdownV2" });
                     break;
                 case ImageMessage:
                     await this.bot.telegram.sendPhoto(
                         message.chatId, 
                         message.image, 
-                        message.replyId ? { replyToMessage: message.replyId } : undefined);
+                        message.replyId ? { reply_to_message_id: message.replyId } : undefined);
                     break;
                 case VideoMessage:
                     await this.bot.telegram.sendVideo(
                         message.chatId,
                         message.video, 
-                        message.replyId ? { replyToMessage: message.replyId } : undefined);
+                        message.replyId ? { reply_to_message_id: message.replyId } : undefined);
                     break;
                 default:
                     break;

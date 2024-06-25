@@ -26,11 +26,11 @@ class Bot {
             const messageContent = msg.text 
                 ?? (ctx.update.message.photo ? 'image' : null)
                 ?? ctx.update.message.document?.mime_type
-                ?? 'unknown content';
+                ?? 'unknown content (probably sticker)';
 
             console.log(`${msg.chat.title ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from?.first_name ?? "Unknown"} (${msg.from?.id ?? "Unknown"}): ${messageContent}`);
 
-            if (!ctx.update.message.document?.mime_type){
+            if (msg.text){
                 this.messageQueue.push(msg);
             }
         });
