@@ -1,30 +1,19 @@
 const { Telegraf } = require("telegraf");
 const BotApiService = require('../services/botApi');
-const taskScheduler = require('../services/taskScheduler');
 const BotMessage = require("./botMessage");
+const taskScheduler = require('../services/taskScheduler');
+const functionality = require('../functionality/functionality');
 
 class Bot {
     constructor(name, broadcastPool) {
         this.name = name;
         this.bot = null;
         this.api = null;
-        this.commands = [];
-        this.triggers = [];
+        this.commands = functionality.commands;
+        this.triggers = functionality.triggers;
         this.messageQueue = [];
 
         this.broadcastPool = broadcastPool;
-    }
-
-    addCommand(command) {
-        this.commands.push(command);
-    }
-
-    removeCommand(commandName) {
-        this.commands = this.commands.filter(x => x.name != commandName);
-    }
-
-    addTrigger(command) {
-        this.triggers.push(command);
     }
 
     start(token) {
