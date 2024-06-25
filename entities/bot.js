@@ -27,7 +27,7 @@ class Bot {
 
             console.log(`${msg.chat.title ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from?.first_name ?? "Unknown"} (${msg.from?.id ?? "Unknown"}): ${messageContent}`);
 
-            if (!ctx.update.message.document.mime_type){
+            if (!ctx.update.message.document?.mime_type){
                 this.messageQueue.push(msg);
             }
         });
