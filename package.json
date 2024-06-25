@@ -10,6 +10,6 @@
     "esbuild": "0.21.5"
   },
   "scripts": {
-    "build": "esbuild index.js --bundle --platform=node --outfile=build/index.js --ignore-annotations --minify --legal-comments=none"
+    "build": "esbuild index.js --bundle --platform=node --outfile=build/index.js --ignore-annotations --legal-comments=none"
   }
 }
