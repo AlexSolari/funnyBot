@@ -13,9 +13,10 @@ class MessageContext extends ChatContext {
      * @param {Number} messageId 
      * @param {Number} fromUserId 
      * @param {String} messageText 
+     * @param {Number | String} traceId 
      */
-    constructor(enqueueMethod, chatId, messageId, messageText, fromUserId) {
-        super(enqueueMethod, chatId);
+    constructor(enqueueMethod, chatId, messageId, messageText, fromUserId, traceId) {
+        super(enqueueMethod, chatId, traceId);
 
         this.messageId = messageId;
         this.messageText = messageText;

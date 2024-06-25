@@ -5,6 +5,7 @@ const TextMessage = require("../entities/replyMessages/textMessage");
 const VideoMessage = require("../entities/replyMessages/videoMessage");
 const taskScheduler = require('../services/taskScheduler');
 const { Telegraf } = require("telegraf");
+const BotMessage = require("../entities/botMessage");
 
 class BotApiService {
     /**
@@ -55,12 +56,13 @@ class BotApiService {
         this.messageQueue.push(response);
     }
 
+    /** @param {BotMessage} botMessage  */
     usingMessage(botMessage) {
-        return new MessageContext((response) => this.enqueue(response), botMessage.chat.id, botMessage.message_id, botMessage.text, botMessage.from?.id ?? undefined);
+        return new MessageContext((response) => this.enqueue(response), botMessage.chat.id, botMessage.message_id, botMessage.text, botMessage.from?.id ?? undefined, botMessage.traceId);
     }
 
     usingChat(chatId) {
-        return new ChatContext((response) => this.enqueue(response), chatId);
+        return new ChatContext((response) => this.enqueue(response), chatId, `Trigger${chatId}`);
     }
 }
 

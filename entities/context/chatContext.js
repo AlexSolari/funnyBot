@@ -9,11 +9,13 @@ class ChatContext {
     /**
      * @param {Number} chatId
      * @param {function(TextMessage | ImageMessage | VideoMessage):void} enqueueMethod
+     * @param {Number | String} traceId 
      */
-    constructor(enqueueMethod, chatId) {
+    constructor(enqueueMethod, chatId, traceId) {
         /** @private */
         this.enqueue = enqueueMethod;
         this.chatId = chatId;
+        this.traceId = traceId;
     }
 
     /**

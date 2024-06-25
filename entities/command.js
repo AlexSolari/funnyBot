@@ -45,7 +45,7 @@ class Command {
 
             await measureExecutionTime(this.name, async () => {
                 await this.handler(ctx);
-            })
+            }, ctx.traceId)
 
             if (ctx.startCooldown) {
                 storedData[ctx.chatId] = {

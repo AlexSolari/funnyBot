@@ -3,6 +3,7 @@ const BotApiService = require('../services/botApi');
 const BotMessage = require("./botMessage");
 const taskScheduler = require('../services/taskScheduler');
 const functionality = require('../functionality/functionality');
+const log = require('../helpers/logger');
 
 class Bot {
     constructor(name, broadcastPool) {
@@ -11,6 +12,8 @@ class Bot {
         this.api = null;
         this.commands = functionality.commands;
         this.triggers = functionality.triggers;
+
+        /** @type {BotMessage[]} */
         this.messageQueue = [];
 
         this.broadcastPool = broadcastPool;
@@ -28,7 +31,7 @@ class Bot {
                 ?? ctx.update.message.document?.mime_type
                 ?? 'unknown content (probably sticker)';
 
-            console.log(`${msg.chat.title ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from?.first_name ?? "Unknown"} (${msg.from?.id ?? "Unknown"}): ${messageContent}`);
+            log(msg.traceId, `${msg.chat.title ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from?.first_name ?? "Unknown"} (${msg.from?.id ?? "Unknown"}): ${messageContent}`);
 
             if (msg.text){
                 this.messageQueue.push(msg);
@@ -71,7 +74,7 @@ class Bot {
                 await cmd.exec(this.api.usingMessage(msg));
             }
             catch (error) {
-                console.error(error);
+                console.error(`TRACE${msg.traceId} Error: ${error}`);
             }
         }
     }

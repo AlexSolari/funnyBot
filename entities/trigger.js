@@ -29,7 +29,7 @@ class Trigger {
         if (this.shouldTrigger(storedData[ctx.chatId])) {
             await measureExecutionTime(this.name, async () => {
                 await this.handler(ctx);
-            });
+            }, ctx.traceId);
 
             storedData[ctx.chatId] = {
                 triggerDate: new Date().setHours(0, 0, 0, 0)
