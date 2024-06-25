@@ -23,7 +23,9 @@ class Bot {
 
         this.bot.on('message', (ctx) => {
             const msg = new BotMessage(ctx.update.message);
-            console.log(`${msg.chat.title ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from?.first_name ?? "Unknown"} (${msg.from?.id ?? "Unknown"}): ${msg.text}`);
+            const messageContent = msg.text ?? ctx.update.message.document.mime_type;
+
+            console.log(`${msg.chat.title ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from?.first_name ?? "Unknown"} (${msg.from?.id ?? "Unknown"}): ${messageContent}`);
             this.messageQueue.push(msg);
         });
 

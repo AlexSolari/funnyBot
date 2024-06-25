@@ -4,7 +4,6 @@ const chatIds = require('./helpers/chatIds');
 
 startBot("main", 'token.prod', [chatIds.modernChat, chatIds.pioneerChat, chatIds.spellSeeker]);
 startBot("lviv", 'token.lviv', [chatIds.lvivChat]);
-startBot("test", 'token.test', []);
 
 async function startBot(name, tokenFile, broadcastPool) {
     console.log(`Initializing bot [${name}]...`);
