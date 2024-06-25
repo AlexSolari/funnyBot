@@ -31,8 +31,9 @@ class ChatContext {
      * @param {string} name 
      */
     sendImageToChat(name) {
-        const path = `./content/${name}.png`;
-        this.enqueue(new ImageMessage(path,
+        const filePath = `./content/${name}.png`;
+        this.enqueue(new ImageMessage(
+            { source: resolve(filePath) },
             this.chatId,
             undefined))
     }
@@ -42,8 +43,9 @@ class ChatContext {
      * @param {string} name 
      */
     sendVideoToChat(name) {
-        const path = `./content/${name}.mp4`;
-        this.enqueue(new VideoMessage(path,
+        const filePath = `./content/${name}.mp4`;
+        this.enqueue(new VideoMessage(
+            { source: resolve(filePath) },
             this.chatId,
             undefined))
     }

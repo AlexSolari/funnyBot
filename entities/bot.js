@@ -1,6 +1,7 @@
-const TeleBot = require('telebot');
+const { Telegraf } = require("telegraf");
 const BotApiService = require('../services/botApi');
 const taskScheduler = require('../services/taskScheduler');
+const BotMessage = require("./botMessage");
 
 class Bot {
     constructor(name, broadcastPool) {
@@ -27,24 +28,17 @@ class Bot {
     }
 
     start(token) {
-        this.bot = new TeleBot({
-            token: token,
-            polling: {
-                interval: 50,
-                limit: 10,
-            },
-            usePlugins: [],
-            buildInPlugins: []
-        });
+        this.bot = new Telegraf(token);
 
         this.api = new BotApiService(this.bot);
 
-        this.bot.on('text', (msg) => {
+        this.bot.on('message', (ctx) => {
+            const msg = new BotMessage(ctx.update.message);
             console.log(`${msg.chat.title ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from?.first_name ?? "Unknown"} (${msg.from?.id ?? "Unknown"}): ${msg.text}`);
             this.messageQueue.push(msg);
         });
 
-        this.bot.start();
+        this.bot.launch();
 
         taskScheduler.createTask("MessageProcessing", async () => {
             while (this.messageQueue.length > 0) {

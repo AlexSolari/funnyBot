@@ -2,6 +2,7 @@ const ImageMessage = require("../replyMessages/imageMessage");
 const TextMessage = require("../replyMessages/textMessage");
 const VideoMessage = require("../replyMessages/videoMessage");
 const ChatContext = require("./chatContext");
+const { resolve } = require("path");
 
 /**@class Context used to reply to specific message that triggered a command*/
 class MessageContext extends ChatContext {
@@ -37,8 +38,10 @@ class MessageContext extends ChatContext {
      * @method
      * @param {String} name */
     replyWithImage(name) {
-        const path = `./content/${name}.png`;
-        this.enqueue(new ImageMessage(path,
+        
+        const filePath = `./content/${name}.png`;
+        this.enqueue(new ImageMessage(
+            { source: resolve(filePath) },
             this.chatId,
             this.messageId))
     }
@@ -47,8 +50,9 @@ class MessageContext extends ChatContext {
      * @method
      * @param {String} name */
     replyWithVideo(name) {
-        const path = `./content/${name}.mp4`;
-        this.enqueue(new VideoMessage(path,
+        const filePath = `./content/${name}.mp4`;
+        this.enqueue(new VideoMessage(
+            { source: resolve(filePath) },
             this.chatId,
             this.messageId))
     }

@@ -4,11 +4,11 @@ const ImageMessage = require("../entities/replyMessages/imageMessage");
 const TextMessage = require("../entities/replyMessages/textMessage");
 const VideoMessage = require("../entities/replyMessages/videoMessage");
 const taskScheduler = require('../services/taskScheduler');
-const telebot = require("telebot");
+const { Telegraf } = require("telegraf");
 
 class BotApiService {
     /**
-    * @param {telebot} bot
+    * @param {Telegraf} bot
     */
     constructor(bot) {
         this.bot = bot;
@@ -20,28 +20,34 @@ class BotApiService {
 
         taskScheduler.createTask("MessageSending", () => {
             this._dequeueMessage();
-        }, 35);
+        }, 100);
     }
 
-    _dequeueMessage() {
+    async _dequeueMessage() {
         const message = this.messageQueue.pop();
 
         if (message) {
             switch (message.constructor) {
                 case TextMessage:
-                    this.bot.sendMessage(message.chatId, message.text, { replyToMessage: message.replyId, parseMode: "MarkdownV2" })
-                        .catch(e => console.error(e));
+                    await this.bot.telegram.sendMessage(message.chatId, 
+                        message.text, 
+                        { replyToMessage: message.replyId, parseMode: "MarkdownV2" });
                     break;
                 case ImageMessage:
-                    this.bot.sendPhoto(message.chatId, message.imagePath, message.replyId ? { replyToMessage: message.replyId } : undefined)
-                        .catch(e => console.error(e));
+                    await this.bot.telegram.sendPhoto(
+                        message.chatId, 
+                        message.image, 
+                        message.replyId ? { replyToMessage: message.replyId } : undefined);
+                    break;
                 case VideoMessage:
-                    this.bot.sendVideo(message.chatId, message.videoPath, message.replyId ? { replyToMessage: message.replyId } : undefined)
-                        .catch(e => console.error(e));
+                    await this.bot.telegram.sendVideo(
+                        message.chatId,
+                        message.video, 
+                        message.replyId ? { replyToMessage: message.replyId } : undefined);
+                    break;
                 default:
                     break;
             }
-
         }
     }
 
