@@ -27,7 +27,8 @@ class Bot {
         this.bot.on('message', (ctx) => {
             const msg = new BotMessage(ctx.update.message);
             const messageContent = msg.text 
-                ?? (ctx.update.message.photo ? 'image' : null)
+                ?? (ctx.update.message.photo ? '🖼️' : null)
+                ?? (ctx.update.message.document?.mime_type == "video/mp4" ? '🎞️' : null)
                 ?? ctx.update.message.document?.mime_type
                 ?? 'unknown content (probably sticker)';
 

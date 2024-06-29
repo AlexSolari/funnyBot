@@ -61,8 +61,8 @@ module.exports = new TriggerBuilder("Trigger.Meta")
                 }
 
                 if (pioneerString.length > 0
-                    && modernString.length > 0
-                    && standardString.length > 0) {
+                    || modernString.length > 0
+                    || standardString.length > 0) {
                     ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n ${modernString} ${pioneerString} ${standardString}`);
                 }
             default:
