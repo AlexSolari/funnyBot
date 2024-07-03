@@ -14,6 +14,7 @@ const rakdos = require('./commands/rakdos.js');
 const rating = require('./commands/rating.js');
 const registration = require('./commands/registration.js');
 const ring = require('./commands/ring.js');
+const rozklad = require('./commands/rozklad.js');
 
 
-module.exports = [black,cardSearch,cardSearch_small,control,fang,hello,ihor,kalitas,kamaz,lotus,pizda,rakdos,rating,registration,ring];
+module.exports = [black,cardSearch,cardSearch_small,control,fang,hello,ihor,kalitas,kamaz,lotus,pizda,rakdos,rating,registration,ring,rozklad];
