@@ -1,6 +1,7 @@
 const ImageMessage = require("../replyMessages/imageMessage");
 const TextMessage = require("../replyMessages/textMessage");
 const VideoMessage = require("../replyMessages/videoMessage");
+const { resolve } = require("path");
 
 /**
  * @class Context used to send a message to a chat
