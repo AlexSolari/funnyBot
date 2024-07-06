@@ -8,7 +8,6 @@ const log = require('../helpers/logger');
 class Bot {
     constructor(name, broadcastPool) {
         this.name = name;
-        this.bot = null;
         this.api = null;
         this.commands = functionality.commands;
         this.triggers = functionality.triggers;
@@ -20,11 +19,11 @@ class Bot {
     }
 
     start(token) {
-        this.bot = new Telegraf(token);
+        const bot = new Telegraf(token);
 
-        this.api = new BotApiService(this.bot);
+        this.api = new BotApiService(bot);
 
-        this.bot.on('message', (ctx) => {
+        bot.on('message', (ctx) => {
             const msg = new BotMessage(ctx.update.message);
             const messageContent = msg.text 
                 ?? (ctx.update.message.photo ? '🖼️' : null)
@@ -39,7 +38,7 @@ class Bot {
             }
         });
 
-        this.bot.launch();
+        bot.launch();
 
         taskScheduler.createTask("MessageProcessing", async () => {
             while (this.messageQueue.length > 0) {

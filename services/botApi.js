@@ -30,20 +30,20 @@ class BotApiService {
         if (message) {
             switch (message.constructor) {
                 case TextMessage:
-                    await this.bot.telegram.sendMessage(message.chatId, 
-                        message.text, 
+                    await this.bot.telegram.sendMessage(message.chatId,
+                        message.text,
                         { reply_to_message_id: message.replyId, parse_mode: "MarkdownV2" });
                     break;
                 case ImageMessage:
                     await this.bot.telegram.sendPhoto(
-                        message.chatId, 
-                        message.image, 
+                        message.chatId,
+                        message.image,
                         message.replyId ? { reply_to_message_id: message.replyId } : undefined);
                     break;
                 case VideoMessage:
                     await this.bot.telegram.sendVideo(
                         message.chatId,
-                        message.video, 
+                        message.video,
                         message.replyId ? { reply_to_message_id: message.replyId } : undefined);
                     break;
                 default:

@@ -14,10 +14,14 @@ class Storage {
                 return null;
             }
 
-            const file = await readFile(targetPath, 'utf8');
-            const data = JSON.parse(file);
+            const fileContent = await readFile(targetPath, 'utf8');
 
-            this.cache.set(key, data);
+            if (fileContent) {
+                const data = JSON.parse(fileContent);
+                
+                this.cache.set(key, data);
+            }
+
         }
 
         return this.cache.get(key);
