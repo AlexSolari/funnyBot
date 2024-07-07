@@ -1,8 +1,8 @@
-const storage = require('../services/storage');
-const measureExecutionTime = require('../helpers/executionTimeTracker');
-const ChatContext = require('./context/chatContext');
+import storage from '../services/storage.js';
+import measureExecutionTime from '../helpers/executionTimeTracker.js';
+import ChatContext from './context/chatContext.js';
 
-class Trigger {
+export default class Trigger {
     constructor(name, handler, timeinHours, active, whitelist) {
         this.name = name;
         this.handler = handler;
@@ -52,6 +52,4 @@ class Trigger {
         return isAllowedToTrigger
             && hasNotTriggeredToday;
     }
-}
-
-module.exports = Trigger;
+};

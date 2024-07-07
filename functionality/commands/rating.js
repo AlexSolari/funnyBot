@@ -1,8 +1,8 @@
-const CommandBuilder = require('../../helpers/commandBuilder');
-const randomInteger = require('../../helpers/randomInt');
-const chatIds = require('../../helpers/chatIds');
+import CommandBuilder from '../../helpers/commandBuilder.js';
+import randomInteger from '../../helpers/randomInt.js';
+import { lvivChat } from '../../helpers/chatIds.js';
 
-module.exports = new CommandBuilder("Reaction.Rating")
+export default new CommandBuilder("Reaction.Rating")
     .on(/youtube\.com\/watch\?/i)
     .do((ctx) => {
         if (randomInteger(0, 1) == 0) {
@@ -10,5 +10,5 @@ module.exports = new CommandBuilder("Reaction.Rating")
         }
     })
     .cooldown(7200)
-    .ignoreChat(chatIds.lvivChat)
+    .ignoreChat(lvivChat)
     .build();

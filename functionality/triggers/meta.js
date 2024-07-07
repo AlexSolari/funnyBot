@@ -1,9 +1,9 @@
-const TriggerBuilder = require('../../helpers/triggerBuilder');
-const formatDate = require('../../helpers/formatDate');
-const cheerio = require('cheerio');
-const fetch = require('node-fetch');
-const chatIds = require('../../helpers/chatIds');
-const escape = require('markdown-escape');
+import TriggerBuilder from '../../helpers/triggerBuilder.js';
+import formatDate from '../../helpers/formatDate.js';
+import { load } from 'cheerio';
+import fetch from 'node-fetch';
+import { modernChat, pioneerChat, lvivChat } from '../../helpers/chatIds.js';
+import escape from 'markdown-escape';
 
 async function loadTournaments(formatName) {
     const today = new Date();
@@ -12,7 +12,7 @@ async function loadTournaments(formatName) {
 
     const response = await fetch(`https://www.mtggoldfish.com/tournament_searches/create?utf8=%E2%9C%93&tournament_search%5Bname%5D=&tournament_search%5Bformat%5D=${formatName}&tournament_search%5Bdate_range%5D=${formatDate(yesterday)}+-+${formatDate(today)}&commit=Search`)
     const text = await response.text();
-    const $ = cheerio.load(text);
+    const $ = load(text);
     const $links = $('.table-responsive td a').toArray();
     const parsedData = $links
         .map(link => `[${escape(link.children[0].data).replaceAll('-', '\\-')}](https://www.mtggoldfish.com${link.attribs.href})`)
@@ -21,19 +21,19 @@ async function loadTournaments(formatName) {
     return parsedData ?? "";
 }
 
-module.exports = new TriggerBuilder("Trigger.Meta")
+export default new TriggerBuilder("Trigger.Meta")
     .at(20) //20:00 Kiev time
-    .allowIn([chatIds.modernChat, chatIds.pioneerChat, chatIds.lvivChat])
+    .allowIn([modernChat, pioneerChat, lvivChat])
     .do(async (ctx) => {
         switch (ctx.chatId) {
-            case chatIds.pioneerChat:
+            case pioneerChat:
                 const pioneer = await loadTournaments('pioneer');
 
                 if (pioneer.length > 0) {
                     ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${pioneer}`);
                 }
                 break;
-            case chatIds.modernChat:
+            case modernChat:
                 const modern = await loadTournaments('modern');
 
                 if (modern.length > 0) {
@@ -41,7 +41,7 @@ module.exports = new TriggerBuilder("Trigger.Meta")
                 }
 
                 break;
-            case chatIds.lvivChat:
+            case lvivChat:
                 const pioneerTournaments = await loadTournaments('pioneer');
                 const modernTournaments = await loadTournaments('modern');
                 const standardTournaments = await loadTournaments('standard');

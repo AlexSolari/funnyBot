@@ -1,8 +1,8 @@
-const CommandBuilder = require('../../helpers/commandBuilder');
-const randomInteger = require('../../helpers/randomInt');
-const chatIds = require('../../helpers/chatIds');
+import CommandBuilder from '../../helpers/commandBuilder.js';
+import randomInteger from '../../helpers/randomInt.js';
+import { lvivChat } from '../../helpers/chatIds.js';
 
-module.exports = new CommandBuilder("Reaction.Ring")
+export default new CommandBuilder("Reaction.Ring")
     .on(/кольц/i)
     .do((ctx) => {
         const seed = randomInteger(0, 2);
@@ -21,5 +21,5 @@ module.exports = new CommandBuilder("Reaction.Ring")
     })
     .cooldown(7200)
     .disabled()
-    .ignoreChat(chatIds.lvivChat)
+    .ignoreChat(lvivChat)
     .build();

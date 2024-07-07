@@ -1,10 +1,10 @@
-const CommandBuilder = require('../../helpers/commandBuilder');
-const chatIds = require('../../helpers/chatIds');
+import CommandBuilder from '../../helpers/commandBuilder.js';
+import { lvivChat } from '../../helpers/chatIds.js';
 
-module.exports = new CommandBuilder("Reaction.Ihor")
+export default new CommandBuilder("Reaction.Ihor")
     .on(/мод[еє]рн/i)
     .do(async (ctx) => {
-        if (ctx.fromUserId != 381992977 || ctx.chatId != chatIds.lvivChat) {
+        if (ctx.fromUserId != 381992977 || ctx.chatId != lvivChat) {
             ctx.startCooldown = false;
             return;
         }

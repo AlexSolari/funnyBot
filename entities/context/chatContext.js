@@ -1,12 +1,12 @@
-const ImageMessage = require("../replyMessages/imageMessage");
-const TextMessage = require("../replyMessages/textMessage");
-const VideoMessage = require("../replyMessages/videoMessage");
-const { resolve } = require("path");
+import ImageMessage from "../replyMessages/imageMessage.js";
+import TextMessage from "../replyMessages/textMessage.js";
+import VideoMessage from "../replyMessages/videoMessage.js";
+import { resolve } from "path";
 
 /**
  * @class Context used to send a message to a chat
  */
-class ChatContext {
+export default class ChatContext {
     /**
      * @param {Number} chatId
      * @param {function(TextMessage | ImageMessage | VideoMessage):void} enqueueMethod
@@ -52,6 +52,4 @@ class ChatContext {
             this.chatId,
             undefined))
     }
-}
-
-module.exports = ChatContext;
+};

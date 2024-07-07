@@ -22,4 +22,4 @@ class TaskScheduler {
     }
 }
 
-module.exports = new TaskScheduler();
+export default new TaskScheduler();

@@ -1,15 +1,15 @@
-const CommandBuilder = require('../../helpers/commandBuilder');
-const fetch = require('node-fetch');
-const chatIds = require('../../helpers/chatIds');
-const cheerio = require('cheerio');
+import CommandBuilder from '../../helpers/commandBuilder.js';
+import fetch from 'node-fetch';
+import { modernChat, pioneerChat, spellSeeker } from '../../helpers/chatIds.js';
+import { load } from 'cheerio';
 
-module.exports = new CommandBuilder("Reaction.Schedule")
+export default new CommandBuilder("Reaction.Schedule")
     .on(["розклад"])
     .do(async (ctx) => {
         const response = await fetch(`https://t.me/s/otawaratcg?q=%D1%80%D0%BE%D0%B7%D0%BA%D0%BB%D0%B0%D0%B4`);
         const text = await response.text();
 
-        const $ = cheerio.load(text);        
+        const $ = load(text);        
         const $post = $('.js-widget_message').toArray();
         const link = $post.at(-1).attribs['data-post'];
         
@@ -17,7 +17,7 @@ module.exports = new CommandBuilder("Reaction.Schedule")
 
     })
     .cooldown(30)
-    .ignoreChat(chatIds.modernChat)
-    .ignoreChat(chatIds.pioneerChat)
-    .ignoreChat(chatIds.spellSeeker)
+    .ignoreChat(modernChat)
+    .ignoreChat(pioneerChat)
+    .ignoreChat(spellSeeker)
     .build();

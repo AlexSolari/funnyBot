@@ -1,11 +1,11 @@
-const ImageMessage = require("../replyMessages/imageMessage");
-const TextMessage = require("../replyMessages/textMessage");
-const VideoMessage = require("../replyMessages/videoMessage");
-const ChatContext = require("./chatContext");
-const { resolve } = require("path");
+import ImageMessage from "../replyMessages/imageMessage.js";
+import TextMessage from "../replyMessages/textMessage.js";
+import VideoMessage from "../replyMessages/videoMessage.js";
+import ChatContext from "./chatContext.js";
+import { resolve } from "path";
 
 /**@class Context used to reply to specific message that triggered a command*/
-class MessageContext extends ChatContext {
+export default class MessageContext extends ChatContext {
     /**
      * @extends ChatContext
      * @param {function(TextMessage | ImageMessage | VideoMessage):void} enqueueMethod
@@ -57,6 +57,4 @@ class MessageContext extends ChatContext {
             this.chatId,
             this.messageId))
     }
-}
-
-module.exports = MessageContext;
+};

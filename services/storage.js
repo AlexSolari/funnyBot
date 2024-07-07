@@ -1,6 +1,6 @@
-const { readFile, writeFile, mkdir } = require("fs").promises;
-const { existsSync } = require("fs");
-const path = require('path');
+import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { existsSync } from "fs";
+import { dirname } from 'path';
 
 class Storage {
     constructor() {
@@ -31,10 +31,10 @@ class Storage {
         this.cache.delete(key);
 
         const targetPath = this._buidPathFromKey(key);
-        const dirname = path.dirname(targetPath);
+        const folderName = dirname(targetPath);
 
-        if (!existsSync(dirname)) {
-            await mkdir(dirname, { recursive: true });
+        if (!existsSync(folderName)) {
+            await mkdir(folderName, { recursive: true });
         }
 
         await writeFile(targetPath, JSON.stringify(data), { flag: 'w+' });
@@ -45,4 +45,4 @@ class Storage {
     }
 }
 
-module.exports = new Storage();
+export default new Storage();

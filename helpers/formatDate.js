@@ -3,7 +3,7 @@
  * @param {Date} date 
  * @returns {string} formatted date
  */
-function formatDate(date) {
+export default function formatDate(date) {
   // Get the month, day, and year from the date object
   const month = date.getMonth() + 1;
   const day = date.getDate();
@@ -14,6 +14,4 @@ function formatDate(date) {
 
   // Return the formatted date string
   return formattedDate;
-}
-
-module.exports = formatDate;
+};

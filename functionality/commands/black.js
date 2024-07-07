@@ -1,12 +1,12 @@
-const CommandBuilder = require('../../helpers/commandBuilder');
-const chatIds = require('../../helpers/chatIds');
+import CommandBuilder from '../../helpers/commandBuilder.js';
+import { lvivChat } from '../../helpers/chatIds.js';
 
-module.exports = new CommandBuilder("Reaction.Black")
+export default new CommandBuilder("Reaction.Black")
     .on(/моноб/i)
     .do((ctx) => {
         ctx.replyWithImage("monoB");
     })
-    .ignoreChat(chatIds.lvivChat)
+    .ignoreChat(lvivChat)
     .cooldown(7200)
     .disabled()
     .build();

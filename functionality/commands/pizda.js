@@ -1,11 +1,11 @@
-const CommandBuilder = require('../../helpers/commandBuilder');
-const chatIds = require('../../helpers/chatIds');
+import CommandBuilder from '../../helpers/commandBuilder.js';
+import { lvivChat } from '../../helpers/chatIds.js';
 
-module.exports = new CommandBuilder("Reaction.Pizda")
+export default new CommandBuilder("Reaction.Pizda")
     .on("да")
     .do((ctx) => {
         ctx.replyWithText("пизда");
     })
     .cooldown(7200)
-    .ignoreChat(chatIds.lvivChat)
+    .ignoreChat(lvivChat)
     .build();

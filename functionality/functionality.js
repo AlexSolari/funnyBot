@@ -1,7 +1,7 @@
-const triggers = require('./gen_triggers');
-const commands = require('./gen_commands');
+import triggers from './gen_triggers.js';
+import commands from './gen_commands.js';
 
-module.exports = {
+export default {
     commands,
     triggers
 };

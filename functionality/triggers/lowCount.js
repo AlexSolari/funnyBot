@@ -1,13 +1,13 @@
-const TriggerBuilder = require('../../helpers/triggerBuilder');
-const getCurrentWeek = require('../../helpers/getWeek');
-const fetch = require('node-fetch');
-const chatIds = require('../../helpers/chatIds');
+import TriggerBuilder from '../../helpers/triggerBuilder.js';
+import getCurrentWeek from '../../helpers/getWeek.js';
+import fetch from 'node-fetch';
+import { modernChat, pioneerChat, lvivChat } from '../../helpers/chatIds.js';
 
-module.exports = new TriggerBuilder("Trigger.LowCount")
+export default new TriggerBuilder("Trigger.LowCount")
     .at(11) //15:00 Kiev time
-    .allowIn([chatIds.modernChat, chatIds.pioneerChat])
+    .allowIn([modernChat, pioneerChat])
     .do(async (ctx) => {
-        if (ctx.chatId == chatIds.lvivChat)
+        if (ctx.chatId == lvivChat)
             return;
 
         const currentWeek = getCurrentWeek();
@@ -20,11 +20,11 @@ module.exports = new TriggerBuilder("Trigger.LowCount")
             let serviceName = '';
 
             switch (ctx.chatId) {
-                case chatIds.pioneerChat:
+                case pioneerChat:
                     prefix = 'pioneer_';
                     serviceName = 'Піонер'
                     break;
-                case chatIds.modernChat:
+                case modernChat:
                     prefix = 'modern_';
                     serviceName = 'Модерн'
                     break;

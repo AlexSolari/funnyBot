@@ -1,12 +1,12 @@
-const CommandBuilder = require('../../helpers/commandBuilder');
-const chatIds = require('../../helpers/chatIds');
+import CommandBuilder from '../../helpers/commandBuilder.js';
+import { lvivChat } from '../../helpers/chatIds.js';
 
-module.exports = new CommandBuilder("Reaction.Rakdos")
+export default new CommandBuilder("Reaction.Rakdos")
     .on(/(ракдос|рб|бр)(?![a-zA-Z0-9а-яА-Я])/i)
     .do((ctx) => {
         ctx.replyWithImage("rakdos");
     })
     .cooldown(7200)
-    .ignoreChat(chatIds.lvivChat)
+    .ignoreChat(lvivChat)
     .disabled()
     .build();

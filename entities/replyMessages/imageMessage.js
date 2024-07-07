@@ -1,4 +1,4 @@
-class ImageMessage {
+export default class ImageMessage {
     /**
      * 
      * @param {import("telegraf/types").InputFile} image 
@@ -10,6 +10,4 @@ class ImageMessage {
         this.chatId = chatId;
         this.replyId = replyId;
     }
-}
-
-module.exports = ImageMessage;
+};

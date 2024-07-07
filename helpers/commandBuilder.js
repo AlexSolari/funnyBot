@@ -1,7 +1,7 @@
-const Command = require("../entities/command");
-const MessageContext = require("../entities/context/messageContext")
+import Command from "../entities/command.js";
+import MessageContext from "../entities/context/messageContext.js";
 
-class CommandBuilder {
+export default class CommandBuilder {
     constructor(name) {
         this.name = name;
         this.trigger = null;
@@ -52,6 +52,4 @@ class CommandBuilder {
     build() {
         return new Command(this.trigger, this.handler, this.name, this.active, this.cooldownSeconds, this.blacklist);
     }
-}
-
-module.exports = CommandBuilder;
+};

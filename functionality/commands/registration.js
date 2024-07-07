@@ -1,9 +1,9 @@
-const CommandBuilder = require('../../helpers/commandBuilder');
-const getCurrentWeek = require('../../helpers/getWeek');
-const fetch = require('node-fetch');
-const chatIds = require('../../helpers/chatIds');
+import CommandBuilder from '../../helpers/commandBuilder.js';
+import getCurrentWeek from '../../helpers/getWeek.js';
+import fetch from 'node-fetch';
+import { pioneerChat, modernChat, lvivChat } from '../../helpers/chatIds.js';
 
-module.exports = new CommandBuilder("Reaction.Registration")
+export default new CommandBuilder("Reaction.Registration")
     .on(["рега", "Рега"])
     .do(async (ctx) => {
         const currentWeek = getCurrentWeek();
@@ -12,10 +12,10 @@ module.exports = new CommandBuilder("Reaction.Registration")
         let serviceName = '';
 
         switch (ctx.chatId) {
-            case chatIds.pioneerChat:
+            case pioneerChat:
                 serviceName = 'Піонер'
                 break;
-            case chatIds.modernChat:
+            case modernChat:
                 serviceName = 'Модерн'
                 break;
             default:
@@ -52,5 +52,5 @@ module.exports = new CommandBuilder("Reaction.Registration")
 
     })
     .cooldown(30)
-    .ignoreChat(chatIds.lvivChat)
+    .ignoreChat(lvivChat)
     .build();

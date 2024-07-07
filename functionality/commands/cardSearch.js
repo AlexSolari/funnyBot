@@ -1,4 +1,5 @@
-const CommandBuilder = require('../../helpers/commandBuilder');
+import CommandBuilder from '../../helpers/commandBuilder.js';
+import fetch from 'node-fetch';
 
 function getCardText(card, fallback) {
     const images = card.image_uris ?? fallback;
@@ -9,7 +10,7 @@ function getCardText(card, fallback) {
         + card.oracle_text;
 }
 
-module.exports = new CommandBuilder("Reaction.CardSearch")
+export default new CommandBuilder("Reaction.CardSearch")
     .on(/\[\[(.+)\]\]/i)
     .do(async (ctx) => {
         const response = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${ctx.matchResult[1]}`)

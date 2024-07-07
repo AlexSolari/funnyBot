@@ -1,10 +1,10 @@
-const moment = require("moment");
+import moment from "moment";
 
 /**
  * 
  * @returns {{firstDay: String, lastDay: String}} first and last date of current week
  */
-function getCurrentWeek() {
+export default function getCurrentWeek() {
   const currentDate = moment();
 
   const firstDay = currentDate.clone().startOf('isoWeek').format("YYYY-MM-DD");
@@ -12,5 +12,3 @@ function getCurrentWeek() {
 
   return { firstDay, lastDay };
 }
-
-module.exports = getCurrentWeek;  

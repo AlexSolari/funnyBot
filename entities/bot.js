@@ -1,11 +1,11 @@
-const { Telegraf } = require("telegraf");
-const BotApiService = require('../services/botApi');
-const BotMessage = require("./botMessage");
-const taskScheduler = require('../services/taskScheduler');
-const functionality = require('../functionality/functionality');
-const log = require('../helpers/logger');
+import { Telegraf } from "telegraf";
+import BotApiService from '../services/botApi.js';
+import BotMessage from "./botMessage.js";
+import taskScheduler from '../services/taskScheduler.js';
+import functionality from '../functionality/functionality.js';
+import log from '../helpers/logger.js';
 
-class Bot {
+export default class Bot {
     constructor(name, broadcastPool) {
         this.name = name;
         this.api = null;
@@ -78,6 +78,4 @@ class Bot {
             }
         }
     }
-}
-
-module.exports = Bot;
+};

@@ -1,12 +1,13 @@
-const { performance } = require('perf_hooks');
-const log = require('./logger');
+import { performance } from 'perf_hooks';
+import log from './logger.js';
 
 /**
  * 
  * @param {String} name 
  * @param {Function} action 
+ * @param {string | number} traceId 
  */
-module.exports = async (name, action, traceId) => {
+export default async function measureExecutionTime(name, action, traceId) {
     log(traceId, ` - Executing [${name}]`);
     const t0 = performance.now();
     await action();

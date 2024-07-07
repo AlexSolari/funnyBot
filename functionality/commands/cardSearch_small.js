@@ -1,4 +1,5 @@
-const CommandBuilder = require('../../helpers/commandBuilder');
+import CommandBuilder from '../../helpers/commandBuilder.js';
+import fetch from 'node-fetch';
 
 function getCardText(card, fallback) {
     const images = card.image_uris ?? fallback;
@@ -9,7 +10,7 @@ function getCardText(card, fallback) {
     return card.oracle_text;
 }
 
-module.exports = new CommandBuilder("Reaction.CardSearch_Small")
+export default new CommandBuilder("Reaction.CardSearch_Small")
     .on(/\[(.+)\]/i)
     .do(async (ctx) => {
         if (ctx.messageText.indexOf('[[') != -1)

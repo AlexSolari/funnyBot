@@ -1,9 +1,9 @@
-const { readFile } = require("node:fs/promises");
-const Bot = require('./entities/bot');
-const chatIds = require('./helpers/chatIds');
+import { readFile } from "node:fs/promises";
+import Bot from './entities/bot.js';
+import { modernChat, pioneerChat, spellSeeker, lvivChat } from './helpers/chatIds.js';
 
-startBot("main", 'token.prod', [chatIds.modernChat, chatIds.pioneerChat, chatIds.spellSeeker]);
-startBot("lviv", 'token.lviv', [chatIds.lvivChat]);
+startBot("main", 'token.prod', [modernChat, pioneerChat, spellSeeker]);
+startBot("lviv", 'token.lviv', [lvivChat]);
 
 async function startBot(name, tokenFile, broadcastPool) {
     console.log(`Initializing bot [${name}]...`);

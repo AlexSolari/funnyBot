@@ -1,8 +1,8 @@
-const storage = require('../services/storage');
-const measureExecutionTime = require('../helpers/executionTimeTracker');
-const MessageContext = require('./context/messageContext');
+import storage from '../services/storage.js';
+import measureExecutionTime from '../helpers/executionTimeTracker.js';
+import MessageContext from './context/messageContext.js';
 
-class Command {
+export default class Command {
     constructor(trigger, handler, name, active, cooldown, chatsBlacklist) {
         this.trigger = trigger;
         this.handler = handler;
@@ -80,6 +80,4 @@ class Command {
 
         return { shouldTrigger, matchResult };
     }
-}
-
-module.exports = Command;
+};

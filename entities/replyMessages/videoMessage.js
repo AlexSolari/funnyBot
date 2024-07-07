@@ -1,4 +1,4 @@
-class VideoMessage {
+export default class VideoMessage {
     /**
      * 
      * @param {import("telegraf/types").InputFile} video 
@@ -10,6 +10,4 @@ class VideoMessage {
         this.chatId = chatId;
         this.replyId = replyId;
     }
-}
-
-module.exports = VideoMessage;
+};

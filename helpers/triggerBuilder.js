@@ -1,7 +1,7 @@
-const ChatContext = require("../entities/context/chatContext");
-const Trigger = require("../entities/trigger");
+import ChatContext from "../entities/context/chatContext.js";
+import Trigger from "../entities/trigger.js";
 
-class TriggerBuilder {
+export default class TriggerBuilder {
     constructor(name) {
         this.name = name;
         this.active = true;
@@ -41,6 +41,4 @@ class TriggerBuilder {
     build() {
         return new Trigger(this.name, this.handler, this.time, this.active, this.whitelist);
     }
-}
-
-module.exports = TriggerBuilder;
+};

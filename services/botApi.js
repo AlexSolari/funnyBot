@@ -1,13 +1,13 @@
-const MessageContext = require("../entities/context/messageContext");
-const ChatContext = require("../entities/context/chatContext");
-const ImageMessage = require("../entities/replyMessages/imageMessage");
-const TextMessage = require("../entities/replyMessages/textMessage");
-const VideoMessage = require("../entities/replyMessages/videoMessage");
-const taskScheduler = require('../services/taskScheduler');
-const { Telegraf } = require("telegraf");
-const BotMessage = require("../entities/botMessage");
+import MessageContext from "../entities/context/messageContext.js";
+import ChatContext from "../entities/context/chatContext.js";
+import ImageMessage from "../entities/replyMessages/imageMessage.js";
+import TextMessage from "../entities/replyMessages/textMessage.js";
+import VideoMessage from "../entities/replyMessages/videoMessage.js";
+import taskScheduler from '../services/taskScheduler.js';
+import { Telegraf } from "telegraf";
+import BotMessage from "../entities/botMessage.js";
 
-class BotApiService {
+export default class BotApiService {
     /**
     * @param {Telegraf} bot
     */
@@ -64,6 +64,4 @@ class BotApiService {
     usingChat(chatId) {
         return new ChatContext((response) => this.enqueue(response), chatId, `Trigger${chatId}`);
     }
-}
-
-module.exports = BotApiService;
+};
