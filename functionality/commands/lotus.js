@@ -1,4 +1,4 @@
-import CommandBuilder from '../../helpers/commandBuilder.js';
+import CommandBuilder from '../../helpers/builders/commandBuilder.js';
 import randomInteger from '../../helpers/randomInt.js';
 import { lvivChat } from '../../helpers/chatIds.js';
 

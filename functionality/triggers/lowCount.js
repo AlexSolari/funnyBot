@@ -1,4 +1,4 @@
-import TriggerBuilder from '../../helpers/triggerBuilder.js';
+import TriggerBuilder from '../../helpers/builders/triggerBuilder.js';
 import getCurrentWeek from '../../helpers/getWeek.js';
 import fetch from 'node-fetch';
 import { modernChat, pioneerChat, lvivChat } from '../../helpers/chatIds.js';

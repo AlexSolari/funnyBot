@@ -1,17 +1,20 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "fs";
 import { dirname } from 'path';
+import ActionState from "../entities/actionState.js";
+import TransactionResult from "../entities/transactionResult.js";
 
 class Storage {
     constructor() {
+        /** @type {Map<string, Record<number, ActionState>>} */
         this.cache = new Map();
     }
 
-    async load(key) {
+    async #load(key) {
         if (!this.cache.has(key)) {
-            const targetPath = this._buidPathFromKey(key);
+            const targetPath = this.#buidPathFromKey(key);
             if (!existsSync(targetPath)) {
-                return null;
+                return {};
             }
 
             const fileContent = await readFile(targetPath, 'utf8');
@@ -24,13 +27,13 @@ class Storage {
 
         }
 
-        return this.cache.get(key);
+        return this.cache.get(key) ?? {};
     }
 
-    async save(data, key) {
+    async #save(data, key) {
         this.cache.delete(key);
 
-        const targetPath = this._buidPathFromKey(key);
+        const targetPath = this.#buidPathFromKey(key);
         const folderName = dirname(targetPath);
 
         if (!existsSync(folderName)) {
@@ -40,8 +43,27 @@ class Storage {
         await writeFile(targetPath, JSON.stringify(data), { flag: 'w+' });
     }
 
-    _buidPathFromKey(key) {
+    #buidPathFromKey(key) {
         return 'storage/' + key.replace(new RegExp(':', 'g'), '/') + ".json";
+    }
+
+    /**
+     * 
+     * @param {{key: string}} entity 
+     * @param {number} chatId 
+     * @param {(state: ActionState) => Promise<TransactionResult>} transaction 
+     */
+    async transactionForEntity(entity, chatId, transaction)
+    {
+        const entityData = await this.#load(entity.key);
+        const chatData = entityData[chatId] ?? new ActionState();
+
+        const result = await transaction(chatData);
+
+        if (result.shouldUpdate) {
+            entityData[chatId] = result.data;
+            await this.#save(entityData, entity.key);
+        }
     }
 }
 

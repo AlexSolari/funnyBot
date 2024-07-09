@@ -1,4 +1,4 @@
-import CommandBuilder from '../../helpers/commandBuilder.js';
+import CommandBuilder from '../../helpers/builders/commandBuilder.js';
 import fetch from 'node-fetch';
 
 function getCardText(card, fallback) {

@@ -32,7 +32,8 @@ export default class MessageContext extends ChatContext {
     replyWithText(text) {
         this.enqueue(new TextMessage(text,
             this.chatId,
-            this.messageId));
+            this.messageId,
+            this.traceId));
     }
 
     /** 
@@ -44,7 +45,8 @@ export default class MessageContext extends ChatContext {
         this.enqueue(new ImageMessage(
             { source: resolve(filePath) },
             this.chatId,
-            this.messageId))
+            this.messageId,
+            this.traceId))
     }
 
     /** 
@@ -55,6 +57,7 @@ export default class MessageContext extends ChatContext {
         this.enqueue(new VideoMessage(
             { source: resolve(filePath) },
             this.chatId,
-            this.messageId))
+            this.messageId,
+            this.traceId))
     }
 };

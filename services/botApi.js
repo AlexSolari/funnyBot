@@ -5,7 +5,8 @@ import TextMessage from "../entities/replyMessages/textMessage.js";
 import VideoMessage from "../entities/replyMessages/videoMessage.js";
 import taskScheduler from '../services/taskScheduler.js';
 import { Telegraf } from "telegraf";
-import BotMessage from "../entities/botMessage.js";
+import IncomingMessage from "../entities/incomingMessage.js";
+import logger from "./logger.js";
 
 export default class BotApiService {
     /**
@@ -20,13 +21,22 @@ export default class BotApiService {
         this.messageQueue = [];
 
         taskScheduler.createTask("MessageSending", () => {
-            this._dequeueMessage();
+            this.#dequeueMessage();
         }, 100);
     }
 
-    async _dequeueMessage() {
+    async #dequeueMessage(){
         const message = this.messageQueue.pop();
 
+        try {
+            await this.#processMessage(message);
+        } 
+        catch (error) {
+            logger.errorWithTraceId(message.traceId, error);
+        }
+    }
+
+    async #processMessage(message) {
         if (message) {
             switch (message.constructor) {
                 case TextMessage:
@@ -52,16 +62,16 @@ export default class BotApiService {
         }
     }
 
-    enqueue(response) {
+    #enqueue(response) {
         this.messageQueue.push(response);
     }
 
-    /** @param {BotMessage} botMessage  */
-    usingMessage(botMessage) {
-        return new MessageContext((response) => this.enqueue(response), botMessage.chat.id, botMessage.message_id, botMessage.text, botMessage.from?.id ?? undefined, botMessage.traceId);
+    /** @param {IncomingMessage} incomingMessage  */
+    usingMessage(incomingMessage) {
+        return new MessageContext((response) => this.#enqueue(response), incomingMessage.chat.id, incomingMessage.message_id, incomingMessage.text, incomingMessage.from?.id ?? undefined, incomingMessage.traceId);
     }
 
     usingChat(chatId) {
-        return new ChatContext((response) => this.enqueue(response), chatId, `Trigger${chatId}`);
+        return new ChatContext((response) => this.#enqueue(response), chatId, `Trigger${chatId}`);
     }
 };

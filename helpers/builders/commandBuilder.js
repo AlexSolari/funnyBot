@@ -1,5 +1,5 @@
-import Command from "../entities/command.js";
-import MessageContext from "../entities/context/messageContext.js";
+import Command from "../../entities/actions/command.js";
+import MessageContext from "../../entities/context/messageContext.js";
 
 export default class CommandBuilder {
     constructor(name) {

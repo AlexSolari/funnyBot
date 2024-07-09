@@ -1,5 +1,5 @@
 import { performance } from 'perf_hooks';
-import log from './logger.js';
+import logger from './logger.js';
 
 /**
  * 
@@ -8,9 +8,9 @@ import log from './logger.js';
  * @param {string | number} traceId 
  */
 export default async function measureExecutionTime(name, action, traceId) {
-    log(traceId, ` - Executing [${name}]`);
+    logger.logWithTraceId(traceId, ` - Executing [${name}]`);
     const t0 = performance.now();
     await action();
     const t1 = performance.now();
-    log(traceId, ` - [${name}] took ${(t1 - t0).toFixed(3)} ms.`);
+    logger.logWithTraceId(traceId, ` - [${name}] took ${(t1 - t0).toFixed(3)} ms.`);
 };

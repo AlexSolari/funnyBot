@@ -1,9 +1,9 @@
-import TriggerBuilder from '../../helpers/triggerBuilder.js';
+import TriggerBuilder from '../../helpers/builders/triggerBuilder.js';
 import formatDate from '../../helpers/formatDate.js';
 import { load } from 'cheerio';
 import fetch from 'node-fetch';
 import { modernChat, pioneerChat, lvivChat } from '../../helpers/chatIds.js';
-import escape from 'markdown-escape';
+import markdownEscape from 'markdown-escape';
 
 async function loadTournaments(formatName) {
     const today = new Date();
@@ -12,10 +12,10 @@ async function loadTournaments(formatName) {
 
     const response = await fetch(`https://www.mtggoldfish.com/tournament_searches/create?utf8=%E2%9C%93&tournament_search%5Bname%5D=&tournament_search%5Bformat%5D=${formatName}&tournament_search%5Bdate_range%5D=${formatDate(yesterday)}+-+${formatDate(today)}&commit=Search`)
     const text = await response.text();
-    const $ = load(text);
-    const $links = $('.table-responsive td a').toArray();
-    const parsedData = $links
-        .map(link => `[${escape(link.children[0].data).replaceAll('-', '\\-')}](https://www.mtggoldfish.com${link.attribs.href})`)
+    const findInDOM = load(text);
+    const links = findInDOM('.table-responsive td a').toArray();
+    const parsedData = links
+        .map(link => `[${markdownEscape(link.children[0].data)}](https://www.mtggoldfish.com${link.attribs.href})`)
         .join('\n');
 
     return parsedData ?? "";

@@ -26,7 +26,8 @@ export default class ChatContext {
     sendTextToChat(text) {
         this.enqueue(new TextMessage(text,
             this.chatId,
-            undefined));
+            undefined,
+            this.traceId));
     }
 
     /**
@@ -38,7 +39,8 @@ export default class ChatContext {
         this.enqueue(new ImageMessage(
             { source: resolve(filePath) },
             this.chatId,
-            undefined))
+            undefined,
+            this.traceId))
     }
 
     /**
@@ -50,6 +52,7 @@ export default class ChatContext {
         this.enqueue(new VideoMessage(
             { source: resolve(filePath) },
             this.chatId,
-            undefined))
+            undefined,
+            this.traceId))
     }
 };

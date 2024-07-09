@@ -1,6 +1,6 @@
 import randomInteger from "../helpers/randomInt.js";
 
-export default class BotMessage {
+export default class IncomingMessage {
     constructor(ctxMessage) {
         this.message_id = ctxMessage.message_id,
             this.chat = ctxMessage.chat,

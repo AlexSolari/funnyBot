@@ -1,5 +1,6 @@
-import CommandBuilder from '../../helpers/commandBuilder.js';
+import CommandBuilder from '../../helpers/builders/commandBuilder.js';
 import fetch from 'node-fetch';
+import escapeMarkdown from '../../helpers/escapeMarkdown.js';
 
 function getCardText(card, fallback) {
     const images = card.image_uris ?? fallback;
@@ -25,7 +26,7 @@ export default new CommandBuilder("Reaction.CardSearch")
             : [data];
         const text = cards.map(x => getCardText(x, data.image_uris)).join('\n\n➡️➡️➡️➡️➡️⤵️\n\n');
 
-        ctx.replyWithText(text);
+        ctx.replyWithText(escapeMarkdown(text));
     })
     .cooldown(0)
     .build();
