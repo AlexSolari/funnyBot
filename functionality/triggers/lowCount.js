@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
 import { modernChat, pioneerChat, lvivChat } from '../../helpers/chatIds.js';
 
 export default new TriggerBuilder("Trigger.LowCount")
-    .at(11) //15:00 Kiev time
+    .at(8) //08:00 Kiev time
     .allowIn([modernChat, pioneerChat])
     .do(async (ctx) => {
         if (ctx.chatId == lvivChat)

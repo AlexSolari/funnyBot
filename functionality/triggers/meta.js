@@ -22,7 +22,7 @@ async function loadTournaments(formatName) {
 }
 
 export default new TriggerBuilder("Trigger.Meta")
-    .at(20) //20:00 Kiev time
+    .at(18) //18:00 Kiev time
     .allowIn([modernChat, pioneerChat, lvivChat])
     .do(async (ctx) => {
         switch (ctx.chatId) {
