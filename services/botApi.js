@@ -21,22 +21,22 @@ export default class BotApiService {
         this.messageQueue = [];
 
         taskScheduler.createTask("MessageSending", () => {
-            this.#dequeueMessage();
+            this.#dequeueResponse();
         }, 100);
     }
 
-    async #dequeueMessage(){
+    async #dequeueResponse() {
         const message = this.messageQueue.pop();
 
         try {
-            await this.#processMessage(message);
-        } 
+            await this.#processResponse(message);
+        }
         catch (error) {
             logger.errorWithTraceId(message.traceId, error);
         }
     }
 
-    async #processMessage(message) {
+    async #processResponse(message) {
         if (message) {
             switch (message.constructor) {
                 case TextMessage:
@@ -62,16 +62,25 @@ export default class BotApiService {
         }
     }
 
-    #enqueue(response) {
+    #enqueueResponse(response) {
         this.messageQueue.push(response);
     }
 
     /** @param {IncomingMessage} incomingMessage  */
     usingMessage(incomingMessage) {
-        return new MessageContext((response) => this.#enqueue(response), incomingMessage.chat.id, incomingMessage.message_id, incomingMessage.text, incomingMessage.from?.id ?? undefined, incomingMessage.traceId);
+        return new MessageContext(
+            (response) => this.#enqueueResponse(response),
+            incomingMessage.chat.id,
+            incomingMessage.message_id,
+            incomingMessage.text,
+            incomingMessage.from?.id ?? undefined,
+            incomingMessage.traceId);
     }
 
-    usingChat(chatId) {
-        return new ChatContext((response) => this.#enqueue(response), chatId, `Trigger${chatId}`);
+    usingChat(chatId, triggerName) {
+        return new ChatContext(
+            (response) => this.#enqueueResponse(response),
+            chatId,
+            `Trigger:${triggerName}:${chatId}`);
     }
 };

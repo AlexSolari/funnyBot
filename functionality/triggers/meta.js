@@ -3,7 +3,7 @@ import formatDate from '../../helpers/formatDate.js';
 import { load } from 'cheerio';
 import fetch from 'node-fetch';
 import { modernChat, pioneerChat, lvivChat } from '../../helpers/chatIds.js';
-import markdownEscape from 'markdown-escape';
+import escapeMarkdown from '../../helpers/escapeMarkdown.js';
 
 async function loadTournaments(formatName) {
     const today = new Date();
@@ -15,7 +15,7 @@ async function loadTournaments(formatName) {
     const findInDOM = load(text);
     const links = findInDOM('.table-responsive td a').toArray();
     const parsedData = links
-        .map(link => `[${markdownEscape(link.children[0].data)}](https://www.mtggoldfish.com${link.attribs.href})`)
+        .map(link => `[${escapeMarkdown(link.children[0].data)}](https://www.mtggoldfish.com${link.attribs.href})`)
         .join('\n');
 
     return parsedData ?? "";

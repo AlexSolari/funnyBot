@@ -11,10 +11,6 @@ export default class Bot {
         this.api = null;
         this.commands = functionality.commands;
         this.triggers = functionality.triggers;
-
-        /** @type {IncomingMessage[]} */
-        this.messageQueue = [];
-
         this.broadcastPool = broadcastPool;
     }
 
@@ -23,7 +19,7 @@ export default class Bot {
 
         this.api = new BotApiService(bot);
 
-        bot.on('message', (ctx) => {
+        bot.on('message', async (ctx) => {
             const msg = new IncomingMessage(ctx.update.message);
             const messageContent = msg.text 
                 ?? (ctx.update.message.photo ? '🖼️' : null)
@@ -34,17 +30,21 @@ export default class Bot {
             logger.logWithTraceId(msg.traceId, `${msg.chat.title ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from?.first_name ?? "Unknown"} (${msg.from?.id ?? "Unknown"}): ${messageContent}`);
 
             if (msg.text){
-                this.messageQueue.push(msg);
+                for (let cmd of this.commands) {
+                    const ctx = this.api.usingMessage(msg);
+        
+                    try {
+                        // For commands we have cooldowns, so we need to wait for the command to finish running
+                        await cmd.exec(ctx);
+                    }
+                    catch (error) {
+                        logger.errorWithTraceId(ctx.traceId, error);
+                    }
+                }
             }
         });
 
         bot.launch();
-
-        taskScheduler.createTask("MessageProcessing", async () => {
-            while (this.messageQueue.length > 0) {
-                await this.#dequeue();
-            }
-        }, 500); //Half of a second
 
         taskScheduler.createTask("TriggerProcessing", async () => {
             this.#runTriggers();
@@ -54,7 +54,7 @@ export default class Bot {
     #runTriggers() {
         for (let chatId of this.broadcastPool) {
             for (let trig of this.triggers) {
-                const ctx = this.api.usingChat(chatId);
+                const ctx = this.api.usingChat(chatId, trig.name);
 
                 try {
                     // Trigger.exec is async, but we dont need to await for result, so just fire and forget
@@ -63,22 +63,6 @@ export default class Bot {
                 catch (error) {
                     logger.errorWithTraceId(ctx.traceId);
                 }
-            }
-        }
-    }
-
-    async #dequeue() {
-        const msg = this.messageQueue.pop();
-
-        for (let cmd of this.commands) {
-            const ctx = this.api.usingMessage(msg);
-
-            try {
-                // For commands however, we have cooldowns, so we need to wait for the command to finish running
-                await cmd.exec(ctx);
-            }
-            catch (error) {
-                logger.errorWithTraceId(ctx.traceId, error);
             }
         }
     }

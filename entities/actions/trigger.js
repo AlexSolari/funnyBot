@@ -44,7 +44,6 @@ export default class Trigger {
 
             return new TransactionResult(state, isAllowedToTrigger);
         });
-        
     }
 
     /**
@@ -54,14 +53,12 @@ export default class Trigger {
      */
     #shouldTrigger(state) {
         const today = new Date();
-        const yesterday = new Date(today);
-        yesterday.setDate(today.getDate() - 1);
-        yesterday.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
 
-        const isAllowedToTrigger = new Date().getHours() >= this.timeinHours;
-        const hasNotTriggeredToday = state.lastExecutedDate <= yesterday.getTime();
+        const isAllowedToTrigger = new Date().getUTCHours() >= this.timeinHours;
+        const hasTriggeredToday = state.lastExecutedDate >= today.getTime();
 
         return isAllowedToTrigger
-            && hasNotTriggeredToday;
+            && !hasTriggeredToday;
     }
 };
