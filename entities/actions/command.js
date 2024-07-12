@@ -3,6 +3,7 @@ import measureExecutionTime from '../../services/executionTimeTracker.js';
 import MessageContext from '../context/messageContext.js';
 import ActionState from '../actionState.js';
 import TransactionResult from '../transactionResult.js';
+import moment from "moment";
 
 export default class Command {
     /**
@@ -52,7 +53,7 @@ export default class Command {
                 }, ctx.traceId)
     
                 if (ctx.startCooldown) {
-                    state.lastExecutedDate = new Date().getTime();
+                    state.lastExecutedDate = moment().valueOf();
                 }
             }
                 
@@ -69,9 +70,11 @@ export default class Command {
     #checkTrigger(message, trigger, state) {
         let shouldTrigger = false;
         let matchResult = null;
+        
         const cooldownMilliseconds = this.cooldown * 1000;
-
-        if ((new Date().getTime() - state.lastExecutedDate) >= cooldownMilliseconds) {
+        const notOnCooldown = (moment().valueOf() - state.lastExecutedDate) >= cooldownMilliseconds;
+        
+        if (notOnCooldown) {
             if (typeof (trigger) == "string") {
                 shouldTrigger = message.toLowerCase() == trigger;
             } else {

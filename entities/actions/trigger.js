@@ -3,6 +3,7 @@ import measureExecutionTime from '../../services/executionTimeTracker.js';
 import ChatContext from '../context/chatContext.js';
 import ActionState from '../actionState.js';
 import TransactionResult from '../transactionResult.js';
+import moment from "moment";
 
 export default class Trigger {
     /**
@@ -39,7 +40,7 @@ export default class Trigger {
                     await this.handler(ctx);
                 }, ctx.traceId);
     
-                state.lastExecutedDate = new Date().getTime();
+                state.lastExecutedDate = moment().valueOf();
             }
 
             return new TransactionResult(state, isAllowedToTrigger);
@@ -52,11 +53,10 @@ export default class Trigger {
      * @returns {boolean}
      */
     #shouldTrigger(state) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const today = moment().startOf('day').valueOf();
 
-        const isAllowedToTrigger = new Date().getUTCHours() >= this.timeinHours;
-        const hasTriggeredToday = state.lastExecutedDate >= today.getTime();
+        const isAllowedToTrigger = moment().hour() >= this.timeinHours;
+        const hasTriggeredToday = state.lastExecutedDate >= today;
 
         return isAllowedToTrigger
             && !hasTriggeredToday;

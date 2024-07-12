@@ -2,6 +2,7 @@ import TriggerBuilder from '../../helpers/builders/triggerBuilder.js';
 import getCurrentWeek from '../../helpers/getWeek.js';
 import fetch from 'node-fetch';
 import { modernChat, pioneerChat, lvivChat } from '../../helpers/chatIds.js';
+import moment from "moment";
 
 export default new TriggerBuilder("Trigger.LowCount")
     .at(8) //08:00 Kiev time
@@ -11,7 +12,7 @@ export default new TriggerBuilder("Trigger.LowCount")
             return;
 
         const currentWeek = getCurrentWeek();
-        const today = new Date().getDay();
+        const today = moment().day();
 
         if (today >= 5 || today == 0) {
 
