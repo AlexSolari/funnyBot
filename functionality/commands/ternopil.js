@@ -2,16 +2,16 @@ import CommandBuilder from '../../helpers/builders/commandBuilder.js';
 import { lvivChat } from '../../helpers/chatIds.js';
 import userIds from '../../helpers/userIds.js';
 
-export default new CommandBuilder("Reaction.Ihor")
-    .on(/мод[еє]рн/i)
-    .from(userIds.ihor)
+export default new CommandBuilder("Reaction.Ternopil")
+    .on(/.+/i)
+    .from([userIds.pontiff, userIds.trigan, userIds.zohan])
     .do(async (ctx) => {
         if (ctx.chatId != lvivChat) {
             ctx.startCooldown = false;
             return;
         }
 
-        ctx.replyWithImage("ihor");
+        ctx.replyWithImage("ternopil");
     })
-    .cooldown(7200)
+    .cooldown(72000)
     .build();

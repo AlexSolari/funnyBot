@@ -9,6 +9,7 @@ export default class CommandBuilder {
         this.cooldownSeconds = 0;
         this.handler = () => { };
         this.blacklist = [];
+        this.allowedUsers = [];
     }
 
     /**
@@ -17,6 +18,20 @@ export default class CommandBuilder {
      */
     on(trigger) {
         this.trigger = trigger;
+
+        return this;
+    }
+
+    /**
+     * @param {number | Array<number>} trigger 
+     * @returns {CommandBuilder}
+     */
+    from(id) {
+        if (!Array.isArray(id)) {
+            id = [id]
+        }
+
+        this.allowedUsers = id;
 
         return this;
     }
@@ -50,6 +65,12 @@ export default class CommandBuilder {
     }
 
     build() {
-        return new Command(this.trigger, this.handler, this.name, this.active, this.cooldownSeconds, this.blacklist);
+        return new Command(this.trigger, 
+            this.handler, 
+            this.name, 
+            this.active, 
+            this.cooldownSeconds, 
+            this.blacklist, 
+            this.allowedUsers);
     }
 };

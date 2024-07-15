@@ -13,14 +13,16 @@ export default class Command {
      * @param {boolean} active 
      * @param {number} cooldown 
      * @param {Array<number>} chatsBlacklist 
+     * @param {Array<number>} allowedUsers 
      */
-    constructor(trigger, handler, name, active, cooldown, chatsBlacklist) {
+    constructor(trigger, handler, name, active, cooldown, chatsBlacklist, allowedUsers) {
         this.trigger = Array.isArray(trigger) ? trigger : [trigger];
         this.handler = handler;
         this.name = name;
         this.cooldown = cooldown;
         this.active = active;
         this.chatsBlacklist = chatsBlacklist;
+        this.allowedUsers = allowedUsers;
 
         this.key = `command:${this.name.replace('.', '-')}`;
     }
@@ -37,12 +39,14 @@ export default class Command {
         await storage.transactionForEntity(this, ctx.chatId, async (state) => {
             let shouldTrigger = false;
             let matchResult = null;
+            let skipCooldown = true;
 
             this.trigger.forEach(commandTrigger => {
-                const validationResult = this.#checkTrigger(ctx.messageText, commandTrigger, state);
+                const validationResult = this.#checkTrigger(ctx, commandTrigger, state);
     
                 shouldTrigger = shouldTrigger || validationResult.shouldTrigger;
                 matchResult = matchResult || validationResult.matchResult;
+                skipCooldown = skipCooldown || validationResult.skipCooldown;
             });
     
             if (shouldTrigger) {
@@ -51,6 +55,10 @@ export default class Command {
                 await measureExecutionTime(this.name, async () => {
                     await this.handler(ctx);
                 }, ctx.traceId)
+
+                if (skipCooldown) {
+                    ctx.startCooldown = false;
+                }
     
                 if (ctx.startCooldown) {
                     state.lastExecutedDate = moment().valueOf();
@@ -62,27 +70,28 @@ export default class Command {
     }
 
     /**
-     * @param {string} message 
+     * @param {MessageContext} ctx 
      * @param {RegExp | String} trigger 
      * @param {ActionState} state 
-     * @returns {{shouldTrigger: boolean, matchResult: RegExpExecArray | null}}
+     * @returns {{shouldTrigger: boolean, matchResult: RegExpExecArray | null, skipCooldown: boolean}}
      */
-    #checkTrigger(message, trigger, state) {
+    #checkTrigger(ctx, trigger, state) {
         let shouldTrigger = false;
         let matchResult = null;
         
+        const isUserAllowed = this.allowedUsers.length == 0 || this.allowedUsers.includes(ctx.fromUserId);
         const cooldownMilliseconds = this.cooldown * 1000;
         const notOnCooldown = (moment().valueOf() - state.lastExecutedDate) >= cooldownMilliseconds;
         
-        if (notOnCooldown) {
+        if (isUserAllowed && notOnCooldown) {
             if (typeof (trigger) == "string") {
-                shouldTrigger = message.toLowerCase() == trigger;
+                shouldTrigger = ctx.messageText.toLowerCase() == trigger;
             } else {
-                matchResult = trigger.exec(message);
+                matchResult = trigger.exec(ctx.messageText);
                 shouldTrigger = (matchResult && matchResult.length > 0) || false;
             }
         }
 
-        return { shouldTrigger, matchResult };
+        return { shouldTrigger, matchResult, skipCooldown: !isUserAllowed };
     }
 };
