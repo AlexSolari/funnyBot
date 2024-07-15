@@ -7,14 +7,15 @@ import { resolve } from "path";
  * @class Context used to send a message to a chat
  */
 export default class ChatContext {
+    #enqueue;
+
     /**
      * @param {Number} chatId
-     * @param {function(TextMessage | ImageMessage | VideoMessage):void} enqueueMethod
+     * @param {(message: TextMessage | ImageMessage | VideoMessage) => void} enqueueMethod
      * @param {Number | String} traceId 
      */
     constructor(enqueueMethod, chatId, traceId) {
-        /** @private */
-        this.enqueue = enqueueMethod;
+        this.#enqueue = enqueueMethod;
         this.chatId = chatId;
         this.traceId = traceId;
     }
@@ -24,7 +25,7 @@ export default class ChatContext {
      * @param {string} text 
      */
     sendTextToChat(text) {
-        this.enqueue(new TextMessage(text,
+        this.#enqueue(new TextMessage(text,
             this.chatId,
             undefined,
             this.traceId));
@@ -36,7 +37,7 @@ export default class ChatContext {
      */
     sendImageToChat(name) {
         const filePath = `./content/${name}.png`;
-        this.enqueue(new ImageMessage(
+        this.#enqueue(new ImageMessage(
             { source: resolve(filePath) },
             this.chatId,
             undefined,
@@ -49,7 +50,7 @@ export default class ChatContext {
      */
     sendVideoToChat(name) {
         const filePath = `./content/${name}.mp4`;
-        this.enqueue(new VideoMessage(
+        this.#enqueue(new VideoMessage(
             { source: resolve(filePath) },
             this.chatId,
             undefined,

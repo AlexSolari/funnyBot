@@ -8,7 +8,7 @@ import { resolve } from "path";
 export default class MessageContext extends ChatContext {
     /**
      * @extends ChatContext
-     * @param {function(TextMessage | ImageMessage | VideoMessage):void} enqueueMethod
+     * @param {(message: TextMessage | ImageMessage | VideoMessage) => void} enqueueMethod
      * @param {Number} chatId
      * @param {Number} messageId 
      * @param {Number} fromUserId 

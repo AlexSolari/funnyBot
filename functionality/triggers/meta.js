@@ -1,16 +1,15 @@
 import TriggerBuilder from '../../helpers/builders/triggerBuilder.js';
-import formatDate from '../../helpers/formatDate.js';
 import { load } from 'cheerio';
 import fetch from 'node-fetch';
 import { modernChat, pioneerChat, lvivChat } from '../../helpers/chatIds.js';
 import escapeMarkdown from '../../helpers/escapeMarkdown.js';
+import moment from 'moment';
 
 async function loadTournaments(formatName) {
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
+    const today = moment().format('MM/DD/YYYY');
+    const yesterday = moment().subtract(1, 'day').format('MM/DD/YYYY');
 
-    const response = await fetch(`https://www.mtggoldfish.com/tournament_searches/create?utf8=%E2%9C%93&tournament_search%5Bname%5D=&tournament_search%5Bformat%5D=${formatName}&tournament_search%5Bdate_range%5D=${formatDate(yesterday)}+-+${formatDate(today)}&commit=Search`)
+    const response = await fetch(`https://www.mtggoldfish.com/tournament_searches/create?utf8=%E2%9C%93&tournament_search%5Bname%5D=&tournament_search%5Bformat%5D=${formatName}&tournament_search%5Bdate_range%5D=${yesterday}+-+${today}&commit=Search`)
     const text = await response.text();
     const findInDOM = load(text);
     const links = findInDOM('.table-responsive td a').toArray();

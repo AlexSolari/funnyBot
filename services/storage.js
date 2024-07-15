@@ -43,8 +43,9 @@ class Storage {
         await writeFile(targetPath, JSON.stringify(data), { flag: 'w+' });
     }
 
+    /** * @param {string} key */
     #buidPathFromKey(key) {
-        return 'storage/' + key.replace(new RegExp(':', 'g'), '/') + ".json";
+        return 'storage/' + key.replaceAll(':', '/') + ".json";
     }
 
     /**
