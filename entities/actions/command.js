@@ -39,7 +39,7 @@ export default class Command {
         await storage.transactionForEntity(this, ctx.chatId, async (state) => {
             let shouldTrigger = false;
             let matchResult = null;
-            let skipCooldown = true;
+            let skipCooldown = false;
 
             this.trigger.forEach(commandTrigger => {
                 const validationResult = this.#checkTrigger(ctx, commandTrigger, state);
