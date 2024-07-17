@@ -14,4 +14,5 @@ export default new CommandBuilder("Reaction.Ihor")
         ctx.replyWithImage("ihor");
     })
     .cooldown(7200)
+    .disabled()
     .build();
