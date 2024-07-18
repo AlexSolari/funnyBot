@@ -67,7 +67,7 @@ export default class BotApiService {
     }
 
     /** @param {IncomingMessage} incomingMessage  */
-    usingMessage(incomingMessage) {
+    createContextForMessage(incomingMessage) {
         return new MessageContext(
             (response) => this.#enqueueResponse(response),
             incomingMessage.chat.id,
@@ -77,7 +77,7 @@ export default class BotApiService {
             incomingMessage.traceId);
     }
 
-    usingChat(chatId, triggerName) {
+    createContextForChat(chatId, triggerName) {
         return new ChatContext(
             (response) => this.#enqueueResponse(response),
             chatId,
