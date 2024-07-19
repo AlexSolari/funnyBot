@@ -55,7 +55,7 @@ export default class Trigger {
     #shouldTrigger(state) {
         const today = moment().startOf('day').valueOf();
 
-        const isAllowedToTrigger = moment().hour() >= this.timeinHours;
+        const isAllowedToTrigger = moment().hour().valueOf() >= this.timeinHours;
         const hasTriggeredToday = state.lastExecutedDate >= today;
 
         return isAllowedToTrigger

@@ -57,6 +57,7 @@ export default class BotApiService {
                         message.replyId ? { reply_to_message_id: message.replyId } : undefined);
                     break;
                 default:
+                    logger.errorWithTraceId(`Unknown message type: ${message.constructor}`, error);
                     break;
             }
         }
