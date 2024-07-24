@@ -23,7 +23,7 @@ export default class CommandBuilder {
     }
 
     /**
-     * @param {number | Array<number>} trigger 
+     * @param {number | Array<number>} id 
      * @returns {CommandBuilder}
      */
     from(id) {

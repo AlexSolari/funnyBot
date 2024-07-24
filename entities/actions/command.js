@@ -52,7 +52,7 @@ export default class Command {
             if (shouldTrigger) {
                 ctx.matchResult = matchResult;
     
-                await measureExecutionTime(this.name, async () => {
+                await measureExecutionTime(`${this.name} in ${ctx.chatId}`, async () => {
                     await this.handler(ctx);
                 }, ctx.traceId)
 

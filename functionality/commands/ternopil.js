@@ -13,5 +13,5 @@ export default new CommandBuilder("Reaction.Ternopil")
 
         ctx.replyWithImage("ternopil");
     })
-    .cooldown(43200)
+    .cooldown(18000)
     .build();

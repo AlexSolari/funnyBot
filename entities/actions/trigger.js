@@ -36,7 +36,7 @@ export default class Trigger {
             const isAllowedToTrigger = this.#shouldTrigger(state);
 
             if (isAllowedToTrigger) {
-                await measureExecutionTime(this.name, async () => {
+                await measureExecutionTime(`${this.name} in ${ctx.chatId}`, async () => {
                     await this.handler(ctx);
                 }, ctx.traceId);
     
