@@ -16,6 +16,7 @@ import registration from './commands/registration.js';
 import ring from './commands/ring.js';
 import rozklad from './commands/rozklad.js';
 import ternopil from './commands/ternopil.js';
+import vitalii from './commands/vitalii.js';
 
 
-export default [black,cardSearch,cardSearch_small,control,fang,hello,ihor,kalitas,kamaz,lotus,pizda,rakdos,rating,registration,ring,rozklad,ternopil];
+export default [black,cardSearch,cardSearch_small,control,fang,hello,ihor,kalitas,kamaz,lotus,pizda,rakdos,rating,registration,ring,rozklad,ternopil,vitalii];

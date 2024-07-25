@@ -1,10 +1,20 @@
-class Logger{
+import taskScheduler from "./taskScheduler";
+
+class Logger {
+    constructor(){
+        /** @type {Array<() => void>} */
+        this.queue = [];
+        this.noop = () => {};
+
+        taskScheduler.createTask("Log", () => (this.queue.pop() ?? this.noop)(), 100);
+    }
+
     logWithTraceId(traceId, text){
-        console.log(`TRACE${traceId} ${text}`);
+        this.queue.push(() => console.log(`TRACE${traceId} ${text}`));
     }
     
-    errorWithTraceId(traceId, error){
-        console.error(`TRACE${traceId} Error: ${error} \n ${error.stack}`);
+    errorWithTraceId(traceId, errorObj){
+        this.queue.push(() => console.error(`TRACE${traceId} Error: ${errorObj} \n ${errorObj?.stack}`));
     }
 }
 
