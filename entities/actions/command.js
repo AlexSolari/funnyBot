@@ -1,9 +1,9 @@
 import storage from '../../services/storage.js';
-import measureExecutionTime from '../../services/executionTimeTracker.js';
 import MessageContext from '../context/messageContext.js';
 import ActionState from '../actionState.js';
 import TransactionResult from '../transactionResult.js';
 import moment from "moment";
+import logger from '../../services/logger.js';
 
 export default class Command {
     /**
@@ -16,7 +16,7 @@ export default class Command {
      * @param {Array<number>} allowedUsers 
      */
     constructor(trigger, handler, name, active, cooldown, chatsBlacklist, allowedUsers) {
-        this.trigger = Array.isArray(trigger) ? trigger : [trigger];
+        this.triggers = Array.isArray(trigger) ? trigger : [trigger];
         this.handler = handler;
         this.name = name;
         this.cooldown = cooldown;
@@ -36,37 +36,45 @@ export default class Command {
         if (!this.active || this.chatsBlacklist.indexOf(ctx.chatId) != -1)
             return;
 
-        await storage.transactionForEntity(this, ctx.chatId, async (state) => {
-            let shouldTrigger = false;
-            let matchResult = null;
-            let skipCooldown = false;
+        const state = await storage.beginTransactionForEntity(this, ctx.chatId);
 
-            this.trigger.forEach(commandTrigger => {
-                const validationResult = this.#checkTrigger(ctx, commandTrigger, state);
-    
-                shouldTrigger = shouldTrigger || validationResult.shouldTrigger;
-                matchResult = matchResult || validationResult.matchResult;
-                skipCooldown = skipCooldown || validationResult.skipCooldown;
-            });
-    
-            if (shouldTrigger) {
-                ctx.matchResult = matchResult;
-    
-                await measureExecutionTime(`${this.name} in ${ctx.chatId}`, async () => {
-                    await this.handler(ctx);
-                }, ctx.traceId)
+        const { shouldTrigger, matchResult, skipCooldown } =
+            this.triggers
+                .map(x => this.#checkTrigger(ctx, x, state))
+                .reduce(
+                    (acc, curr) => (
+                        {
+                            shouldTrigger: acc.shouldTrigger || curr.shouldTrigger,
+                            matchResult: acc.matchResult || curr.matchResult,
+                            skipCooldown: acc.skipCooldown || curr.skipCooldown
+                        }),
+                    {
+                        shouldTrigger: false,
+                        matchResult: null,
+                        skipCooldown: false
+                    }
+                );
 
-                if (skipCooldown) {
-                    ctx.startCooldown = false;
-                }
-    
-                if (ctx.startCooldown) {
-                    state.lastExecutedDate = moment().valueOf();
-                }
+
+        if (shouldTrigger) {
+            logger.logWithTraceId(ctx.traceId, ` - Executing [${this.name}] in ${ctx.chatId}`);
+            ctx.matchResult = matchResult;
+
+            await this.handler(ctx);
+
+            if (skipCooldown) {
+                ctx.startCooldown = false;
             }
-                
-            return new TransactionResult(state, ctx.startCooldown && shouldTrigger);
-        });
+
+            if (ctx.startCooldown) {
+                state.lastExecutedDate = moment().valueOf();
+            }
+
+            await storage.commitTransactionForEntity(
+                this, 
+                ctx.chatId, 
+                new TransactionResult(state, ctx.startCooldown && shouldTrigger));
+        }
     }
 
     /**
@@ -78,11 +86,11 @@ export default class Command {
     #checkTrigger(ctx, trigger, state) {
         let shouldTrigger = false;
         let matchResult = null;
-        
+
         const isUserAllowed = this.allowedUsers.length == 0 || this.allowedUsers.includes(ctx.fromUserId);
         const cooldownMilliseconds = this.cooldown * 1000;
         const notOnCooldown = (moment().valueOf() - state.lastExecutedDate) >= cooldownMilliseconds;
-        
+
         if (isUserAllowed && notOnCooldown) {
             if (typeof (trigger) == "string") {
                 shouldTrigger = ctx.messageText.toLowerCase() == trigger;

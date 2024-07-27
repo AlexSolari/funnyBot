@@ -23,7 +23,7 @@ export default class TriggerBuilder {
     }
 
     /**
-     * @param {function(ChatContext)} handler 
+     * @param {(ctx: ChatContext) => Promise<void>} handler 
      * @returns {TriggerBuilder}
      */
     do(handler) {

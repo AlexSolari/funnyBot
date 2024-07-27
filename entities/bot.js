@@ -47,6 +47,15 @@ export default class Bot {
         taskScheduler.createTask("TriggerProcessing", async () => {
             await this.#runTriggers();
         }, 1000 * 60 * 30, true); //30 minutes
+
+        process.once('SIGINT', () => this.#stop(bot, 'SIGINT'));
+        process.once('SIGTERM', () => this.#stop(bot, 'SIGTERM'));
+    }
+
+    #stop(bot, code){
+        bot.stop(code);
+        
+        setTimeout(() => process.exit(0), 1000);
     }
 
     async #runTriggers() {
@@ -58,7 +67,7 @@ export default class Bot {
                     await trig.exec(ctx);
                 }
                 catch (error) {
-                    logger.errorWithTraceId(ctx.traceId);
+                    logger.errorWithTraceId(ctx.traceId, error);
                 }
             }
         }

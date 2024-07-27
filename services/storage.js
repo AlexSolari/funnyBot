@@ -21,7 +21,7 @@ class Storage {
 
             if (fileContent) {
                 const data = JSON.parse(fileContent);
-                
+
                 this.cache.set(key, data);
             }
 
@@ -52,17 +52,25 @@ class Storage {
      * 
      * @param {{key: string}} entity 
      * @param {number} chatId 
-     * @param {(state: ActionState) => Promise<TransactionResult>} transaction 
+     * @returns {Promise<ActionState>}
      */
-    async transactionForEntity(entity, chatId, transaction)
-    {
+    async beginTransactionForEntity(entity, chatId) {
         const entityData = await this.#load(entity.key);
-        const chatData = entityData[chatId] ?? new ActionState();
+        return entityData[chatId] ?? new ActionState();
+    }
 
-        const result = await transaction(chatData);
+    /**
+     * 
+     * @param {{key: string}} entity 
+     * @param {number} chatId 
+     * @param {TransactionResult} transactionResult 
+     * @returns {Promise<void>}
+     */
+    async commitTransactionForEntity(entity, chatId, transactionResult) {
+        const entityData = await this.#load(entity.key);
 
-        if (result.shouldUpdate) {
-            entityData[chatId] = result.data;
+        if (transactionResult.shouldUpdate) {
+            entityData[chatId] = transactionResult.data;
             await this.#save(entityData, entity.key);
         }
     }

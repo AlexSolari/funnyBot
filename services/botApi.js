@@ -36,6 +36,9 @@ export default class BotApiService {
         }
     }
 
+    /**
+     * @param {TextMessage | ImageMessage | VideoMessage} message 
+     */
     async #processResponse(message) {
         if (message) {
             switch (message.constructor) {
@@ -57,7 +60,7 @@ export default class BotApiService {
                         message.replyId ? { reply_to_message_id: message.replyId } : undefined);
                     break;
                 default:
-                    logger.errorWithTraceId(`Unknown message type: ${message.constructor}`, error);
+                    logger.errorWithTraceId(message.traceId, `Unknown message type: ${message.constructor}`);
                     break;
             }
         }

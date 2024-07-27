@@ -1,5 +1,4 @@
 import storage from '../../services/storage.js';
-import measureExecutionTime from '../../services/executionTimeTracker.js';
 import ChatContext from '../context/chatContext.js';
 import ActionState from '../actionState.js';
 import TransactionResult from '../transactionResult.js';
@@ -33,20 +32,20 @@ export default class Trigger {
         if (!this.active || this.chatsWhitelist.indexOf(ctx.chatId) == -1)
             return;
 
-        await storage.transactionForEntity(this, ctx.chatId, async (state) => {
-            const isAllowedToTrigger = this.#shouldTrigger(state, ctx.traceId);
+        const state = await storage.beginTransactionForEntity(this, ctx.chatId);
+        const isAllowedToTrigger = this.#shouldTrigger(state);
 
-            if (isAllowedToTrigger) {
-                await measureExecutionTime(`${this.name} in ${ctx.chatId}`, async () => {
-                    await this.handler(ctx);
-                }, ctx.traceId);
-    
-                state.lastExecutedDate = moment().valueOf();
-                logger.logWithTraceId(ctx.traceId, `Saving: ${JSON.stringify(state)}`);
-            }
+        if (isAllowedToTrigger) {
+            logger.logWithTraceId(ctx.traceId, ` - Executing [${this.name}] in ${ctx.chatId}`);
+            logger.logWithTraceId(ctx.traceId, `Recieved: ${JSON.stringify(state)}`);
 
-            return new TransactionResult(state, isAllowedToTrigger);
-        });
+            await this.handler(ctx);
+
+            state.lastExecutedDate = moment().valueOf();
+
+            logger.logWithTraceId(ctx.traceId, `Saving: ${JSON.stringify(state)}`);
+            await storage.commitTransactionForEntity(this, ctx.chatId, new TransactionResult(state, isAllowedToTrigger))
+        }
     }
 
     /**
@@ -54,14 +53,11 @@ export default class Trigger {
      * @param {ActionState} state 
      * @returns {boolean}
      */
-    #shouldTrigger(state, traceId) {
+    #shouldTrigger(state) {
         const today = moment().startOf('day').valueOf();
 
         const isAllowedToTrigger = moment().hour().valueOf() >= this.timeinHours;
         const hasTriggeredToday = state.lastExecutedDate >= today;
-        
-
-        logger.logWithTraceId(traceId, `Checking: \n Allowed to trigger = ${isAllowedToTrigger} (${moment().hour().valueOf()} vs ${this.timeinHours}) \n Triggered today: ${hasTriggeredToday} (${state.lastExecutedDate} vs ${today})`);
 
         return isAllowedToTrigger
             && !hasTriggeredToday;

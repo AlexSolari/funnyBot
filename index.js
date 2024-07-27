@@ -4,6 +4,7 @@ import { modernChat, pioneerChat, spellSeeker, lvivChat } from './helpers/chatId
 
 startBot("main", 'token.prod', [modernChat, pioneerChat, spellSeeker]);
 startBot("lviv", 'token.lviv', [lvivChat]);
+//startBot("test", 'token.test', [-1001759510701]);
 
 async function startBot(name, tokenFile, broadcastPool) {
     console.log(`Initializing bot [${name}]...`);
