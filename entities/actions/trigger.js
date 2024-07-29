@@ -32,7 +32,7 @@ export default class Trigger {
         if (!this.active || this.chatsWhitelist.indexOf(ctx.chatId) == -1)
             return;
 
-        const state = await storage.beginTransactionForEntity(this, ctx.chatId);
+        const state = await storage.getActionState(this, ctx.chatId);
         const isAllowedToTrigger = this.#shouldTrigger(state);
 
         if (isAllowedToTrigger) {

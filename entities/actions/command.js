@@ -36,7 +36,7 @@ export default class Command {
         if (!this.active || this.chatsBlacklist.indexOf(ctx.chatId) != -1)
             return;
 
-        const state = await storage.beginTransactionForEntity(this, ctx.chatId);
+        const state = await storage.getActionState(this, ctx.chatId);
 
         const { shouldTrigger, matchResult, skipCooldown } =
             this.triggers

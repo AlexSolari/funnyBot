@@ -54,7 +54,7 @@ class Storage {
      * @param {number} chatId 
      * @returns {Promise<ActionState>}
      */
-    async beginTransactionForEntity(entity, chatId) {
+    async getActionState(entity, chatId) {
         const entityData = await this.#load(entity.key);
         return entityData[chatId] ?? new ActionState();
     }
