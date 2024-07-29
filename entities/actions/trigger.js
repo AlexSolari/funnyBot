@@ -37,13 +37,11 @@ export default class Trigger {
 
         if (isAllowedToTrigger) {
             logger.logWithTraceId(ctx.traceId, ` - Executing [${this.name}] in ${ctx.chatId}`);
-            logger.logWithTraceId(ctx.traceId, `Recieved: ${JSON.stringify(state)}`);
 
             await this.handler(ctx);
 
             state.lastExecutedDate = moment().valueOf();
 
-            logger.logWithTraceId(ctx.traceId, `Saving: ${JSON.stringify(state)}`);
             await storage.commitTransactionForEntity(this, ctx.chatId, new TransactionResult(state, isAllowedToTrigger))
         }
     }
