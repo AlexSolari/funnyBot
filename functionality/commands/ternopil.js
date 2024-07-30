@@ -16,7 +16,7 @@ export default new CommandBuilder("Reaction.Ternopil")
             ctx.replyWithImage("ternopil");
         }
         else{
-            switch (randomInteger(0, 5)) {
+            switch (randomInteger(0, 2)) {
                 case 0:
                     ctx.replyWithText('🫵🤣');
                     break;
