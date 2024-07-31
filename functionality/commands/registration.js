@@ -1,7 +1,8 @@
 import CommandBuilder from '../../helpers/builders/commandBuilder.js';
 import getCurrentWeek from '../../helpers/getWeek.js';
 import fetch from 'node-fetch';
-import { pioneerChat, modernChat, lvivChat } from '../../helpers/chatIds.js';
+import { pioneerChat, modernChat, lvivChat, standardChat } from '../../helpers/chatIds.js';
+import escapeMarkdown from '../../helpers/escapeMarkdown.js';
 
 export default new CommandBuilder("Reaction.Registration")
     .on(["рега", "Рега"])
@@ -10,10 +11,13 @@ export default new CommandBuilder("Reaction.Registration")
 
         switch (ctx.chatId) {
             case pioneerChat:
-                serviceName = 'Піонер'
+                serviceName = 'Піонер';
                 break;
             case modernChat:
-                serviceName = 'Модерн'
+                serviceName = 'Модерн';
+                break;
+            case standardChat:
+                serviceName = 'Стандарт';
                 break;
             default:
                 ctx.startCooldown = false;
@@ -21,7 +25,7 @@ export default new CommandBuilder("Reaction.Registration")
         }
 
         const currentWeek = getCurrentWeek();
-        
+
         const response = await fetch(`https://api.wlaunch.net/v1/company/7ea091e0-359a-11eb-86df-9f45a44f29bd/branch/7ea10724-359a-11eb-86df-9f45a44f29bd/slot/gt/resource?start=${currentWeek.firstDay}&end=${currentWeek.lastDay}&source=WIDGET&withDiscounts=true&preventBookingEnabled=true`);
         const data = await response.json();
         const resources = data.slots.map(x => x.date_slots.map(ds => ds.slots.find(dss => dss.gt.service.name.indexOf(serviceName) != -1))).flat(Infinity).filter(x => x);
@@ -39,11 +43,11 @@ export default new CommandBuilder("Reaction.Registration")
         }));
 
         let text = eventInfos.length == 1
-            ? 'Регістрації на цю неділю:\n\n'
+            ? 'Реєстрації на цю неділю:\n\n'
             : '';
 
         eventInfos.forEach((x, i) => {
-            text += `[${x.name}](https://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${x.id}) \\(${x.usedSpaces} уже в резі\\)`;
+            text += `[${escapeMarkdown(x.name)}](https://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${x.id}) \\(${x.usedSpaces} уже в резі\\)`;
 
             if ((i + 1) < eventInfos.length)
                 text += '\n';

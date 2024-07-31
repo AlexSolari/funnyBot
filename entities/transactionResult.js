@@ -1,4 +1,4 @@
-import ActionState from "./actionState.js";
+/** @import ActionState from "./actionState.js"; */
 
 export default class TransactionResult{
     /**

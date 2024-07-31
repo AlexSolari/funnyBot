@@ -22,11 +22,11 @@ export default new TriggerBuilder("Trigger.LowCount")
             switch (ctx.chatId) {
                 case pioneerChat:
                     prefix = 'pioneer_';
-                    serviceName = 'Піонер'
+                    serviceName = 'Піонер';
                     break;
                 case modernChat:
                     prefix = 'modern_';
-                    serviceName = 'Модерн'
+                    serviceName = 'Модерн';
                     break;
                 default:
                     return;

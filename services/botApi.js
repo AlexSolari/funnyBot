@@ -1,11 +1,11 @@
+/** @import { Telegraf } from "telegraf"; */
+/** @import IncomingMessage from "../entities/incomingMessage.js"; */
 import MessageContext from "../entities/context/messageContext.js";
 import ChatContext from "../entities/context/chatContext.js";
 import ImageMessage from "../entities/replyMessages/imageMessage.js";
 import TextMessage from "../entities/replyMessages/textMessage.js";
 import VideoMessage from "../entities/replyMessages/videoMessage.js";
 import taskScheduler from '../services/taskScheduler.js';
-import { Telegraf } from "telegraf";
-import IncomingMessage from "../entities/incomingMessage.js";
 import logger from "./logger.js";
 
 export default class BotApiService {
@@ -14,7 +14,6 @@ export default class BotApiService {
     */
     constructor(bot) {
         this.bot = bot;
-
         /**
          * @type {Array<TextMessage | ImageMessage | VideoMessage>}
          */

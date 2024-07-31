@@ -1,4 +1,4 @@
-import ChatContext from "../../entities/context/chatContext.js";
+/** @import ChatContext from "../../entities/context/chatContext.js"; */
 import Trigger from "../../entities/actions/trigger.js";
 
 export default class TriggerBuilder {

@@ -5,7 +5,7 @@ import escapeMarkdown from '../../helpers/escapeMarkdown.js';
 function getCardText(card, fallback) {
     const images = card.image_uris ?? fallback;
 
-    return `${card.name}   ${card.mana_cost.replaceAll(/[{}]/gi, '')}\n\n`
+    return `${card.name}   ${card.mana_cost.replaceAll(/[{}]/gi, '')}\n\n`
         + `${images.normal}\n\n`
         + `${card.type_line}\n\n`
         + card.oracle_text;

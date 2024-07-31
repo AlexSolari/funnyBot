@@ -1,8 +1,8 @@
+/** @import TransactionResult from '../entities/transactionResult.js' */
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "fs";
 import { dirname } from 'path';
 import ActionState from "../entities/actionState.js";
-import TransactionResult from "../entities/transactionResult.js";
 
 class Storage {
     constructor() {

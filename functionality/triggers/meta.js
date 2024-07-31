@@ -1,7 +1,7 @@
 import TriggerBuilder from '../../helpers/builders/triggerBuilder.js';
 import { load } from 'cheerio';
 import fetch from 'node-fetch';
-import { modernChat, pioneerChat, lvivChat } from '../../helpers/chatIds.js';
+import { modernChat, pioneerChat, lvivChat, standardChat } from '../../helpers/chatIds.js';
 import escapeMarkdown from '../../helpers/escapeMarkdown.js';
 import moment from 'moment';
 
@@ -22,17 +22,18 @@ async function loadTournaments(formatName) {
 
 export default new TriggerBuilder("Trigger.Meta")
     .at(18) //18:00 Kiev time
-    .allowIn([modernChat, pioneerChat, lvivChat])
+    .allowIn([modernChat, pioneerChat, lvivChat, standardChat])
     .do(async (ctx) => {
         switch (ctx.chatId) {
-            case pioneerChat:
+            case pioneerChat: {
                 const pioneer = await loadTournaments('pioneer');
 
                 if (pioneer.length > 0) {
                     ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${pioneer}`);
                 }
                 break;
-            case modernChat:
+            }
+            case modernChat: {
                 const modern = await loadTournaments('modern');
 
                 if (modern.length > 0) {
@@ -40,7 +41,17 @@ export default new TriggerBuilder("Trigger.Meta")
                 }
 
                 break;
-            case lvivChat:
+            }
+            case standardChat: {
+                const standard = await loadTournaments('standard');
+
+                if (standard.length > 0) {
+                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${standard}`);
+                }
+
+                break;
+            }
+            case lvivChat: {
                 const pioneerTournaments = await loadTournaments('pioneer');
                 const modernTournaments = await loadTournaments('modern');
                 const standardTournaments = await loadTournaments('standard');
@@ -64,6 +75,8 @@ export default new TriggerBuilder("Trigger.Meta")
                     || standardString.length > 0) {
                     ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n ${modernString} ${pioneerString} ${standardString}`);
                 }
+                break;
+            }
             default:
                 return;
         }

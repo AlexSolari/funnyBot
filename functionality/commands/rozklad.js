@@ -1,6 +1,6 @@
 import CommandBuilder from '../../helpers/builders/commandBuilder.js';
 import fetch from 'node-fetch';
-import { modernChat, pioneerChat, spellSeeker } from '../../helpers/chatIds.js';
+import { modernChat, pioneerChat, spellSeeker, standardChat } from '../../helpers/chatIds.js';
 import { load } from 'cheerio';
 
 export default new CommandBuilder("Reaction.Schedule")
@@ -19,5 +19,6 @@ export default new CommandBuilder("Reaction.Schedule")
     .cooldown(30)
     .ignoreChat(modernChat)
     .ignoreChat(pioneerChat)
+    .ignoreChat(standardChat)
     .ignoreChat(spellSeeker)
     .build();
