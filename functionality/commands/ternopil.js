@@ -6,12 +6,8 @@ import userIds from '../../helpers/userIds.js';
 export default new CommandBuilder("Reaction.Ternopil")
     .on(/.+/i)
     .from([userIds.pontiff, userIds.trigan, userIds.zohan])
+    .when((ctx) => ctx.chatId == lvivChat)
     .do(async (ctx) => {
-        if (ctx.chatId != lvivChat) {
-            ctx.startCooldown = false;
-            return;
-        }
-
         if (randomInteger(0, 1) == 0) {
             ctx.replyWithImage("ternopil");
         }

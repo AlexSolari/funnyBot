@@ -5,12 +5,8 @@ import userIds from '../../helpers/userIds.js';
 export default new CommandBuilder("Reaction.Ihor")
     .on(/мод[еє]рн/i)
     .from(userIds.ihor)
+    .when((ctx) => ctx.chatId == lvivChat)
     .do(async (ctx) => {
-        if (ctx.chatId != lvivChat) {
-            ctx.startCooldown = false;
-            return;
-        }
-
         ctx.replyWithImage("ihor");
     })
     .cooldown(7200)

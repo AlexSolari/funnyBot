@@ -3,13 +3,9 @@ import randomInteger from '../../helpers/randomInt.js';
 
 export default new CommandBuilder("Reaction.Potuzhno")
     .on(/.+/i)
+    .when(() => randomInteger(0, 99) == 0)
     .do(async (ctx) => {
-        if (randomInteger(0, 99) == 0) {
-            ctx.replyWithText("Потужно 💪");
-        }
-        else{
-            ctx.startCooldown = false;
-        }
+        ctx.replyWithText("Потужно 💪");
     })
     .cooldown(14400)
     .build();

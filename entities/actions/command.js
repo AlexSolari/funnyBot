@@ -8,14 +8,15 @@ import logger from '../../services/logger.js';
 export default class Command {
     /**
      * @param {string | RegExp | Array<string> | Array<RegExp>} trigger 
-     * @param {(ctx: MessageContext) => Promise<void>} handler 
+     * @param {function(MessageContext): Promise<void>} handler 
      * @param {string} name 
      * @param {boolean} active 
      * @param {number} cooldown 
      * @param {Array<number>} chatsBlacklist 
      * @param {Array<number>} allowedUsers 
+     * @param {function(MessageContext): Promise<boolean>} condition 
      */
-    constructor(trigger, handler, name, active, cooldown, chatsBlacklist, allowedUsers) {
+    constructor(trigger, handler, name, active, cooldown, chatsBlacklist, allowedUsers, condition) {
         this.triggers = Array.isArray(trigger) ? trigger : [trigger];
         this.handler = handler;
         this.name = name;
@@ -23,6 +24,7 @@ export default class Command {
         this.active = active;
         this.chatsBlacklist = chatsBlacklist;
         this.allowedUsers = allowedUsers;
+        this.condition = condition;
 
         this.key = `command:${this.name.replace('.', '-')}`;
     }
@@ -55,8 +57,9 @@ export default class Command {
                     }
                 );
 
+        const isConditionMet = await this.condition(ctx);
 
-        if (shouldTrigger) {
+        if (shouldTrigger && isConditionMet) {
             logger.logWithTraceId(ctx.traceId, ` - Executing [${this.name}] in ${ctx.chatId}`);
             ctx.matchResult = matchResult;
 

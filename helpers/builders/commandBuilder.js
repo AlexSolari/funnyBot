@@ -8,6 +8,7 @@ export default class CommandBuilder {
         this.active = true;
         this.cooldownSeconds = 0;
         this.handler = () => { };
+        this.condition = () => true;
         this.blacklist = [];
         this.allowedUsers = [];
     }
@@ -37,11 +38,21 @@ export default class CommandBuilder {
     }
 
     /**
-     * @param {function(MessageContext): void} handler 
+     * @param {function(MessageContext): Promise} handler 
      * @returns {CommandBuilder}
      */
     do(handler) {
         this.handler = handler;
+
+        return this;
+    }
+
+    /**
+     * @param {function(MessageContext): Promise<boolean>} condition 
+     * @returns {CommandBuilder}
+     */
+    when(condition) {
+        this.condition = condition;
 
         return this;
     }
@@ -65,12 +76,13 @@ export default class CommandBuilder {
     }
 
     build() {
-        return new Command(this.trigger, 
-            this.handler, 
-            this.name, 
-            this.active, 
-            this.cooldownSeconds, 
-            this.blacklist, 
-            this.allowedUsers);
+        return new Command(this.trigger,
+            this.handler,
+            this.name,
+            this.active,
+            this.cooldownSeconds,
+            this.blacklist,
+            this.allowedUsers,
+            this.condition);
     }
 };

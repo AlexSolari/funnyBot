@@ -1,9 +1,10 @@
 import CommandBuilder from '../../helpers/builders/commandBuilder.js';
-import { modernChat, pioneerChat, spellSeeker, standardChat } from '../../helpers/chatIds.js';
+import { lvivChat } from '../../helpers/chatIds.js';
 import { load } from 'cheerio';
 
 export default new CommandBuilder("Reaction.Schedule")
     .on(["розклад"])
+    .when((ctx) => ctx.chatId == lvivChat)
     .do(async (ctx) => {
         const response = await fetch(`https://t.me/s/otawaratcg?q=%D1%80%D0%BE%D0%B7%D0%BA%D0%BB%D0%B0%D0%B4`);
         const text = await response.text();
@@ -16,8 +17,4 @@ export default new CommandBuilder("Reaction.Schedule")
 
     })
     .cooldown(30)
-    .ignoreChat(modernChat)
-    .ignoreChat(pioneerChat)
-    .ignoreChat(standardChat)
-    .ignoreChat(spellSeeker)
     .build();

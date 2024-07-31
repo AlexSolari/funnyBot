@@ -5,12 +5,8 @@ import userIds from '../../helpers/userIds.js';
 export default new CommandBuilder("Reaction.Vitalii")
     .on(/маліфо/i)
     .from(userIds.vitalii)
-    .do(async (ctx) => {
-        if (ctx.chatId != lvivChat) {
-            ctx.startCooldown = false;
-            return;
-        }
-
+    .when((ctx) => ctx.chatId == lvivChat)
+    .do((ctx) => {
         ctx.replyWithImage("malifo");
     })
     .cooldown(86400)
