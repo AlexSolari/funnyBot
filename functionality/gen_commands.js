@@ -10,6 +10,7 @@ import kalitas from './commands/kalitas.js';
 import kamaz from './commands/kamaz.js';
 import lotus from './commands/lotus.js';
 import pizda from './commands/pizda.js';
+import potuzhno from './commands/potuzhno.js';
 import rakdos from './commands/rakdos.js';
 import rating from './commands/rating.js';
 import registration from './commands/registration.js';
@@ -19,4 +20,4 @@ import ternopil from './commands/ternopil.js';
 import vitalii from './commands/vitalii.js';
 
 
-export default [black,cardSearch,cardSearch_small,control,fang,hello,ihor,kalitas,kamaz,lotus,pizda,rakdos,rating,registration,ring,rozklad,ternopil,vitalii];
+export default [black,cardSearch,cardSearch_small,control,fang,hello,ihor,kalitas,kamaz,lotus,pizda,potuzhno,rakdos,rating,registration,ring,rozklad,ternopil,vitalii];
