@@ -23,10 +23,13 @@ async function loadTournaments(formatName) {
 export default new TriggerBuilder("Trigger.Meta")
     .at(18) //18:00 Kiev time
     .allowIn([modernChat, pioneerChat, lvivChat, standardChat])
-    .do(async (ctx) => {
+    .withSharedCache('pioneer', () => loadTournaments('pioneer'))
+    .withSharedCache('modern', () => loadTournaments('modern'))
+    .withSharedCache('standard', () => loadTournaments('standard'))
+    .do(async (ctx, getCached) => {
         switch (ctx.chatId) {
             case pioneerChat: {
-                const pioneer = await loadTournaments('pioneer');
+                const pioneer = await getCached('pioneer');
 
                 if (pioneer.length > 0) {
                     ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${pioneer}`);
@@ -34,7 +37,7 @@ export default new TriggerBuilder("Trigger.Meta")
                 break;
             }
             case modernChat: {
-                const modern = await loadTournaments('modern');
+                const modern = await getCached('modern');
 
                 if (modern.length > 0) {
                     ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${modern}`);
@@ -43,7 +46,7 @@ export default new TriggerBuilder("Trigger.Meta")
                 break;
             }
             case standardChat: {
-                const standard = await loadTournaments('standard');
+                const standard = await getCached('standard');
 
                 if (standard.length > 0) {
                     ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${standard}`);
@@ -52,9 +55,9 @@ export default new TriggerBuilder("Trigger.Meta")
                 break;
             }
             case lvivChat: {
-                const pioneerTournaments = await loadTournaments('pioneer');
-                const modernTournaments = await loadTournaments('modern');
-                const standardTournaments = await loadTournaments('standard');
+                const pioneerTournaments = await getCached('pioneer');
+                const modernTournaments = await getCached('modern');
+                const standardTournaments = await getCached('standard');
 
                 let pioneerString = '';
                 let modernString = '';
