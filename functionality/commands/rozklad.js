@@ -1,5 +1,4 @@
 import CommandBuilder from '../../helpers/builders/commandBuilder.js';
-import fetch from 'node-fetch';
 import { modernChat, pioneerChat, spellSeeker, standardChat } from '../../helpers/chatIds.js';
 import { load } from 'cheerio';
 

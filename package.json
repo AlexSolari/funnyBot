@@ -1,10 +1,10 @@
 {
   "type": "module",
   "dependencies": {
+    "async-sema": "^3.1.1",
     "cheerio": "^1.0.0-rc.12",
     "markdown-escape": "^2.0.0",
     "moment": "^2.29.4",
-    "node-fetch": "^2.6.11",
     "telegraf": "^4.16.3"
   },
   "devDependencies": {

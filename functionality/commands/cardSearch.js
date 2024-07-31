@@ -1,5 +1,4 @@
 import CommandBuilder from '../../helpers/builders/commandBuilder.js';
-import fetch from 'node-fetch';
 import escapeMarkdown from '../../helpers/escapeMarkdown.js';
 
 function getCardText(card, fallback) {

@@ -1,5 +1,4 @@
 import CommandBuilder from '../../helpers/builders/commandBuilder.js';
-import fetch from 'node-fetch';
 
 function getCardText(card, fallback) {
     const images = card.image_uris ?? fallback;

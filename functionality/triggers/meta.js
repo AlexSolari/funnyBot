@@ -1,6 +1,5 @@
 import TriggerBuilder from '../../helpers/builders/triggerBuilder.js';
 import { load } from 'cheerio';
-import fetch from 'node-fetch';
 import { modernChat, pioneerChat, lvivChat, standardChat } from '../../helpers/chatIds.js';
 import escapeMarkdown from '../../helpers/escapeMarkdown.js';
 import moment from 'moment';

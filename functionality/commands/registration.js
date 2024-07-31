@@ -1,6 +1,5 @@
 import CommandBuilder from '../../helpers/builders/commandBuilder.js';
 import getCurrentWeek from '../../helpers/getWeek.js';
-import fetch from 'node-fetch';
 import { pioneerChat, modernChat, lvivChat, standardChat } from '../../helpers/chatIds.js';
 import escapeMarkdown from '../../helpers/escapeMarkdown.js';
 

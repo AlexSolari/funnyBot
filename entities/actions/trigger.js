@@ -5,8 +5,11 @@ import TransactionResult from '../transactionResult.js';
 import moment from "moment";
 import logger from '../../services/logger.js';
 import taskScheduler from '../../services/taskScheduler.js';
+import { Sema as Semaphore } from 'async-sema';
 
 export default class Trigger {
+    static semaphore = new Semaphore(1);
+
     /**
      * @param {string} name 
      * @param {(ctx: ChatContext, getCached: ((key: string) => Promise<any>) | void) => Promise<void>} handler 
@@ -56,22 +59,28 @@ export default class Trigger {
      * @returns {Promise<any>}
      */
     async #getCachedValue(key) {
-        if (this.cachedState.has(key)){
+        if (this.cachedState.has(key)) {
             return this.cachedState.get(key) ?? null;
         }
 
-        if (this.cachedStateFactories.has(key)){
-            const cachedItemPrefab = this.cachedStateFactories.get(key);
-            const value = await cachedItemPrefab.itemFactory();
+        if (this.cachedStateFactories.has(key)) {
+            await Trigger.semaphore.acquire();
 
-            this.cachedState.set(key, value);
-            taskScheduler.createOnetimeTask(
-                `Drop cached value [${this.name} : ${key}]`,
-                () => this.cachedState.delete(key),
-                cachedItemPrefab.invalidationTimeout
-            );
+            try {
+                const cachedItemPrefab = this.cachedStateFactories.get(key);
+                const value = await cachedItemPrefab.itemFactory();
 
-            return value;
+                this.cachedState.set(key, value);
+                taskScheduler.createOnetimeTask(
+                    `Drop cached value [${this.name} : ${key}]`,
+                    () => this.cachedState.delete(key),
+                    cachedItemPrefab.invalidationTimeout
+                );
+
+                return value;
+            } finally {
+                Trigger.semaphore.release();
+            }
         }
 
         return null;
