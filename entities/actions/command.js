@@ -38,6 +38,11 @@ export default class Command {
         if (!this.active || this.chatsBlacklist.indexOf(ctx.chatId) != -1)
             return;
 
+        const isConditionMet = await this.condition(ctx);
+
+        if (!isConditionMet)
+            return;
+
         const state = await storage.getActionState(this, ctx.chatId);
 
         const { shouldTrigger, matchResult, skipCooldown } =
@@ -57,27 +62,26 @@ export default class Command {
                     }
                 );
 
-        const isConditionMet = await this.condition(ctx);
+        if (!shouldTrigger)
+            return;
 
-        if (shouldTrigger && isConditionMet) {
-            logger.logWithTraceId(ctx.traceId, ` - Executing [${this.name}] in ${ctx.chatId}`);
-            ctx.matchResult = matchResult;
+        logger.logWithTraceId(ctx.traceId, ` - Executing [${this.name}] in ${ctx.chatId}`);
+        ctx.matchResult = matchResult;
 
-            await this.handler(ctx);
+        await this.handler(ctx);
 
-            if (skipCooldown) {
-                ctx.startCooldown = false;
-            }
-
-            if (ctx.startCooldown) {
-                state.lastExecutedDate = moment().valueOf();
-            }
-
-            await storage.commitTransactionForEntity(
-                this, 
-                ctx.chatId, 
-                new TransactionResult(state, ctx.startCooldown && shouldTrigger));
+        if (skipCooldown) {
+            ctx.startCooldown = false;
         }
+
+        if (ctx.startCooldown) {
+            state.lastExecutedDate = moment().valueOf();
+        }
+
+        await storage.commitTransactionForEntity(
+            this,
+            ctx.chatId,
+            new TransactionResult(state, ctx.startCooldown && shouldTrigger));
     }
 
     /**
