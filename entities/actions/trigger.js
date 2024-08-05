@@ -59,14 +59,15 @@ export default class Trigger {
      * @returns {Promise<any>}
      */
     async #getCachedValue(key) {
-        if (this.cachedState.has(key)) {
-            return this.cachedState.get(key) ?? null;
-        }
+        await Trigger.semaphore.acquire();
 
-        if (this.cachedStateFactories.has(key)) {
-            await Trigger.semaphore.acquire();
+        try {
+            if (this.cachedState.has(key)) {
+                return this.cachedState.get(key) ?? null;
+            }
 
-            try {
+            if (this.cachedStateFactories.has(key)) {
+
                 const cachedItemPrefab = this.cachedStateFactories.get(key);
                 const value = await cachedItemPrefab.itemFactory();
 
@@ -78,12 +79,12 @@ export default class Trigger {
                 );
 
                 return value;
-            } finally {
-                Trigger.semaphore.release();
             }
-        }
 
-        return null;
+            return null;
+        } finally {
+            Trigger.semaphore.release();
+        }
     }
 
     /**
