@@ -42,7 +42,7 @@ export default new CommandBuilder("Reaction.Registration")
         }));
 
         let text = eventInfos.length == 1
-            ? 'Реєстрації на цю неділю:\n\n'
+            ? 'Реєстрації на цей тиждень:\n\n'
             : '';
 
         eventInfos.forEach((x, i) => {
