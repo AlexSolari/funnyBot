@@ -1,15 +1,12 @@
 import TriggerBuilder from '../../helpers/builders/triggerBuilder.js';
 import getCurrentWeek from '../../helpers/getWeek.js';
-import { modernChat, pioneerChat, lvivChat } from '../../helpers/chatIds.js';
+import { modernChat, pioneerChat } from '../../helpers/chatIds.js';
 import moment from "moment";
 
 export default new TriggerBuilder("Trigger.LowCount")
     .at(8) //08:00 Kiev time
     .allowIn([modernChat, pioneerChat])
     .do(async (ctx) => {
-        if (ctx.chatId == lvivChat)
-            return;
-
         const currentWeek = getCurrentWeek();
         const today = moment().day();
 
@@ -32,7 +29,10 @@ export default new TriggerBuilder("Trigger.LowCount")
             }
 
             const data = await response.json();
-            const target = data.slots.map(x => x.date_slots.map(ds => ds.slots.find(dss => dss.gt.service.name == serviceName))).flat(Infinity).filter(x => x)[0];
+            const target = data.slots
+                .map(x => x.date_slots.map(ds => ds.slots.find(dss => dss.gt.service.name == serviceName)))
+                .flat(Infinity)
+                .filter(x => x)[0];
 
             if (!target)
                 return;

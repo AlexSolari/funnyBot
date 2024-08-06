@@ -20,4 +20,4 @@ import ternopil from './commands/ternopil.js';
 import vitalii from './commands/vitalii.js';
 
 
-export default [black,cardSearch,cardSearch_small,control,fang,hello,ihor,kalitas,kamaz,lotus,pizda,potuzhno,rakdos,rating,registration,ring,rozklad,ternopil,vitalii];
+export default [black,cardSearch,cardSearch_small,control,fang,hello,ihor,kalitas,kamaz,lotus,pizda,potuzhno,rakdos,rating,registration,ring,rozklad,ternopil,vitalii].filter(x => x.active);

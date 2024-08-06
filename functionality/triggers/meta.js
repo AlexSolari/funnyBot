@@ -19,44 +19,50 @@ async function loadTournaments(formatName) {
     return parsedData ?? "";
 }
 
+const FormatName = {
+    Pioneer: 'pioneer',
+    Modern: 'modern',
+    Standard: 'standard'
+}
+
 export default new TriggerBuilder("Trigger.Meta")
     .at(18) //18:00 Kiev time
     .allowIn([modernChat, pioneerChat, lvivChat, standardChat])
-    .withSharedCache('pioneer', () => loadTournaments('pioneer'))
-    .withSharedCache('modern', () => loadTournaments('modern'))
-    .withSharedCache('standard', () => loadTournaments('standard'))
+    .withSharedCache(FormatName.Pioneer, () => loadTournaments(FormatName.Pioneer))
+    .withSharedCache(FormatName.Modern, () => loadTournaments(FormatName.Modern))
+    .withSharedCache(FormatName.Standard, () => loadTournaments(FormatName.Standard))
     .do(async (ctx, getCached) => {
         switch (ctx.chatId) {
             case pioneerChat: {
-                const pioneer = await getCached('pioneer');
+                const pioneerTournaments = await getCached(FormatName.Pioneer);
 
-                if (pioneer.length > 0) {
-                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${pioneer}`);
+                if (pioneerTournaments.length > 0) {
+                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${pioneerTournaments}`);
                 }
                 break;
             }
             case modernChat: {
-                const modern = await getCached('modern');
+                const modernTournaments = await getCached(FormatName.Modern);
 
-                if (modern.length > 0) {
-                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${modern}`);
+                if (modernTournaments.length > 0) {
+                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${modernTournaments}`);
                 }
 
                 break;
             }
             case standardChat: {
-                const standard = await getCached('standard');
+                const standardTournaments = await getCached(FormatName.Standard);
 
-                if (standard.length > 0) {
-                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${standard}`);
+                if (standardTournaments.length > 0) {
+                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${standardTournaments}`);
                 }
 
                 break;
             }
             case lvivChat: {
-                const pioneerTournaments = await getCached('pioneer');
-                const modernTournaments = await getCached('modern');
-                const standardTournaments = await getCached('standard');
+                const pioneerTournaments = await getCached(FormatName.Pioneer);
+                const modernTournaments = await getCached(FormatName.Modern);
+                const standardTournaments = await getCached(FormatName.Standard);
 
                 let pioneerString = '';
                 let modernString = '';

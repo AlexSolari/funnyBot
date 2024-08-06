@@ -3,4 +3,4 @@ import lowCount from './triggers/lowCount.js';
 import meta from './triggers/meta.js';
 
 
-export default [lowCount,meta];
+export default [lowCount,meta].filter(x => x.active);

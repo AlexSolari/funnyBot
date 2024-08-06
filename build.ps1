@@ -14,7 +14,7 @@ function Generate{
         $result += $require + "`n";
     }
     $array = $array.Substring(0,$array.Length-1);
-    $array += "];";
+    $array += "].filter(x => x.active);";
     Set-Location ..;
     $result += "`n`n" + $array;
 

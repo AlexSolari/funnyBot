@@ -14,8 +14,7 @@ export default new CommandBuilder("Reaction.CardSearch")
     .on(/\[\[(.+)\]\]/i)
     .do(async (ctx) => {
         const response = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${ctx.matchResult[1]}`)
-        const json = await response.text();
-        const data = JSON.parse(json);
+        const data = await response.json();
 
         if (data.status == 404)
             return;

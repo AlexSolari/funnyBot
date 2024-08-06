@@ -11,13 +11,10 @@ function getCardText(card, fallback) {
 
 export default new CommandBuilder("Reaction.CardSearch_Small")
     .on(/\[(.+)\]/i)
+    .when((ctx) => ctx.messageText.indexOf('[[') == -1)
     .do(async (ctx) => {
-        if (ctx.messageText.indexOf('[[') != -1)
-            return;
-
         const response = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${ctx.matchResult[1]}`)
-        const json = await response.text();
-        const data = JSON.parse(json);
+        const data = await response.json();
 
         if (data.status == 404)
             return;
