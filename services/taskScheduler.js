@@ -34,7 +34,7 @@ class TaskScheduler {
      */
     createOnetimeTask(name, action, delay) {
         const actionWrapper = () => {
-            console.log(`Executing delayed oneshot [${taskId}]${name}]`);
+            console.log(`Executing delayed oneshot [${taskId}]${name}`);
             action();
         };
         const taskId = setTimeout(actionWrapper, delay);
