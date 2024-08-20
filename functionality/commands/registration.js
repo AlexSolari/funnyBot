@@ -41,7 +41,7 @@ export default new CommandBuilder("Reaction.Registration")
             usedSpaces: x.gt.used_space
         }));
 
-        let text = eventInfos.length == 1
+        let text = eventInfos.length > 1
             ? 'Реєстрації на цей тиждень:\n\n'
             : '';
 
@@ -53,7 +53,6 @@ export default new CommandBuilder("Reaction.Registration")
         });
 
         ctx.replyWithText(text);
-
     })
     .cooldown(30)
     .ignoreChat(lvivChat)

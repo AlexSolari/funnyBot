@@ -11,8 +11,8 @@ export default new CommandBuilder("Reaction.Ternopil")
         if (randomInteger(0, 1) == 0) {
             ctx.replyWithImage("ternopil");
         }
-        else{
-            switch (randomInteger(0, 2)) {
+        else {
+            switch (randomInteger(0, 3)) {
                 case 0:
                     ctx.replyWithText('🫵🤣');
                     break;
@@ -22,8 +22,14 @@ export default new CommandBuilder("Reaction.Ternopil")
                 case 2:
                     ctx.replyWithText('🙃');
                     break;
+                case 3:
+                    ctx.replyWithText('😃👉🚪');
+                    break;
+                case 4:
+                    ctx.replyWithText('🤫🧏‍♂️🤫');
+                    break;
             }
         }
     })
-    .cooldown(12000)
+    .cooldown(28800)
     .build();
