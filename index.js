@@ -1,8 +1,8 @@
 import { readFile } from "node:fs/promises";
 import Bot from './entities/bot.js';
-import { modernChat, pioneerChat, spellSeeker, lvivChat, standardChat } from './helpers/chatIds.js';
+import { modernChat, pioneerChat, spellSeeker, lvivChat, standardChat, pauperChat } from './helpers/chatIds.js';
 
-startBot("main", 'token.prod', [modernChat, pioneerChat, spellSeeker, standardChat]);
+startBot("main", 'token.prod', [modernChat, pioneerChat, spellSeeker, standardChat, pauperChat]);
 startBot("lviv", 'token.lviv', [lvivChat]);
 //startBot("test", 'token.test', [-1001759510701]);
 

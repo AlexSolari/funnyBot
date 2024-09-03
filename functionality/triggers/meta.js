@@ -1,6 +1,6 @@
 import TriggerBuilder from '../../helpers/builders/triggerBuilder.js';
 import { load } from 'cheerio';
-import { modernChat, pioneerChat, lvivChat, standardChat } from '../../helpers/chatIds.js';
+import { modernChat, pioneerChat, lvivChat, standardChat, pauperChat } from '../../helpers/chatIds.js';
 import escapeMarkdown from '../../helpers/escapeMarkdown.js';
 import moment from 'moment';
 
@@ -22,15 +22,17 @@ async function loadTournaments(formatName) {
 const FormatName = {
     Pioneer: 'pioneer',
     Modern: 'modern',
-    Standard: 'standard'
+    Standard: 'standard',
+    Pauper: 'pauper'
 }
 
 export default new TriggerBuilder("Trigger.Meta")
     .at(18) //18:00 Kiev time
-    .allowIn([modernChat, pioneerChat, lvivChat, standardChat])
+    .allowIn([modernChat, pioneerChat, lvivChat, standardChat, pauperChat])
     .withSharedCache(FormatName.Pioneer, () => loadTournaments(FormatName.Pioneer))
     .withSharedCache(FormatName.Modern, () => loadTournaments(FormatName.Modern))
     .withSharedCache(FormatName.Standard, () => loadTournaments(FormatName.Standard))
+    .withSharedCache(FormatName.Pauper, () => loadTournaments(FormatName.Pauper))
     .do(async (ctx, getCached) => {
         switch (ctx.chatId) {
             case pioneerChat: {
@@ -55,6 +57,15 @@ export default new TriggerBuilder("Trigger.Meta")
 
                 if (standardTournaments.length > 0) {
                     ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${standardTournaments}`);
+                }
+
+                break;
+            }
+            case pauperChat: {
+                const pauperTournaments = await getCached(FormatName.Pauper);
+
+                if (pauperTournaments.length > 0) {
+                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${pauperTournaments}`);
                 }
 
                 break;

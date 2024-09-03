@@ -1,6 +1,6 @@
 import CommandBuilder from '../../helpers/builders/commandBuilder.js';
 import getCurrentWeek from '../../helpers/getWeek.js';
-import { pioneerChat, modernChat, lvivChat, standardChat } from '../../helpers/chatIds.js';
+import { pioneerChat, modernChat, lvivChat, standardChat, pauperChat } from '../../helpers/chatIds.js';
 import escapeMarkdown from '../../helpers/escapeMarkdown.js';
 
 export default new CommandBuilder("Reaction.Registration")
@@ -56,4 +56,5 @@ export default new CommandBuilder("Reaction.Registration")
     })
     .cooldown(30)
     .ignoreChat(lvivChat)
+    .ignoreChat(pauperChat)
     .build();

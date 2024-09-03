@@ -1,6 +1,6 @@
 import CommandBuilder from '../../helpers/builders/commandBuilder.js';
 import randomInteger from '../../helpers/randomInt.js';
-import { lvivChat } from '../../helpers/chatIds.js';
+import { lvivChat, pauperChat } from '../../helpers/chatIds.js';
 
 export default new CommandBuilder("Reaction.Lotus")
     .on(/лотус/i)
@@ -16,5 +16,6 @@ export default new CommandBuilder("Reaction.Lotus")
         ctx.replyWithImage(imageName);
     })
     .ignoreChat(lvivChat)
+    .ignoreChat(pauperChat)
     .cooldown(7200)
     .build();

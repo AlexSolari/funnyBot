@@ -3,3 +3,4 @@ export const modernChat = -1001734384223;
 export const lvivChat = -1001864573102;
 export const spellSeeker = -1001697109061;
 export const standardChat = -1001654682000;
+export const pauperChat = -1001715317650;

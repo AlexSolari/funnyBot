@@ -1,5 +1,5 @@
 import CommandBuilder from '../../helpers/builders/commandBuilder.js';
-import { lvivChat } from '../../helpers/chatIds.js';
+import { lvivChat, pauperChat } from '../../helpers/chatIds.js';
 
 export default new CommandBuilder("Reaction.Pizda")
     .on("да")
@@ -8,4 +8,5 @@ export default new CommandBuilder("Reaction.Pizda")
     })
     .cooldown(7200)
     .ignoreChat(lvivChat)
+    .ignoreChat(pauperChat)
     .build();

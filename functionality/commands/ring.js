@@ -1,6 +1,6 @@
 import CommandBuilder from '../../helpers/builders/commandBuilder.js';
 import randomInteger from '../../helpers/randomInt.js';
-import { lvivChat } from '../../helpers/chatIds.js';
+import { lvivChat, pauperChat } from '../../helpers/chatIds.js';
 
 export default new CommandBuilder("Reaction.Ring")
     .on(/кольц/i)
@@ -22,4 +22,5 @@ export default new CommandBuilder("Reaction.Ring")
     .cooldown(7200)
     .disabled()
     .ignoreChat(lvivChat)
+    .ignoreChat(pauperChat)
     .build();

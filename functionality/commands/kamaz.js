@@ -1,5 +1,5 @@
 import CommandBuilder from '../../helpers/builders/commandBuilder.js';
-import { lvivChat } from '../../helpers/chatIds.js';
+import { lvivChat, pauperChat } from '../../helpers/chatIds.js';
 
 export default new CommandBuilder("Reaction.Kamaz")
     .on(/камаз/i)
@@ -8,5 +8,5 @@ export default new CommandBuilder("Reaction.Kamaz")
     })
     .cooldown(7200)
     .ignoreChat(lvivChat)
-    .disabled()
+    .ignoreChat(pauperChat)
     .build();
