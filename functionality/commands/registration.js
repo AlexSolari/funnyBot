@@ -36,10 +36,11 @@ export default new CommandBuilder("Reaction.Registration")
         const resources = data.slots
             .map(x => x.date_slots.map(ds => ({date: new Date(ds.date), slots: ds.slots})))
             .flat(Infinity)
-            .filter(x => x.slots.length > 0 && x.slots.find(dss => dss.gt.service.name.indexOf(serviceName) != -1))
+            .filter(x => x.slots.length > 0)
             .sort((a,b) => a.date - b.date)
             .map(({date, slots}) => slots.map(x => {x.date = date.toLocaleDateString("uk-UA", options); return x}))
-            .flat();
+            .flat()
+            .filter(x => x.gt.service.name.indexOf(serviceName) != -1);
 
         if (!resources || resources.length == 0) {
             ctx.replyWithText(`поки нема`);
