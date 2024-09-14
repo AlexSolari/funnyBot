@@ -71,13 +71,18 @@ export default class BotApiService {
 
     /** @param {IncomingMessage} incomingMessage  */
     createContextForMessage(incomingMessage) {
+        const firstName = incomingMessage.from?.first_name ?? 'Unknown user';
+        const lastName = (incomingMessage.from?.last_name) ? ` ${incomingMessage.from?.last_name}` : '';
+
         return new MessageContext(
             (response) => this.#enqueueResponse(response),
             incomingMessage.chat.id,
             incomingMessage.message_id,
             incomingMessage.text,
             incomingMessage.from?.id ?? undefined,
-            incomingMessage.traceId);
+            incomingMessage.traceId,
+            firstName + lastName 
+        );
     }
 
     createContextForChat(chatId, triggerName) {

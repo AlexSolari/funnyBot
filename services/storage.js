@@ -1,16 +1,16 @@
 /** @import TransactionResult from '../entities/transactionResult.js' */
+/** @import ActionStateBase from '../entities/states/actionStateBase.js' */
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "fs";
 import { dirname } from 'path';
-import ActionState from "../entities/actionState.js";
 
 class Storage {
     constructor() {
-        /** @type {Map<string, Record<number, ActionState>>} */
+        /** @type {Map<string, Record<number, ActionStateBase>>} */
         this.cache = new Map();
     }
 
-    async #load(key) {
+    async load(key) {
         if (!this.cache.has(key)) {
             const targetPath = this.#buidPathFromKey(key);
             if (!existsSync(targetPath)) {
@@ -49,14 +49,14 @@ class Storage {
     }
 
     /**
-     * 
-     * @param {{key: string}} entity 
+     * @template {ActionStateBase} TActionState
+     * @param {{key: string, stateConstructor: () => TActionState}} entity 
      * @param {number} chatId 
-     * @returns {Promise<ActionState>}
+     * @returns {Promise<TActionState>}
      */
     async getActionState(entity, chatId) {
-        const entityData = await this.#load(entity.key);
-        return entityData[chatId] ?? new ActionState();
+        const entityData = await this.load(entity.key);
+        return entityData[chatId] ?? new entity.stateConstructor();
     }
 
     /**
@@ -67,7 +67,7 @@ class Storage {
      * @returns {Promise<void>}
      */
     async commitTransactionForEntity(entity, chatId, transactionResult) {
-        const entityData = await this.#load(entity.key);
+        const entityData = await this.load(entity.key);
 
         if (transactionResult.shouldUpdate) {
             entityData[chatId] = transactionResult.data;

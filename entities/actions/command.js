@@ -1,22 +1,26 @@
 /** @import MessageContext from '../context/messageContext.js'; */
-/** @import ActionState from '../actionState.js'; */
+/** @import ActionStateBase from '../states/actionStateBase.js'; */
 import storage from '../../services/storage.js';
 import TransactionResult from '../transactionResult.js';
 import moment from "moment";
 import logger from '../../services/logger.js';
 
+/**
+ * @template {ActionStateBase} TActionState
+ */
 export default class Command {
     /**
      * @param {string | RegExp | Array<string> | Array<RegExp>} trigger 
-     * @param {function(MessageContext): Promise<void>} handler 
+     * @param {function(MessageContext, TActionState): Promise<void>} handler 
      * @param {string} name 
      * @param {boolean} active 
      * @param {number} cooldown 
      * @param {Array<number>} chatsBlacklist 
      * @param {Array<number>} allowedUsers 
      * @param {function(MessageContext): Promise<boolean>} condition 
+     * @param {() => TActionState} stateConstructor
      */
-    constructor(trigger, handler, name, active, cooldown, chatsBlacklist, allowedUsers, condition) {
+    constructor(trigger, handler, name, active, cooldown, chatsBlacklist, allowedUsers, condition, stateConstructor) {
         this.triggers = Array.isArray(trigger) ? trigger : [trigger];
         this.handler = handler;
         this.name = name;
@@ -25,6 +29,7 @@ export default class Command {
         this.chatsBlacklist = chatsBlacklist;
         this.allowedUsers = allowedUsers;
         this.condition = condition;
+        this.stateConstructor = stateConstructor;
 
         this.key = `command:${this.name.replace('.', '-')}`;
     }
@@ -68,7 +73,7 @@ export default class Command {
         logger.logWithTraceId(ctx.traceId, ` - Executing [${this.name}] in ${ctx.chatId}`);
         ctx.matchResult = matchResult;
 
-        await this.handler(ctx);
+        await this.handler(ctx, state);
 
         if (skipCooldown) {
             ctx.startCooldown = false;
@@ -77,6 +82,8 @@ export default class Command {
         if (ctx.startCooldown) {
             state.lastExecutedDate = moment().valueOf();
         }
+
+        ctx.updateActions.forEach(action => action(state));
 
         await storage.commitTransactionForEntity(
             this,
@@ -87,7 +94,7 @@ export default class Command {
     /**
      * @param {MessageContext} ctx 
      * @param {RegExp | String} trigger 
-     * @param {ActionState} state 
+     * @param {ActionStateBase} state 
      * @returns {{shouldTrigger: boolean, matchResult: RegExpExecArray | null, skipCooldown: boolean}}
      */
     #checkTrigger(ctx, trigger, state) {

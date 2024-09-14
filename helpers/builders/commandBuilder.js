@@ -1,16 +1,35 @@
 /** @import MessageContext from "../../entities/context/messageContext.js"; */
 import Command from "../../entities/actions/command.js";
+import ActionStateBase from "../../entities/states/actionStateBase.js";
 
+/**
+ * @template {ActionStateBase} TActionState
+ */
 export default class CommandBuilder {
+    /**
+     * @constructor
+     * @param {string} name 
+     */
     constructor(name) {
         this.name = name;
         this.trigger = null;
         this.active = true;
         this.cooldownSeconds = 0;
         this.handler = () => { };
+        this.stateConstructor = ActionStateBase;
         this.condition = () => true;
         this.blacklist = [];
         this.allowedUsers = [];
+    }
+
+    /**
+     * @param {() => TActionState} stateConstructor 
+     * @returns 
+     */
+    withState(stateConstructor){
+        this.stateConstructor = stateConstructor;
+
+        return this;
     }
 
     /**
@@ -38,7 +57,7 @@ export default class CommandBuilder {
     }
 
     /**
-     * @param {function(MessageContext): Promise} handler 
+     * @param {(ctx: MessageContext<TActionState>, state: TActionState) => Promise} handler 
      * @returns {CommandBuilder}
      */
     do(handler) {
@@ -83,6 +102,7 @@ export default class CommandBuilder {
             this.cooldownSeconds,
             this.blacklist,
             this.allowedUsers,
-            this.condition);
+            this.condition,
+            this.stateConstructor);
     }
 };

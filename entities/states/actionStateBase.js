@@ -1,4 +1,4 @@
-export default class ActionState{
+export default class ActionStateBase{
     constructor(){
         this.lastExecutedDate = 0;
     }

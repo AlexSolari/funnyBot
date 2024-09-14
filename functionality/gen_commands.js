@@ -11,6 +11,7 @@ import kamaz from './commands/kamaz.js';
 import lotus from './commands/lotus.js';
 import pizda from './commands/pizda.js';
 import potuzhno from './commands/potuzhno.js';
+import potuzhnoStats from './commands/potuzhnoStats.js';
 import rakdos from './commands/rakdos.js';
 import rating from './commands/rating.js';
 import registration from './commands/registration.js';
@@ -20,4 +21,4 @@ import ternopil from './commands/ternopil.js';
 import vitalii from './commands/vitalii.js';
 
 
-export default [black,cardSearch,cardSearch_small,control,fang,hello,ihor,kalitas,kamaz,lotus,pizda,potuzhno,rakdos,rating,registration,ring,rozklad,ternopil,vitalii].filter(x => x.active);
+export default [black,cardSearch,cardSearch_small,control,fang,hello,ihor,kalitas,kamaz,lotus,pizda,potuzhno,potuzhnoStats,rakdos,rating,registration,ring,rozklad,ternopil,vitalii].filter(x => x.active);

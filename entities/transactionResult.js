@@ -1,9 +1,9 @@
-/** @import ActionState from "./actionState.js"; */
+/** @import ActionStateBase from "./states/actionStateBase.js"; */
 
 export default class TransactionResult{
     /**
      * 
-     * @param {ActionState} data 
+     * @param {ActionStateBase} data 
      * @param {boolean} shouldUpdate 
      */
     constructor(data, shouldUpdate){
