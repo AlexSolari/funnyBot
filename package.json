@@ -8,13 +8,18 @@
     "telegraf": "^4.16.3"
   },
   "devDependencies": {
-    "@eslint/js": "^9.8.0",
+    "@eslint/js": "^9.10.0",
+    "@types/eslint__js": "^8.42.3",
+    "@types/markdown-escape": "^1.1.3",
+    "@types/node": "^22.5.5",
     "esbuild": "0.21.5",
-    "eslint": "^9.8.0",
-    "globals": "^15.8.0"
+    "eslint": "^9.10.0",
+    "globals": "^15.8.0",
+    "typescript": "^5.6.2",
+    "typescript-eslint": "^8.5.0"
   },
   "scripts": {
-    "build": "esbuild index.js --bundle --platform=node --outfile=build/index.js --ignore-annotations --legal-comments=none",
+    "build": "esbuild index.ts --bundle --platform=node --outfile=build/index.js --ignore-annotations --legal-comments=none",
     "lint": "npx eslint"
   }
 }

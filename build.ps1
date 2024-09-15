@@ -9,7 +9,7 @@ function Generate{
     $array = "export default [";
     foreach ($i in $names) {
         $varname = $i.split(".")[0];
-        $require = "import " + $varname + " from './"+ $Folder +"/" + $i + "';";
+        $require = "import " + $varname + " from './"+ $Folder +"/" + $i.Substring(0,$i.Length-3) + "';";
         $array += $varname + "," ;
         $result += $require + "`n";
     }
@@ -24,8 +24,8 @@ function Generate{
 Set-Location functionality
 $c = Generate -Folder 'commands';
 $t = Generate -Folder 'triggers';
-Out-File -Encoding utf8 -FilePath .\gen_commands.js -InputObject $c
-Out-File -Encoding utf8 -FilePath .\gen_triggers.js -InputObject $t
+Out-File -Encoding utf8 -FilePath .\gen_commands.ts -InputObject $c
+Out-File -Encoding utf8 -FilePath .\gen_triggers.ts -InputObject $t
 Set-Location ..
 Remove-Item -r -fo build
 mkdir build
