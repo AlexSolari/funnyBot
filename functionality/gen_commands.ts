@@ -17,8 +17,9 @@ import rating from './commands/rating';
 import registration from './commands/registration';
 import ring from './commands/ring';
 import rozklad from './commands/rozklad';
+import slon from './commands/slon';
 import ternopil from './commands/ternopil';
 import vitalii from './commands/vitalii';
 
 
-export default [black,cardSearch,cardSearch_small,control,fang,hello,ihor,kalitas,kamaz,lotus,pizda,potuzhno,potuzhnoStats,rakdos,rating,registration,ring,rozklad,ternopil,vitalii].filter(x => x.active);
+export default [black,cardSearch,cardSearch_small,control,fang,hello,ihor,kalitas,kamaz,lotus,pizda,potuzhno,potuzhnoStats,rakdos,rating,registration,ring,rozklad,slon,ternopil,vitalii].filter(x => x.active);
