@@ -6,7 +6,8 @@ import { ChatId } from '../../helpers/chatIds';
 
 export default new TriggerBuilder("Trigger.LowCount")
     .at(8) //08:00 Kiev time
-    .allowIn([ChatId.ModernChat, ChatId.PioneerChat])
+    .allowIn(ChatId.PioneerChat)
+    .allowIn(ChatId.ModernChat)
     .do(async (ctx) => {
         const currentWeek = getCurrentWeek();
         const today = moment().day();

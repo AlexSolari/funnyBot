@@ -38,7 +38,11 @@ async function sendRecentTournaments(format: Format, ctx: ChatContext, getCached
 
 export default new TriggerBuilder("Trigger.Meta")
     .at(18) //18:00 Kiev time
-    .allowIn([ChatId.ModernChat, ChatId.PioneerChat, ChatId.LvivChat, ChatId.StandardChat, ChatId.PauperChat])
+    .allowIn(ChatId.ModernChat)
+    .allowIn(ChatId.PioneerChat)
+    .allowIn(ChatId.LvivChat)
+    .allowIn(ChatId.StandardChat)
+    .allowIn(ChatId.PauperChat)
     .withSharedCache(Format.Pioneer, () => loadTournaments(Format.Pioneer))
     .withSharedCache(Format.Modern, () => loadTournaments(Format.Modern))
     .withSharedCache(Format.Standard, () => loadTournaments(Format.Standard))

@@ -16,8 +16,8 @@ export default class TriggerBuilder {
         this.name = name;
     }
 
-    allowIn(whitelist: number[]) {
-        this.whitelist = whitelist;
+    allowIn(chatId: number) {
+        this.whitelist.push(chatId);
 
         return this;
     }
