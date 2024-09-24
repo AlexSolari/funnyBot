@@ -1,4 +1,4 @@
-import CommandBuilder from '../../helpers/builders/commandBuilder';
+import { CommandBuilder } from '../../helpers/builders/commandBuilder';
 import getCurrentWeek from '../../helpers/getWeek';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { IMWApiResponse, IMwApiResponseDateSlot } from '../../entities/externalApiDefinitions/mw';
@@ -35,11 +35,11 @@ export default new CommandBuilder("Reaction.Registration")
         const response = await fetch(`https://api.wlaunch.net/v1/company/7ea091e0-359a-11eb-86df-9f45a44f29bd/branch/7ea10724-359a-11eb-86df-9f45a44f29bd/slot/gt/resource?start=${currentWeek.firstDay}&end=${currentWeek.lastDay}&source=WIDGET&withDiscounts=true&preventBookingEnabled=true`);
         const data = await response.json() as IMWApiResponse;
         const resources = (data.slots
-            .map(x => x.date_slots.map(ds => ({date: new Date(ds.date), slots: ds.slots} as IMwApiResponseDateSlot)))
+            .map(x => x.date_slots.map(ds => ({ date: new Date(ds.date), slots: ds.slots } as IMwApiResponseDateSlot)))
             .flat(Infinity) as IMwApiResponseDateSlot[])
             .filter(x => x.slots.length > 0)
-            .sort((a,b) => a.date.getTime() - b.date.getTime())
-            .map(({date, slots}) => slots.map(x => {x.date = date.toLocaleDateString("uk-UA", options); return x}))
+            .sort((a, b) => a.date.getTime() - b.date.getTime())
+            .map(({ date, slots }) => slots.map(x => { x.date = date.toLocaleDateString("uk-UA", options); return x }))
             .flat()
             .filter(x => x.gt.service.name.indexOf(serviceName) != -1);
 

@@ -2,7 +2,7 @@ import MessageContext from "../../entities/context/messageContext";
 import Command from "../../entities/actions/command";
 import { ActionStateBase, IActionState } from "../../entities/states/actionStateBase";
 
-export default class CommandBuilder<TActionState extends IActionState> {
+export class CommandBuilderWithState<TActionState extends IActionState> {
     name: string;
     trigger: string | RegExp | Array<string> | Array<RegExp> = [];
     
@@ -12,9 +12,9 @@ export default class CommandBuilder<TActionState extends IActionState> {
     allowedUsers: number[] = [];
     stateConstructor: () => IActionState = () => new ActionStateBase();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    handler: (ctx: MessageContext, state: TActionState) => Promise<void> = async (ctx, state) => {};
+    handler: (ctx: MessageContext<TActionState>, state: TActionState) => Promise<void> = async (ctx, state) => {};
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    condition: (ctx: MessageContext) => Promise<boolean> = async (ctx) => true;
+    condition: (ctx: MessageContext<TActionState>) => Promise<boolean> = async (ctx) => true;
 
     constructor(name: string) {
         this.name = name;
@@ -42,13 +42,13 @@ export default class CommandBuilder<TActionState extends IActionState> {
         return this;
     }
 
-    do(handler: (ctx: MessageContext, state: TActionState) => Promise<void>) {
+    do(handler: (ctx: MessageContext<TActionState>, state: TActionState) => Promise<void>) {
         this.handler = handler;
 
         return this;
     }
 
-    when(condition: (arg0: MessageContext) => Promise<boolean>) {
+    when(condition: (arg0: MessageContext<TActionState>) => Promise<boolean>) {
         this.condition = condition;
 
         return this;
@@ -84,3 +84,5 @@ export default class CommandBuilder<TActionState extends IActionState> {
             this.stateConstructor);
     }
 };
+
+export class CommandBuilder extends CommandBuilderWithState<ActionStateBase> {};

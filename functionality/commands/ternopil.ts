@@ -1,4 +1,4 @@
-import CommandBuilder from '../../helpers/builders/commandBuilder';
+import { CommandBuilder } from '../../helpers/builders/commandBuilder';
 import { ChatId } from '../../helpers/chatIds';
 import randomInteger from '../../helpers/randomInt';
 import { SpecificUsers } from '../../helpers/userIds';

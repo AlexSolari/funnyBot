@@ -7,13 +7,13 @@ import storage from '../../services/storage';
 import { resolve } from "path";
 import IReplyMessage from '../replyMessages/replyMessage';
 
-export default class MessageContext extends ChatContext {
+export default class MessageContext<TActionState extends IActionState> extends ChatContext {
     messageId: number;
     messageText: string;
     matchResult: RegExpMatchArray | null = null;
     fromUserId: number | undefined;
     startCooldown: boolean = true;
-    updateActions: Array<(state: IActionState) => void> = [];
+    updateActions: Array<(state: TActionState) => void> = [];
     fromUserName: string;
 
     constructor(enqueueMethod: (message: IReplyMessage) => void, chatId: number, messageId: number, messageText: string, fromUserId: number | undefined, traceId: number | string, fromUserName: string) {
@@ -25,12 +25,12 @@ export default class MessageContext extends ChatContext {
         this.fromUserName = fromUserName;
     }
     
-    async loadStateOf<TActionState extends IActionState>(commandName: string): Promise<TActionState>{
-        return ((await storage.load(`command:${commandName.replace('.', '-')}`))[this.chatId] as TActionState) ?? new ActionStateBase();
+    async loadStateOf<TAnotherActionState extends IActionState>(commandName: string): Promise<TAnotherActionState>{
+        return ((await storage.load(`command:${commandName.replace('.', '-')}`))[this.chatId] as TAnotherActionState) ?? new ActionStateBase();
     }
 
-    updateState<TActionState extends IActionState>(stateUpdateAction: (state: TActionState) => void){
-        this.updateActions.push(stateUpdateAction as (state: IActionState) => void);
+    updateState(stateUpdateAction: (state: TActionState) => void){
+        this.updateActions.push(stateUpdateAction as (state: TActionState) => void);
     }
 
     replyWithText(text: string) {

@@ -1,5 +1,5 @@
 import { IScryfallCardInfo } from '../../entities/externalApiDefinitions/scryfall';
-import CommandBuilder from '../../helpers/builders/commandBuilder';
+import { CommandBuilder } from '../../helpers/builders/commandBuilder';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 
 function getCardText(card: IScryfallCardInfo, fallback: { normal: string }) {

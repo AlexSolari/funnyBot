@@ -1,5 +1,5 @@
 import { IScryfallCardInfo } from '../../entities/externalApiDefinitions/scryfall';
-import CommandBuilder from '../../helpers/builders/commandBuilder';
+import { CommandBuilder } from '../../helpers/builders/commandBuilder';
 
 function getCardText(card: IScryfallCardInfo, fallback: { normal: string }) {
     const images = card.image_uris ?? fallback;

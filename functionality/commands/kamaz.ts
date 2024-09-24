@@ -1,4 +1,4 @@
-import CommandBuilder from '../../helpers/builders/commandBuilder';
+import { CommandBuilder } from '../../helpers/builders/commandBuilder';
 import { ChatId } from '../../helpers/chatIds';
 
 export default new CommandBuilder("Reaction.Kamaz")

@@ -1,8 +1,4 @@
-interface ITaskRecord{
-    name: string,
-    taskId: NodeJS.Timeout,
-    interval: number
-}
+import { ITaskRecord } from "../entities/taskRecord";
 
 class TaskScheduler {
     activeTasks: ITaskRecord[] = [];
