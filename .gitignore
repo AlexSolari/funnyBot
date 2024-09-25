@@ -7,3 +7,5 @@ token.lviv
 storage/
 start.ps1
 build/
+helpers/chatIds.ts
+helpers/userIds.ts
