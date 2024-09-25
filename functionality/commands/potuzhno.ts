@@ -1,10 +1,9 @@
 import PotuzhnoState from '../../entities/states/potuzhnoState';
-import { CommandBuilderWithState } from '../../helpers/builders/commandBuilder';
+import { CommandActionBuilderWithState } from '../../helpers/builders/commandActionBuilder';
 import { ChatId } from '../../helpers/chatIds';
 import randomInteger from '../../helpers/randomInt';
 
-export default new CommandBuilderWithState<PotuzhnoState>("Reaction.Potuzhno")
-    .withState(() => new PotuzhnoState())
+export default new CommandActionBuilderWithState<PotuzhnoState>("Reaction.Potuzhno", () => new PotuzhnoState())
     .on(/.+/i)
     .when(async (ctx) => randomInteger(0, 99) == 0 && ctx.messageText != 'топ потужності')
     .do(async (ctx) => {

@@ -1,8 +1,8 @@
 import MessageContext from "../../entities/context/messageContext";
-import Command from "../../entities/actions/command";
+import CommandAction from "../../entities/actions/commandAction";
 import { ActionStateBase, IActionState } from "../../entities/states/actionStateBase";
 
-export class CommandBuilderWithState<TActionState extends IActionState> {
+export class CommandActionBuilderWithState<TActionState extends IActionState> {
     name: string;
     trigger: string | RegExp | Array<string> | Array<RegExp> = [];
     
@@ -10,20 +10,15 @@ export class CommandBuilderWithState<TActionState extends IActionState> {
     cooldownSeconds = 0;
     blacklist: number[] = [];
     allowedUsers: number[] = [];
-    stateConstructor: () => IActionState = () => new ActionStateBase();
+    stateConstructor: () => TActionState;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     handler: (ctx: MessageContext<TActionState>, state: TActionState) => Promise<void> = async (ctx, state) => {};
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     condition: (ctx: MessageContext<TActionState>) => Promise<boolean> = async (ctx) => true;
 
-    constructor(name: string) {
+    constructor(name: string, stateConstructor: () => TActionState) {
         this.name = name;
-    }
-
-    withState(stateConstructor: () => TActionState){
         this.stateConstructor = stateConstructor;
-
-        return this;
     }
 
     on(trigger: string | RegExp | Array<string> | Array<RegExp>) {
@@ -73,7 +68,7 @@ export class CommandBuilderWithState<TActionState extends IActionState> {
     }
 
     build() {
-        return new Command(this.trigger,
+        return new CommandAction(this.trigger,
             this.handler,
             this.name,
             this.active,
@@ -85,4 +80,8 @@ export class CommandBuilderWithState<TActionState extends IActionState> {
     }
 };
 
-export class CommandBuilder extends CommandBuilderWithState<ActionStateBase> {};
+export class CommandActionBuilder extends CommandActionBuilderWithState<ActionStateBase> {
+    constructor(name: string){
+        super(name, () => new ActionStateBase());
+    }
+};

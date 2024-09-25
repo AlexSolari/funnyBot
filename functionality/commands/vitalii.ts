@@ -1,8 +1,8 @@
-import { CommandBuilder } from '../../helpers/builders/commandBuilder';
+import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import { ChatId } from '../../helpers/chatIds';
 import { SpecificUsers } from '../../helpers/userIds';
 
-export default new CommandBuilder("Reaction.Vitalii")
+export default new CommandActionBuilder("Reaction.Vitalii")
     .on(/маліфо/i)
     .from(SpecificUsers.vitalii)
     .when(async (ctx) => ctx.chatId == ChatId.LvivChat)

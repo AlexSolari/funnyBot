@@ -1,7 +1,7 @@
-import { CommandBuilder } from '../../helpers/builders/commandBuilder';
+import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import { ChatId } from '../../helpers/chatIds';
 
-export default new CommandBuilder("Reaction.Kamaz")
+export default new CommandActionBuilder("Reaction.Kamaz")
     .on(/камаз/i)
     .do(async (ctx) => {
         ctx.replyWithImage("kamazGun");

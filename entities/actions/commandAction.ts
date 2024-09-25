@@ -6,19 +6,29 @@ import MessageContext from '../context/messageContext';
 import { IActionState } from '../states/actionStateBase';
 import IActionWithState from './actionWithState';
 
-export default class Command<TActionState extends IActionState> implements IActionWithState {
+export default class CommandAction<TActionState extends IActionState> implements IActionWithState {
     triggers: (string | RegExp)[];
-    handler: (ctx: MessageContext, state: TActionState) => Promise<void>;
+    handler: (ctx: MessageContext<TActionState>, state: TActionState) => Promise<void>;
     name: string;
     cooldown: number;
     active: boolean;
     chatsBlacklist: number[];
     allowedUsers: number[];
-    condition: (ctx: MessageContext) => Promise<boolean>;
-    stateConstructor: () => IActionState;
+    condition: (ctx: MessageContext<TActionState>) => Promise<boolean>;
+    stateConstructor: () => TActionState;
     key: string;
 
-    constructor(trigger: string | RegExp | Array<string> | Array<RegExp>, handler: (ctx: MessageContext, state: TActionState) => Promise<void>, name: string, active: boolean, cooldown: number, chatsBlacklist: Array<number>, allowedUsers: Array<number>, condition: (arg0: MessageContext) => Promise<boolean>, stateConstructor: () => IActionState) {
+    constructor(
+        trigger: string | RegExp | Array<string> | Array<RegExp>, 
+        handler: (ctx: MessageContext<TActionState>, state: TActionState) => Promise<void>, 
+        name: string, 
+        active: boolean, 
+        cooldown: number, 
+        chatsBlacklist: Array<number>, 
+        allowedUsers: Array<number>, 
+        condition: (ctx: MessageContext<TActionState>) => Promise<boolean>, 
+        stateConstructor: () => TActionState) 
+    {
         this.triggers = Array.isArray(trigger) ? trigger : [trigger];
         this.handler = handler;
         this.name = name;
@@ -32,7 +42,7 @@ export default class Command<TActionState extends IActionState> implements IActi
         this.key = `command:${this.name.replace('.', '-')}`;
     }
 
-    async exec(ctx: MessageContext) {
+    async exec(ctx: MessageContext<TActionState>) {
         if (!this.active || this.chatsBlacklist.indexOf(ctx.chatId) != -1)
             return;
 
@@ -41,7 +51,7 @@ export default class Command<TActionState extends IActionState> implements IActi
         if (!isConditionMet)
             return;
 
-        const state = await storage.getActionState(this, ctx.chatId);
+        const state = await storage.getActionState<TActionState>(this, ctx.chatId);
 
         const { shouldTrigger, matchResult, skipCooldown } =
             this.triggers
@@ -66,7 +76,7 @@ export default class Command<TActionState extends IActionState> implements IActi
         logger.logWithTraceId(ctx.traceId, ` - Executing [${this.name}] in ${ctx.chatId}`);
         ctx.matchResult = matchResult;
 
-        await this.handler(ctx, state as TActionState);
+        await this.handler(ctx, state);
 
         if (skipCooldown) {
             ctx.startCooldown = false;
@@ -84,7 +94,7 @@ export default class Command<TActionState extends IActionState> implements IActi
             new TransactionResult(state, ctx.startCooldown && shouldTrigger));
     }
 
-    #checkTrigger(ctx: MessageContext, trigger: RegExp | string, state: IActionState): { shouldTrigger: boolean; matchResult: RegExpExecArray | null; skipCooldown: boolean; } {
+    #checkTrigger(ctx: MessageContext<TActionState>, trigger: RegExp | string, state: IActionState): { shouldTrigger: boolean; matchResult: RegExpExecArray | null; skipCooldown: boolean; } {
         let shouldTrigger = false;
         let matchResult = null;
 

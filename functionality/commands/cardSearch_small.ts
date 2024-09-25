@@ -1,5 +1,5 @@
 import { IScryfallCardInfo } from '../../entities/externalApiDefinitions/scryfall';
-import { CommandBuilder } from '../../helpers/builders/commandBuilder';
+import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 
 function getCardText(card: IScryfallCardInfo, fallback: { normal: string }) {
     const images = card.image_uris ?? fallback;
@@ -10,7 +10,7 @@ function getCardText(card: IScryfallCardInfo, fallback: { normal: string }) {
     return card.oracle_text;
 }
 
-export default new CommandBuilder("Reaction.CardSearch_Small")
+export default new CommandActionBuilder("Reaction.CardSearch_Small")
     .on(/\[(.+)\]/i)
     .when(async (ctx) => ctx.messageText.indexOf('[[') == -1)
     .do(async (ctx) => {

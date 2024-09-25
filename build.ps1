@@ -23,9 +23,9 @@ function Generate{
 
 Set-Location functionality
 $c = Generate -Folder 'commands';
-$t = Generate -Folder 'triggers';
+$t = Generate -Folder 'scheduled';
 Out-File -Encoding utf8 -FilePath .\gen_commands.ts -InputObject $c
-Out-File -Encoding utf8 -FilePath .\gen_triggers.ts -InputObject $t
+Out-File -Encoding utf8 -FilePath .\gen_scheduled.ts -InputObject $t
 Set-Location ..
 Remove-Item -r -fo build
 mkdir build

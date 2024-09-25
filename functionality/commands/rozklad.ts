@@ -1,8 +1,8 @@
-import { CommandBuilder } from '../../helpers/builders/commandBuilder';
+import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import { load } from 'cheerio';
 import { ChatId } from '../../helpers/chatIds';
 
-export default new CommandBuilder("Reaction.Schedule")
+export default new CommandActionBuilder("Reaction.Schedule")
     .on(["розклад"])
     .when(async (ctx) => ctx.chatId == ChatId.LvivChat)
     .do(async (ctx) => {

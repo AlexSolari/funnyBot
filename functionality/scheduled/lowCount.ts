@@ -1,10 +1,10 @@
-import TriggerBuilder from '../../helpers/builders/triggerBuilder';
+import ScheduledActionBuilder from '../../helpers/builders/scheduledActionBuilder';
 import getCurrentWeek from '../../helpers/getWeek';
 import moment from "moment";
 import { IMWApiResponse, IMWEventDetail } from '../../entities/externalApiDefinitions/mw';
 import { ChatId } from '../../helpers/chatIds';
 
-export default new TriggerBuilder("Trigger.LowCount")
+export default new ScheduledActionBuilder("Scheduled.LowCount")
     .at(8) //08:00 Kiev time
     .allowIn(ChatId.PioneerChat)
     .allowIn(ChatId.ModernChat)

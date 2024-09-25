@@ -1,4 +1,4 @@
-import TriggerBuilder from '../../helpers/builders/triggerBuilder';
+import ScheduledActionBuilder from '../../helpers/builders/scheduledActionBuilder';
 import { load } from 'cheerio';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import moment from 'moment';
@@ -27,16 +27,15 @@ enum Format {
     Pauper = 'pauper'
 }
 
-async function sendRecentTournaments(format: Format, ctx: ChatContext, getCached: (key: string) => Promise<unknown>) {
-    const pioneerTournaments = await getCached(format) as string;
+async function sendRecentTournaments(format: Format, ctx: ChatContext, getCached: <TResult>(key: string) => Promise<TResult>) {
+    const pioneerTournaments = await getCached<string>(format);
 
     if (pioneerTournaments.length > 0) {
         ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${pioneerTournaments}`);
     }
 }
 
-
-export default new TriggerBuilder("Trigger.Meta")
+export default new ScheduledActionBuilder("Scheduled.Meta")
     .at(18) //18:00 Kiev time
     .allowIn(ChatId.ModernChat)
     .allowIn(ChatId.PioneerChat)
@@ -62,9 +61,9 @@ export default new TriggerBuilder("Trigger.Meta")
                 await sendRecentTournaments(Format.Pauper, ctx, getCached);
                 break;
             case ChatId.LvivChat: {
-                const pioneerTournaments = await getCached(Format.Pioneer) as string;
-                const modernTournaments = await getCached(Format.Modern) as string;
-                const standardTournaments = await getCached(Format.Standard) as string;
+                const pioneerTournaments = await getCached<string>(Format.Pioneer)
+                const modernTournaments = await getCached<string>(Format.Modern);
+                const standardTournaments = await getCached<string>(Format.Standard);
 
                 let pioneerString = '';
                 let modernString = '';

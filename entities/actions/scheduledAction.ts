@@ -8,7 +8,7 @@ import ChatContext from '../context/chatContext';
 import IActionWithState from './actionWithState';
 import { ActionStateBase, IActionState } from '../states/actionStateBase';
 
-export default class Trigger implements IActionWithState {
+export default class ScheduledAction implements IActionWithState {
     static semaphore = new Semaphore(1);
     name: string;
     timeinHours: number;
@@ -19,16 +19,21 @@ export default class Trigger implements IActionWithState {
     cachedState = new Map<string, unknown>();
     stateConstructor = () => new ActionStateBase();
     cachedStateFactories: Map<string, { itemFactory: () => Promise<unknown>; invalidationTimeout: number; }>;
-    handler: (ctx: ChatContext, getCached: ((key: string) => Promise<unknown>) | void) => Promise<void>;
+    handler: (ctx: ChatContext, getCached: (<TResult>(key: string) => Promise<TResult>) | void) => Promise<void>;
 
-    constructor(name: string, handler: (ctx: ChatContext, getCached: (key: string) => Promise<unknown>) => Promise<void>, timeinHours: number, active: boolean, whitelist: number[], cachedStateFactories: Map<string, { itemFactory: () => Promise<unknown>; invalidationTimeout: number; }>) {
+    constructor(
+        name: string, 
+        handler: (ctx: ChatContext, getCached: <TResult>(key: string) => Promise<TResult>) => Promise<void>,
+        timeinHours: number, active: boolean, whitelist: number[],
+        cachedStateFactories: Map<string, { itemFactory: () => Promise<unknown>;invalidationTimeout: number; }>) 
+    {
         this.name = name;
         this.handler = handler;
         this.timeinHours = timeinHours;
         this.active = active;
         this.chatsWhitelist = whitelist;
         this.cachedStateFactories = cachedStateFactories;
-        this.key = `trigger:${this.name.replace('.', '-')}`;
+        this.key = `scheduled:${this.name.replace('.', '-')}`;
     }
 
     async exec(ctx: ChatContext) {
@@ -41,7 +46,7 @@ export default class Trigger implements IActionWithState {
         if (isAllowedToTrigger) {
             logger.logWithTraceId(ctx.traceId, ` - Executing [${this.name}] in ${ctx.chatId}`);
 
-            await this.handler(ctx, (key) => this.#getCachedValue(key));
+            await this.handler(ctx, <TResult>(key: string) => this.#getCachedValue(key) as TResult);
 
             state.lastExecutedDate = moment().valueOf();
 
@@ -50,7 +55,7 @@ export default class Trigger implements IActionWithState {
     }
 
     async #getCachedValue(key: string): Promise<unknown> {
-        await Trigger.semaphore.acquire();
+        await ScheduledAction.semaphore.acquire();
 
         try {
             if (this.cachedState.has(key)) {
@@ -74,7 +79,7 @@ export default class Trigger implements IActionWithState {
 
             return null;
         } finally {
-            Trigger.semaphore.release();
+            ScheduledAction.semaphore.release();
         }
     }
 

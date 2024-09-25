@@ -1,8 +1,8 @@
-import { CommandBuilder } from '../../helpers/builders/commandBuilder';
+import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import { ChatId } from '../../helpers/chatIds';
 import randomInteger from '../../helpers/randomInt';
 
-export default new CommandBuilder("Reaction.Fang")
+export default new CommandActionBuilder("Reaction.Fang")
     .on(/(фанг|мотом[иы]ш)/i)
     .do(async (ctx) => {
         const i = randomInteger(0, 2);

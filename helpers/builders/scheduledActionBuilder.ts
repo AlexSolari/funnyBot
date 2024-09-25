@@ -1,14 +1,14 @@
-import Trigger from "../../entities/actions/trigger";
+import ScheduledAction from "../../entities/actions/scheduledAction";
 import ChatContext from "../../entities/context/chatContext";
 
-export default class TriggerBuilder {
+export default class ScheduledActionBuilder {
     active = true;
     time = 0;
     cachedStateFactories = new Map<string, {itemFactory: () => Promise<unknown>, invalidationTimeout: number}>();
     whitelist: number[] = [];
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    handler: (ctx: ChatContext, getCached: (key: string) => Promise<unknown>) => Promise<void> = async (ctx, getCached) => {};
+    handler: (ctx: ChatContext, getCached: <TResult>(key: string) => Promise<TResult>) => Promise<void> = async (ctx, getCached) => {};
 
     name: string;
 
@@ -28,7 +28,7 @@ export default class TriggerBuilder {
         return this;
     }
 
-    do(handler: (ctx: ChatContext, getCached: (key: string) => Promise<unknown>) => Promise<void>) {
+    do(handler: (ctx: ChatContext, getCached: <TResult>(key: string) => Promise<TResult>) => Promise<void>) {
         this.handler = handler;
 
         return this;
@@ -47,6 +47,6 @@ export default class TriggerBuilder {
     }
 
     build() {
-        return new Trigger(this.name, this.handler, this.time, this.active, this.whitelist, this.cachedStateFactories);
+        return new ScheduledAction(this.name, this.handler, this.time, this.active, this.whitelist, this.cachedStateFactories);
     }
 };

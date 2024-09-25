@@ -1,7 +1,7 @@
-import { CommandBuilder } from '../../helpers/builders/commandBuilder';
+import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import { ChatId } from '../../helpers/chatIds';
 
-export default new CommandBuilder("Reaction.Rakdos")
+export default new CommandActionBuilder("Reaction.Rakdos")
     .on(/(ракдос|рб|бр)(?![a-zA-Z0-9а-яА-Я])/i)
     .do(async (ctx) => {
         ctx.replyWithImage("rakdos");

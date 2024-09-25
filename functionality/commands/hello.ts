@@ -1,7 +1,7 @@
-import { CommandBuilder } from '../../helpers/builders/commandBuilder';
+import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import { ChatId } from '../../helpers/chatIds';
 
-export default new CommandBuilder("Reaction.Hello")
+export default new CommandActionBuilder("Reaction.Hello")
     .on("ні")
     .do(async (ctx) => {
         ctx.replyWithText("hello");

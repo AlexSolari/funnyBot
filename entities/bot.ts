@@ -4,22 +4,22 @@ import IncomingMessage from "./incomingMessage";
 import taskScheduler from '../services/taskScheduler';
 import logger from "../services/logger";
 import { IActionState } from "./states/actionStateBase";
-import Command from "./actions/command";
-import Trigger from "./actions/trigger";
+import CommandAction from "./actions/commandAction";
+import ScheduledAction from "./actions/scheduledAction";
 import functionality from "../functionality/functionality";
 
 export default class Bot {
     name : string;
     api: BotApiService | null = null;
-    commands: Command<IActionState>[];
-    triggers: Trigger[];
+    commands: CommandAction<IActionState>[];
+    scheduled: ScheduledAction[];
     broadcastPool: number[];
     messageQueue: IncomingMessage[];
 
     constructor(name: string, broadcastPool: number[]) {
         this.name = name;
         this.commands = functionality.commands;
-        this.triggers = functionality.triggers;
+        this.scheduled = functionality.scheduled;
         this.broadcastPool = broadcastPool;
         this.messageQueue = [];
     }
@@ -48,8 +48,8 @@ export default class Bot {
             }
         }, 333, false);
         
-        taskScheduler.createTask("TriggerProcessing", async () => {
-            await this.#runTriggers();
+        taskScheduler.createTask("ScheduledProcessing", async () => {
+            await this.#runScheduled();
         }, 1000 * 60 * 30, true); //30 minutes
 
         process.once('SIGINT', () => this.#stop(bot, 'SIGINT'));
@@ -62,9 +62,9 @@ export default class Bot {
         setTimeout(() => process.exit(0), 1000);
     }
 
-    async #runTriggers() {
+    async #runScheduled() {
         for (const chatId of this.broadcastPool) {
-            for (const trig of this.triggers) {
+            for (const trig of this.scheduled) {
                 const ctx = this.api!.createContextForChat(chatId, trig.name);
 
                 try {

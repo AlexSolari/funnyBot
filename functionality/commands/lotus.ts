@@ -1,8 +1,8 @@
-import { CommandBuilder } from '../../helpers/builders/commandBuilder';
+import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import { ChatId } from '../../helpers/chatIds';
 import randomInteger from '../../helpers/randomInt';
 
-export default new CommandBuilder("Reaction.Lotus")
+export default new CommandActionBuilder("Reaction.Lotus")
     .on(/лотус/i)
     .do(async (ctx) => {
         let imageName = randomInteger(0, 1)

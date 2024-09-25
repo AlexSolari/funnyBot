@@ -1,9 +1,9 @@
 import PotuzhnoState from '../../entities/states/potuzhnoState';
-import { CommandBuilder } from '../../helpers/builders/commandBuilder';
+import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import { ChatId } from '../../helpers/chatIds';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 
-export default new CommandBuilder("Reaction.PotuzhnoStats")
+export default new CommandActionBuilder("Reaction.PotuzhnoStats")
     .on('топ потужності')
     .do(async (ctx) => {
         const scoreBoard = (await ctx.loadStateOf<PotuzhnoState>('Reaction.Potuzhno')).scoreBoard;

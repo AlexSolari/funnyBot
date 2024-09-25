@@ -1,15 +1,15 @@
-import Command from '../entities/actions/command';
-import Trigger from '../entities/actions/trigger';
+import CommandAction from '../entities/actions/commandAction';
+import ScheduledAction from '../entities/actions/scheduledAction';
 import { IActionState } from '../entities/states/actionStateBase';
-import triggers from './gen_triggers';
+import scheduled from './gen_scheduled';
 import commands from './gen_commands';
 
 interface IFunctionalityData{
-    commands: Command<IActionState>[];
-    triggers: Trigger[];
+    commands: CommandAction<IActionState>[];
+    scheduled: ScheduledAction[];
 }
 
 export default {
     commands,
-    triggers
+    scheduled
 } as IFunctionalityData;

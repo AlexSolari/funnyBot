@@ -39,7 +39,7 @@ export default class BotApiService {
         switch (message.constructor) {
             case TextMessage:
                 await this.bot.telegram.sendMessage(message.chatId,
-                    message.content as string,
+                    message.content,
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     { reply_to_message_id: message.replyId, parse_mode: "MarkdownV2" } as any);
                 break;
@@ -82,10 +82,10 @@ export default class BotApiService {
         );
     }
 
-    createContextForChat(chatId: number, triggerName: string) {
+    createContextForChat(chatId: number, scheduledName: string) {
         return new ChatContext(
             (response) => this.#enqueueResponse(response),
             chatId,
-            `Trigger:${triggerName}:${chatId}`);
+            `Scheduled:${scheduledName}:${chatId}`);
     }
 };

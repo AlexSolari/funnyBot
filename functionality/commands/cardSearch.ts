@@ -1,5 +1,5 @@
 import { IScryfallCardInfo } from '../../entities/externalApiDefinitions/scryfall';
-import { CommandBuilder } from '../../helpers/builders/commandBuilder';
+import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 
 function getCardText(card: IScryfallCardInfo, fallback: { normal: string }) {
@@ -11,7 +11,7 @@ function getCardText(card: IScryfallCardInfo, fallback: { normal: string }) {
         + card.oracle_text;
 }
 
-export default new CommandBuilder("Reaction.CardSearch")
+export default new CommandActionBuilder("Reaction.CardSearch")
     .on(/\[\[(.+)\]\]/i)
     .do(async (ctx) => {
         const response = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${ctx.matchResult![1]}`)

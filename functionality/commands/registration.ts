@@ -1,10 +1,10 @@
-import { CommandBuilder } from '../../helpers/builders/commandBuilder';
+import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import getCurrentWeek from '../../helpers/getWeek';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { IMWApiResponse, IMwApiResponseDateSlot } from '../../entities/externalApiDefinitions/mw';
 import { ChatId } from '../../helpers/chatIds';
 
-export default new CommandBuilder("Reaction.Registration")
+export default new CommandActionBuilder("Reaction.Registration")
     .on(["рега", "Рега"])
     .do(async (ctx) => {
         let serviceName = '';
