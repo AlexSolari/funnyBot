@@ -6,7 +6,7 @@ import VideoMessage from "../entities/replyMessages/videoMessage";
 import taskScheduler from './taskScheduler';
 import logger from "./logger";
 import { Telegraf } from "telegraf";
-import IReplyMessage from "../entities/replyMessages/replyMessage";
+import IReplyMessage from "../types/replyMessage";
 import IncomingMessage from "../entities/incomingMessage";
 
 export default class BotApiService {
@@ -41,21 +41,24 @@ export default class BotApiService {
                 await this.bot.telegram.sendMessage(message.chatId,
                     message.content,
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    { reply_to_message_id: message.replyId, parse_mode: "MarkdownV2" } as any);
+                    { reply_to_message_id: message.replyId, parse_mode: "MarkdownV2" } as any
+                );
                 break;
             case ImageMessage:
                 await this.bot.telegram.sendPhoto(
                     message.chatId,
                     message.content,
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    message.replyId ? { reply_to_message_id: message.replyId } as any : undefined);
+                    message.replyId ? { reply_to_message_id: message.replyId } as any : undefined
+                );
                 break;
             case VideoMessage:
                 await this.bot.telegram.sendVideo(
                     message.chatId,
                     message.content,
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    message.replyId ? { reply_to_message_id: message.replyId } as any : undefined);
+                    message.replyId ? { reply_to_message_id: message.replyId } as any : undefined
+                );
                 break;
             default:
                 logger.errorWithTraceId(message.traceId, `Unknown message type: ${message.constructor}`);

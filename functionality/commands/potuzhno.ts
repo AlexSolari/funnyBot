@@ -1,7 +1,8 @@
 import PotuzhnoState from '../../entities/states/potuzhnoState';
 import { CommandActionBuilderWithState } from '../../helpers/builders/commandActionBuilder';
-import { ChatId } from '../../helpers/chatIds';
+import { ChatId } from '../../types/chatIds';
 import randomInteger from '../../helpers/randomInt';
+import { hoursToSeconds } from '../../helpers/timeConvertions';
 
 export default new CommandActionBuilderWithState<PotuzhnoState>("Reaction.Potuzhno", () => new PotuzhnoState())
     .on(/.+/i)
@@ -14,5 +15,5 @@ export default new CommandActionBuilderWithState<PotuzhnoState>("Reaction.Potuzh
         ctx.replyWithText("Потужно 💪");
     })
     .ignoreChat(ChatId.PauperChat)
-    .cooldown(14400)
+    .cooldown(hoursToSeconds(4))
     .build();

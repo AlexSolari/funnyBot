@@ -1,14 +1,16 @@
 import ScheduledAction from "../../entities/actions/scheduledAction";
-import ChatContext from "../../entities/context/chatContext";
+import CachedStateFactory from "../../entities/cachedStateFactory";
+import { ScheduledHandler } from "../../types/handlers";
+import { Hours } from "../../types/timeValues";
 
 export default class ScheduledActionBuilder {
     active = true;
-    time = 0;
-    cachedStateFactories = new Map<string, {itemFactory: () => Promise<unknown>, invalidationTimeout: number}>();
+    time: Hours = 0;
+    cachedStateFactories = new Map<string, CachedStateFactory>();
     whitelist: number[] = [];
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    handler: (ctx: ChatContext, getCached: <TResult>(key: string) => Promise<TResult>) => Promise<void> = async (ctx, getCached) => {};
+    handler: ScheduledHandler = async (ctx, getCached) => {};
 
     name: string;
 
@@ -22,20 +24,20 @@ export default class ScheduledActionBuilder {
         return this;
     }
 
-    at(time: number) {
+    at(time: Hours) {
         this.time = time;
 
         return this;
     }
 
-    do(handler: (ctx: ChatContext, getCached: <TResult>(key: string) => Promise<TResult>) => Promise<void>) {
+    do(handler: ScheduledHandler) {
         this.handler = handler;
 
         return this;
     }
 
-    withSharedCache(key: string, itemFactory: () => Promise<unknown>, invalidationTimeout = 20 * 60 * 60 * 1000 ) { //20 hours
-        this.cachedStateFactories.set(key, {itemFactory, invalidationTimeout});
+    withSharedCache(key: string, itemFactory: () => Promise<unknown>, invalidationTimeoutInHours: Hours = 20) {
+        this.cachedStateFactories.set(key, new CachedStateFactory(itemFactory, invalidationTimeoutInHours));
 
         return this;
     }

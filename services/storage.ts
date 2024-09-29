@@ -1,8 +1,10 @@
 import { existsSync } from "fs";
 import { dirname } from 'path';
 import TransactionResult from "../entities/transactionResult";
-import { ActionStateBase, IActionState } from "../entities/states/actionStateBase";
 import { mkdir, readFile, writeFile } from "fs/promises";
+import ActionStateBase from "../entities/states/actionStateBase";
+import IActionState from "../types/actionState";
+import IActionWithState from "../types/actionWithState";
 
 class Storage {
     cache: Map<string, Record<number, ActionStateBase>>;
@@ -48,18 +50,18 @@ class Storage {
         return 'storage/' + key.replaceAll(':', '/') + ".json";
     }
 
-    async getActionState<TActionState extends IActionState>(entity: { key: string; stateConstructor: () => TActionState; }, chatId: number): Promise<TActionState> {
-        const entityData = await this.load(entity.key);
+    async getActionState<TActionState extends IActionState>(entity: IActionWithState, chatId: number): Promise<TActionState> {
+        const data = await this.load(entity.key);
 
-        return entityData[chatId] as TActionState ?? entity.stateConstructor();
+        return data[chatId] as TActionState ?? entity.stateConstructor();
     }
 
-    async commitTransactionForEntity(entity: { key: string; }, chatId: number, transactionResult: TransactionResult): Promise<void> {
-        const entityData = await this.load(entity.key);
+    async commitTransactionForAction(action: IActionWithState, chatId: number, transactionResult: TransactionResult): Promise<void> {
+        const data = await this.load(action.key);
 
         if (transactionResult.shouldUpdate) {
-            entityData[chatId] = transactionResult.data;
-            await this.#save(entityData, entity.key);
+            data[chatId] = transactionResult.data;
+            await this.#save(data, action.key);
         }
     }
 }

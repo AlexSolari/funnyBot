@@ -3,7 +3,8 @@ import { load } from 'cheerio';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import moment from 'moment';
 import ChatContext from '../../entities/context/chatContext';
-import { ChatId } from '../../helpers/chatIds';
+import { ChatId } from '../../types/chatIds';
+import { CachedValueAccessor } from '../../types/cachedValueAccessor';
 
 async function loadTournaments(formatName: string): Promise<string> {
     const today = moment().format('MM/DD/YYYY');
@@ -27,7 +28,7 @@ enum Format {
     Pauper = 'pauper'
 }
 
-async function sendRecentTournaments(format: Format, ctx: ChatContext, getCached: <TResult>(key: string) => Promise<TResult>) {
+async function sendRecentTournaments(format: Format, ctx: ChatContext, getCached: CachedValueAccessor) {
     const pioneerTournaments = await getCached<string>(format);
 
     if (pioneerTournaments.length > 0) {

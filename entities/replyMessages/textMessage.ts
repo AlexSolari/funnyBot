@@ -1,4 +1,4 @@
-import IReplyMessage from "./replyMessage";
+import IReplyMessage from "../../types/replyMessage";
 
 export default class TextMessage implements IReplyMessage {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

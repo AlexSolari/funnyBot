@@ -1,19 +1,21 @@
-import { ITaskRecord } from "../entities/taskRecord";
+import TaskRecord from "../entities/taskRecord";
+import { secondsToMilliseconds } from "../helpers/timeConvertions";
+import { Milliseconds } from "../types/timeValues";
 
 class TaskScheduler {
-    activeTasks: ITaskRecord[] = [];
+    activeTasks: TaskRecord[] = [];
 
-    createTask(name: string, action: () => void, interval: number, executeRightAway: boolean) {
+    createTask(name: string, action: () => void, interval: Milliseconds, executeRightAway: boolean) {
         executeRightAway = executeRightAway ?? false;
         const taskId = setInterval(action, interval);
-        const task = {
+        const task = new TaskRecord(
             name,
             taskId,
             interval
-        } as ITaskRecord;
+        );
 
         if (executeRightAway) {
-            setTimeout(action, 1000);
+            setTimeout(action, secondsToMilliseconds(1));
         }
 
         console.log(`Created task [${taskId}]${name}, that will run every ${interval}ms.`)
@@ -21,7 +23,7 @@ class TaskScheduler {
         this.activeTasks.push(task);
     }
     
-    createOnetimeTask(name: string, action: () => void, delay: number) {
+    createOnetimeTask(name: string, action: () => void, delay: Milliseconds) {
         const actionWrapper = () => {
             console.log(`Executing delayed oneshot [${taskId}]${name}`);
             action();

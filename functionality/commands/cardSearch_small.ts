@@ -1,4 +1,4 @@
-import { IScryfallCardInfo } from '../../entities/externalApiDefinitions/scryfall';
+import { IScryfallCardInfo } from '../../types/externalApiDefinitions/scryfall';
 import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 
 function getCardText(card: IScryfallCardInfo, fallback: { normal: string }) {

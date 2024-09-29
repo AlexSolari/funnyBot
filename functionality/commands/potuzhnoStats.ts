@@ -1,18 +1,18 @@
 import PotuzhnoState from '../../entities/states/potuzhnoState';
 import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
-import { ChatId } from '../../helpers/chatIds';
+import { ChatId } from '../../types/chatIds';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 
 export default new CommandActionBuilder("Reaction.PotuzhnoStats")
     .on('топ потужності')
     .do(async (ctx) => {
         const scoreBoard = (await ctx.loadStateOf<PotuzhnoState>('Reaction.Potuzhno')).scoreBoard;
-        const allEnties = [];
+        const allEntries = [];
         for (const [key, value] of Object.entries(scoreBoard)) {
-            allEnties.push({ key, value });
+            allEntries.push({ key, value });
         }
 
-        const topTen = allEnties
+        const topTen = allEntries
             .sort((a, b) => b.value - a.value)
             .slice(0, 10)
             .map(x => `${x.key} - ${x.value} Ватт`)

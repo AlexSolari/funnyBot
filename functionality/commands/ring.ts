@@ -1,6 +1,7 @@
 import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
-import { ChatId } from '../../helpers/chatIds';
+import { ChatId } from '../../types/chatIds';
 import randomInteger from '../../helpers/randomInt';
+import { hoursToSeconds } from '../../helpers/timeConvertions';
 
 export default new CommandActionBuilder("Reaction.Ring")
     .on(/кольц/i)
@@ -19,7 +20,7 @@ export default new CommandActionBuilder("Reaction.Ring")
                 break;
         }
     })
-    .cooldown(7200)
+    .cooldown(hoursToSeconds(2))
     .disabled()
     .ignoreChat(ChatId.LvivChat)
     .ignoreChat(ChatId.PauperChat)

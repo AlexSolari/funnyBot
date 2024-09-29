@@ -1,5 +1,5 @@
 import { InputFile } from "telegraf/types";
-import IReplyMessage from "./replyMessage";
+import IReplyMessage from "../../types/replyMessage";
 
 export default class VideoMessage implements IReplyMessage {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

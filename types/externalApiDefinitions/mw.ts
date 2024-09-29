@@ -1,3 +1,5 @@
+import { Seconds } from "../timeValues";
+
 export interface IMWEventDetail{
     date: Date | string,
     id: number,
@@ -7,7 +9,7 @@ export interface IMWEventDetail{
         used_space: number,
         service: { name: string }
     },
-    time: { start_time: number }
+    time: { start_time: Seconds }
 };
 
 export interface IMwApiResponseDateSlot{ 

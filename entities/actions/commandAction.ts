@@ -3,14 +3,20 @@ import TransactionResult from '../transactionResult';
 import moment from "moment";
 import logger from '../../services/logger';
 import MessageContext from '../context/messageContext';
-import { IActionState } from '../states/actionStateBase';
-import IActionWithState from './actionWithState';
+import IActionWithState from '../../types/actionWithState';
+import toArray from '../../helpers/toArray';
+import IActionState from '../../types/actionState';
+import CommandTriggerCheckResult from '../commandTriggerCheckResult';
+import { CommandHandler } from '../../types/handlers';
+import { CommandCondition } from '../../types/commandCondition';
+import { Seconds } from '../../types/timeValues';
+import { secondsToMilliseconds } from '../../helpers/timeConvertions';
 
 export default class CommandAction<TActionState extends IActionState> implements IActionWithState {
     triggers: (string | RegExp)[];
-    handler: (ctx: MessageContext<TActionState>, state: TActionState) => Promise<void>;
+    handler: CommandHandler<TActionState>;
     name: string;
-    cooldown: number;
+    cooldownInSeconds: Seconds;
     active: boolean;
     chatsBlacklist: number[];
     allowedUsers: number[];
@@ -20,19 +26,19 @@ export default class CommandAction<TActionState extends IActionState> implements
 
     constructor(
         trigger: string | RegExp | Array<string> | Array<RegExp>, 
-        handler: (ctx: MessageContext<TActionState>, state: TActionState) => Promise<void>, 
+        handler: CommandHandler<TActionState>, 
         name: string, 
         active: boolean, 
-        cooldown: number, 
+        cooldown: Seconds, 
         chatsBlacklist: Array<number>, 
         allowedUsers: Array<number>, 
-        condition: (ctx: MessageContext<TActionState>) => Promise<boolean>, 
+        condition: CommandCondition<TActionState>, 
         stateConstructor: () => TActionState) 
     {
-        this.triggers = Array.isArray(trigger) ? trigger : [trigger];
+        this.triggers = toArray(trigger);
         this.handler = handler;
         this.name = name;
-        this.cooldown = cooldown;
+        this.cooldownInSeconds = cooldown;
         this.active = active;
         this.chatsBlacklist = chatsBlacklist;
         this.allowedUsers = allowedUsers;
@@ -57,17 +63,8 @@ export default class CommandAction<TActionState extends IActionState> implements
             this.triggers
                 .map(x => this.#checkTrigger(ctx, x, state))
                 .reduce(
-                    (acc, curr) => (
-                        {
-                            shouldTrigger: acc.shouldTrigger || curr.shouldTrigger,
-                            matchResult: acc.matchResult || curr.matchResult,
-                            skipCooldown: acc.skipCooldown || curr.skipCooldown
-                        }),
-                    {
-                        shouldTrigger: false,
-                        matchResult: null,
-                        skipCooldown: false
-                    }
+                    (acc, curr) => acc.mergeWith(curr),
+                    CommandTriggerCheckResult.DoNotTrigger
                 );
 
         if (!shouldTrigger)
@@ -88,22 +85,22 @@ export default class CommandAction<TActionState extends IActionState> implements
 
         ctx.updateActions.forEach(action => action(state));
 
-        await storage.commitTransactionForEntity(
+        await storage.commitTransactionForAction(
             this,
             ctx.chatId,
             new TransactionResult(state, ctx.startCooldown && shouldTrigger));
     }
 
-    #checkTrigger(ctx: MessageContext<TActionState>, trigger: RegExp | string, state: IActionState): { shouldTrigger: boolean; matchResult: RegExpExecArray | null; skipCooldown: boolean; } {
+    #checkTrigger(ctx: MessageContext<TActionState>, trigger: RegExp | string, state: IActionState) {
         let shouldTrigger = false;
         let matchResult = null;
 
         if (!ctx.fromUserId)
-            return { shouldTrigger: false, matchResult: null, skipCooldown: true };
+            return CommandTriggerCheckResult.DontTriggerAndSkipCooldown;
 
         const isUserAllowed = this.allowedUsers.length == 0 || this.allowedUsers.includes(ctx.fromUserId);
-        const cooldownMilliseconds = this.cooldown * 1000;
-        const notOnCooldown = (moment().valueOf() - state.lastExecutedDate) >= cooldownMilliseconds;
+        const cooldownInMilliseconds = secondsToMilliseconds(this.cooldownInSeconds);
+        const notOnCooldown = (moment().valueOf() - state.lastExecutedDate) >= cooldownInMilliseconds;
 
         if (isUserAllowed && notOnCooldown) {
             if (typeof (trigger) == "string") {
@@ -114,6 +111,6 @@ export default class CommandAction<TActionState extends IActionState> implements
             }
         }
 
-        return { shouldTrigger, matchResult, skipCooldown: !isUserAllowed };
+        return new CommandTriggerCheckResult(shouldTrigger, matchResult, !isUserAllowed);
     }
 };

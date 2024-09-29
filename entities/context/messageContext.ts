@@ -1,11 +1,12 @@
-import { ActionStateBase, IActionState } from '../states/actionStateBase';
+import ActionStateBase from '../states/actionStateBase';
 import ImageMessage from "../replyMessages/imageMessage";
 import TextMessage from "../replyMessages/textMessage";
 import VideoMessage from "../replyMessages/videoMessage";
 import ChatContext from "./chatContext";
 import storage from '../../services/storage';
 import { resolve } from "path";
-import IReplyMessage from '../replyMessages/replyMessage';
+import IReplyMessage from '../../types/replyMessage';
+import IActionState from '../../types/actionState';
 
 export default class MessageContext<TActionState extends IActionState> extends ChatContext {
     messageId: number;
@@ -16,7 +17,14 @@ export default class MessageContext<TActionState extends IActionState> extends C
     updateActions: Array<(state: TActionState) => void> = [];
     fromUserName: string;
 
-    constructor(enqueueMethod: (message: IReplyMessage) => void, chatId: number, messageId: number, messageText: string, fromUserId: number | undefined, traceId: number | string, fromUserName: string) {
+    constructor(enqueueMethod: (message: IReplyMessage) => void, 
+        chatId: number, 
+        messageId: number, 
+        messageText: string, 
+        fromUserId: number | undefined, 
+        traceId: number | string, 
+        fromUserName: string) 
+    {
         super(enqueueMethod, chatId, traceId);
 
         this.messageId = messageId;
@@ -26,7 +34,8 @@ export default class MessageContext<TActionState extends IActionState> extends C
     }
     
     async loadStateOf<TAnotherActionState extends IActionState>(commandName: string): Promise<TAnotherActionState>{
-        return ((await storage.load(`command:${commandName.replace('.', '-')}`))[this.chatId] as TAnotherActionState) ?? new ActionStateBase();
+        return ((await storage.load(`command:${commandName.replace('.', '-')}`))[this.chatId] as TAnotherActionState) 
+            ?? new ActionStateBase();
     }
 
     updateState(stateUpdateAction: (state: TActionState) => void){

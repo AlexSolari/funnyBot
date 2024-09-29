@@ -1,4 +1,4 @@
-import { IActionState } from "./states/actionStateBase";
+import IActionState from "../types/actionState";
 
 export default class TransactionResult{
     data: IActionState;

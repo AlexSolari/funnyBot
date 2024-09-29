@@ -1,8 +1,10 @@
 import ScheduledActionBuilder from '../../helpers/builders/scheduledActionBuilder';
 import getCurrentWeek from '../../helpers/getWeek';
 import moment from "moment";
-import { IMWApiResponse, IMWEventDetail } from '../../entities/externalApiDefinitions/mw';
-import { ChatId } from '../../helpers/chatIds';
+import { IMWApiResponse, IMWEventDetail } from '../../types/externalApiDefinitions/mw';
+import { ChatId } from '../../types/chatIds';
+import { hoursToSeconds } from '../../helpers/timeConvertions';
+import { Day } from '../../types/daysOfTheWeek';
 
 export default new ScheduledActionBuilder("Scheduled.LowCount")
     .at(8) //08:00 Kiev time
@@ -12,7 +14,7 @@ export default new ScheduledActionBuilder("Scheduled.LowCount")
         const currentWeek = getCurrentWeek();
         const today = moment().day();
 
-        if (today >= 5 || today == 0) {
+        if (today >= Day.Friday || today == Day.Sunday) {
             const response = await fetch(`https://api.wlaunch.net/v1/company/7ea091e0-359a-11eb-86df-9f45a44f29bd/branch/7ea10724-359a-11eb-86df-9f45a44f29bd/slot/gt/resource?start=${currentWeek.firstDay}&end=${currentWeek.lastDay}&source=WIDGET&withDiscounts=true&preventBookingEnabled=true`)
             let prefix = '';
             let serviceName = '';
@@ -39,7 +41,7 @@ export default new ScheduledActionBuilder("Scheduled.LowCount")
             if (!target)
                 return;
 
-            if (today == 0 && target.time.start_time != 57600)
+            if (today == Day.Sunday && target.time.start_time < hoursToSeconds(12))
                 return;
 
             if (target.gt.used_space == 7 || target.gt.used_space == 9) {

@@ -1,20 +1,25 @@
 import MessageContext from "../../entities/context/messageContext";
 import CommandAction from "../../entities/actions/commandAction";
-import { ActionStateBase, IActionState } from "../../entities/states/actionStateBase";
+import ActionStateBase from "../../entities/states/actionStateBase";
+import toArray from "../toArray";
+import IActionState from "../../types/actionState";
+import { CommandHandler } from "../../types/handlers";
+import { CommandCondition } from "../../types/commandCondition";
+import { Seconds } from "../../types/timeValues";
 
 export class CommandActionBuilderWithState<TActionState extends IActionState> {
     name: string;
     trigger: string | RegExp | Array<string> | Array<RegExp> = [];
     
     active = true;
-    cooldownSeconds = 0;
+    cooldownSeconds: Seconds = 0;
     blacklist: number[] = [];
     allowedUsers: number[] = [];
     stateConstructor: () => TActionState;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    handler: (ctx: MessageContext<TActionState>, state: TActionState) => Promise<void> = async (ctx, state) => {};
+    handler: CommandHandler<TActionState> = async (ctx, state) => {};
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    condition: (ctx: MessageContext<TActionState>) => Promise<boolean> = async (ctx) => true;
+    condition: CommandCondition<TActionState> = async (ctx) => true;
 
     constructor(name: string, stateConstructor: () => TActionState) {
         this.name = name;
@@ -28,22 +33,18 @@ export class CommandActionBuilderWithState<TActionState extends IActionState> {
     }
 
     from(id: number | Array<number>) {
-        if (!Array.isArray(id)) {
-            id = [id]
-        }
-
-        this.allowedUsers = id;
+        this.allowedUsers = toArray(id);
 
         return this;
     }
 
-    do(handler: (ctx: MessageContext<TActionState>, state: TActionState) => Promise<void>) {
+    do(handler: CommandHandler<TActionState>) {
         this.handler = handler;
 
         return this;
     }
 
-    when(condition: (arg0: MessageContext<TActionState>) => Promise<boolean>) {
+    when(condition: (ctx: MessageContext<TActionState>) => Promise<boolean>) {
         this.condition = condition;
 
         return this;
@@ -55,7 +56,7 @@ export class CommandActionBuilderWithState<TActionState extends IActionState> {
         return this;
     }
 
-    cooldown(seconds: number) {
+    cooldown(seconds: Seconds) {
         this.cooldownSeconds = seconds;
 
         return this;

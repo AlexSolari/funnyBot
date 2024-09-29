@@ -1,7 +1,8 @@
 import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
-import { ChatId } from '../../helpers/chatIds';
+import { ChatId } from '../../types/chatIds';
 import randomInteger from '../../helpers/randomInt';
-import { SpecificUsers } from '../../helpers/userIds';
+import { hoursToSeconds } from '../../helpers/timeConvertions';
+import { SpecificUsers } from '../../types/userIds';
 
 export default new CommandActionBuilder("Reaction.Ternopil")
     .on(/.+/i)
@@ -31,5 +32,5 @@ export default new CommandActionBuilder("Reaction.Ternopil")
             }
         }
     })
-    .cooldown(28800)
+    .cooldown(hoursToSeconds(8))
     .build();

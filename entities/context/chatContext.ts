@@ -1,5 +1,5 @@
 import ImageMessage from "../replyMessages/imageMessage";
-import IReplyMessage from "../replyMessages/replyMessage";
+import IReplyMessage from "../../types/replyMessage";
 import TextMessage from "../replyMessages/textMessage";
 import VideoMessage from "../replyMessages/videoMessage";
 import { resolve } from "path";

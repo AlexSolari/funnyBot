@@ -5,27 +5,35 @@ import logger from '../../services/logger';
 import taskScheduler from '../../services/taskScheduler';
 import { Sema as Semaphore } from 'async-sema';
 import ChatContext from '../context/chatContext';
-import IActionWithState from './actionWithState';
-import { ActionStateBase, IActionState } from '../states/actionStateBase';
+import IActionWithState from '../../types/actionWithState';
+import ActionStateBase from '../states/actionStateBase';
+import IActionState from '../../types/actionState';
+import { ScheduledHandler } from '../../types/handlers';
+import CachedStateFactory from '../cachedStateFactory';
+import { hoursToMilliseconds } from '../../helpers/timeConvertions';
+import { Hours } from '../../types/timeValues';
 
 export default class ScheduledAction implements IActionWithState {
     static semaphore = new Semaphore(1);
+    
     name: string;
-    timeinHours: number;
+    timeinHours: Hours;
     active: boolean;
     chatsWhitelist: number[];
     key: string;
 
     cachedState = new Map<string, unknown>();
     stateConstructor = () => new ActionStateBase();
-    cachedStateFactories: Map<string, { itemFactory: () => Promise<unknown>; invalidationTimeout: number; }>;
-    handler: (ctx: ChatContext, getCached: (<TResult>(key: string) => Promise<TResult>) | void) => Promise<void>;
+    cachedStateFactories: Map<string, CachedStateFactory>;
+    handler: ScheduledHandler;
 
     constructor(
         name: string, 
-        handler: (ctx: ChatContext, getCached: <TResult>(key: string) => Promise<TResult>) => Promise<void>,
-        timeinHours: number, active: boolean, whitelist: number[],
-        cachedStateFactories: Map<string, { itemFactory: () => Promise<unknown>;invalidationTimeout: number; }>) 
+        handler: ScheduledHandler,
+        timeinHours: Hours, 
+        active: boolean, 
+        whitelist: number[],
+        cachedStateFactories: Map<string, CachedStateFactory>) 
     {
         this.name = name;
         this.handler = handler;
@@ -50,7 +58,7 @@ export default class ScheduledAction implements IActionWithState {
 
             state.lastExecutedDate = moment().valueOf();
 
-            await storage.commitTransactionForEntity(this, ctx.chatId, new TransactionResult(state, isAllowedToTrigger))
+            await storage.commitTransactionForAction(this, ctx.chatId, new TransactionResult(state, isAllowedToTrigger))
         }
     }
 
@@ -63,15 +71,14 @@ export default class ScheduledAction implements IActionWithState {
             }
 
             if (this.cachedStateFactories.has(key)) {
-
-                const cachedItemFactories = this.cachedStateFactories.get(key)!;
-                const value = await cachedItemFactories.itemFactory();
+                const cachedItemFactory = this.cachedStateFactories.get(key)!;
+                const value = await cachedItemFactory.getValue();
 
                 this.cachedState.set(key, value);
                 taskScheduler.createOnetimeTask(
                     `Drop cached value [${this.name} : ${key}]`,
                     () => this.cachedState.delete(key),
-                    cachedItemFactories.invalidationTimeout
+                    hoursToMilliseconds(cachedItemFactory.invalidationTimeoutInHours)
                 );
 
                 return value;

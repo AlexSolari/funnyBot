@@ -1,8 +1,8 @@
 import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import getCurrentWeek from '../../helpers/getWeek';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
-import { IMWApiResponse, IMwApiResponseDateSlot } from '../../entities/externalApiDefinitions/mw';
-import { ChatId } from '../../helpers/chatIds';
+import { IMWApiResponse, IMwApiResponseDateSlot } from '../../types/externalApiDefinitions/mw';
+import { ChatId } from '../../types/chatIds';
 
 export default new CommandActionBuilder("Reaction.Registration")
     .on(["рега", "Рега"])

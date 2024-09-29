@@ -3,10 +3,11 @@ import BotApiService from '../services/botApi';
 import IncomingMessage from "./incomingMessage";
 import taskScheduler from '../services/taskScheduler';
 import logger from "../services/logger";
-import { IActionState } from "./states/actionStateBase";
 import CommandAction from "./actions/commandAction";
 import ScheduledAction from "./actions/scheduledAction";
 import functionality from "../functionality/functionality";
+import IActionState from "../types/actionState";
+import { hoursToMilliseconds, secondsToMilliseconds } from "../helpers/timeConvertions";
 
 export default class Bot {
     name : string;
@@ -46,11 +47,11 @@ export default class Bot {
             while (this.messageQueue.length > 0) {
                 await this.#processMessages();
             }
-        }, 333, false);
+        }, secondsToMilliseconds(0.3), false);
         
         taskScheduler.createTask("ScheduledProcessing", async () => {
             await this.#runScheduled();
-        }, 1000 * 60 * 30, true); //30 minutes
+        }, hoursToMilliseconds(0.5), true);
 
         process.once('SIGINT', () => this.#stop(bot, 'SIGINT'));
         process.once('SIGTERM', () => this.#stop(bot, 'SIGTERM'));
@@ -59,7 +60,7 @@ export default class Bot {
     #stop(bot: Telegraf, code: string){
         bot.stop(code);
         
-        setTimeout(() => process.exit(0), 1000);
+        setTimeout(() => process.exit(0), secondsToMilliseconds(1));
     }
 
     async #runScheduled() {
