@@ -49,7 +49,7 @@ export default class CommandAction<TActionState extends IActionState> implements
     }
 
     async exec(ctx: MessageContext<TActionState>) {
-        if (!this.active || this.chatsBlacklist.indexOf(ctx.chatId) != -1)
+        if (!this.active || this.chatsBlacklist.includes(ctx.chatId))
             return;
 
         const isConditionMet = await this.condition(ctx);
@@ -93,7 +93,7 @@ export default class CommandAction<TActionState extends IActionState> implements
 
     #checkTrigger(ctx: MessageContext<TActionState>, trigger: RegExp | string, state: IActionState) {
         let shouldTrigger = false;
-        let matchResult = null;
+        let matchResult: RegExpExecArray | null = null;
 
         if (!ctx.fromUserId)
             return CommandTriggerCheckResult.DontTriggerAndSkipCooldown;

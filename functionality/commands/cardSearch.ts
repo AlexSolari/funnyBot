@@ -27,5 +27,4 @@ export default new CommandActionBuilder("Reaction.CardSearch")
 
         ctx.replyWithText(escapeMarkdown(text));
     })
-    .cooldown(0)
     .build();

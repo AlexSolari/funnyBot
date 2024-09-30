@@ -2,6 +2,7 @@ import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilde
 import { ChatId } from '../../types/chatIds';
 import { hoursToSeconds } from '../../helpers/timeConvertions';
 import { SpecificUsers } from '../../types/userIds';
+import { Hours } from '../../types/timeValues';
 
 export default new CommandActionBuilder("Reaction.Vitalii")
     .on(/маліфо/i)
@@ -10,5 +11,5 @@ export default new CommandActionBuilder("Reaction.Vitalii")
     .do(async (ctx) => {
         ctx.replyWithImage("malifo");
     })
-    .cooldown(hoursToSeconds(24))
+    .cooldown(hoursToSeconds(24 as Hours))
     .build();

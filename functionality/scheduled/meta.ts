@@ -37,7 +37,7 @@ async function sendRecentTournaments(format: Format, ctx: ChatContext, getCached
 }
 
 export default new ScheduledActionBuilder("Scheduled.Meta")
-    .at(18) //18:00 Kiev time
+    .runAt(18)
     .allowIn(ChatId.ModernChat)
     .allowIn(ChatId.PioneerChat)
     .allowIn(ChatId.LvivChat)

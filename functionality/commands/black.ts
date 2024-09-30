@@ -1,6 +1,7 @@
 import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import { ChatId } from '../../types/chatIds';
 import { hoursToSeconds } from '../../helpers/timeConvertions';
+import { Hours } from '../../types/timeValues';
 
 export default new CommandActionBuilder("Reaction.Black")
     .on(/моноб/i)
@@ -8,6 +9,6 @@ export default new CommandActionBuilder("Reaction.Black")
         ctx.replyWithImage("monoB");
     })
     .ignoreChat(ChatId.LvivChat)
-    .cooldown(hoursToSeconds(2))
+    .cooldown(hoursToSeconds(2 as Hours))
     .disabled()
     .build();

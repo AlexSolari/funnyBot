@@ -12,7 +12,7 @@ export class CommandActionBuilderWithState<TActionState extends IActionState> {
     trigger: string | RegExp | Array<string> | Array<RegExp> = [];
     
     active = true;
-    cooldownSeconds: Seconds = 0;
+    cooldownSeconds: Seconds = 0 as Seconds;
     blacklist: number[] = [];
     allowedUsers: number[] = [];
     stateConstructor: () => TActionState;

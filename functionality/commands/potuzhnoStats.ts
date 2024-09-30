@@ -21,5 +21,4 @@ export default new CommandActionBuilder("Reaction.PotuzhnoStats")
         ctx.replyWithText(escapeMarkdown(`💪 TOП-10 потужності: 💪 \n\n` + topTen));
     })
     .ignoreChat(ChatId.PauperChat)
-    .cooldown(0)
     .build();

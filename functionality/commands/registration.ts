@@ -3,6 +3,7 @@ import getCurrentWeek from '../../helpers/getWeek';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { IMWApiResponse, IMwApiResponseDateSlot } from '../../types/externalApiDefinitions/mw';
 import { ChatId } from '../../types/chatIds';
+import { Seconds } from '../../types/timeValues';
 
 export default new CommandActionBuilder("Reaction.Registration")
     .on(["рега", "Рега"])
@@ -41,7 +42,7 @@ export default new CommandActionBuilder("Reaction.Registration")
             .sort((a, b) => a.date.getTime() - b.date.getTime())
             .map(({ date, slots }) => slots.map(x => { x.date = date.toLocaleDateString("uk-UA", options); return x }))
             .flat()
-            .filter(x => x.gt.service.name.indexOf(serviceName) != -1);
+            .filter(x => x.gt.service.name.includes(serviceName));
 
         if (!resources || resources.length == 0) {
             ctx.replyWithText(`поки нема`);
@@ -69,7 +70,7 @@ export default new CommandActionBuilder("Reaction.Registration")
 
         ctx.replyWithText(text);
     })
-    .cooldown(30)
+    .cooldown(30 as Seconds)
     .ignoreChat(ChatId.LvivChat)
     .ignoreChat(ChatId.PauperChat)
     .build();

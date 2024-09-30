@@ -1,6 +1,6 @@
 import TaskRecord from "../entities/taskRecord";
 import { secondsToMilliseconds } from "../helpers/timeConvertions";
-import { Milliseconds } from "../types/timeValues";
+import { Milliseconds, Seconds } from "../types/timeValues";
 
 class TaskScheduler {
     activeTasks: TaskRecord[] = [];
@@ -15,7 +15,7 @@ class TaskScheduler {
         );
 
         if (executeRightAway) {
-            setTimeout(action, secondsToMilliseconds(1));
+            setTimeout(action, secondsToMilliseconds(1 as Seconds));
         }
 
         console.log(`Created task [${taskId}]${name}, that will run every ${interval}ms.`)

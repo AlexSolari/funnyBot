@@ -12,7 +12,7 @@ function getCardText(card: IScryfallCardInfo, fallback: { normal: string }) {
 
 export default new CommandActionBuilder("Reaction.CardSearch_Small")
     .on(/\[(.+)\]/i)
-    .when(async (ctx) => ctx.messageText.indexOf('[[') == -1)
+    .when(async (ctx) => !ctx.messageText.includes('[['))
     .do(async (ctx) => {
         const response = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${ctx.matchResult![1]}`)
         const data = await response.json();
@@ -27,5 +27,4 @@ export default new CommandActionBuilder("Reaction.CardSearch_Small")
 
         ctx.replyWithText(`[\\.](${images[0]})`);
     })
-    .cooldown(0)
     .build();

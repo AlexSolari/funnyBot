@@ -8,9 +8,10 @@ import ScheduledAction from "./actions/scheduledAction";
 import functionality from "../functionality/functionality";
 import IActionState from "../types/actionState";
 import { hoursToMilliseconds, secondsToMilliseconds } from "../helpers/timeConvertions";
+import { Hours, Seconds } from "../types/timeValues";
 
 export default class Bot {
-    name : string;
+    name: string;
     api: BotApiService | null = null;
     commands: CommandAction<IActionState>[];
     scheduled: ScheduledAction[];
@@ -36,7 +37,7 @@ export default class Bot {
 
             logger.logWithTraceId(msg.traceId, `${('title' in msg.chat) ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from?.first_name ?? "Unknown"} (${msg.from?.id ?? "Unknown"}): ${messageContent}`);
 
-            if (msg.text){
+            if (msg.text) {
                 this.messageQueue.push(msg);
             }
         });
@@ -47,20 +48,20 @@ export default class Bot {
             while (this.messageQueue.length > 0) {
                 await this.#processMessages();
             }
-        }, secondsToMilliseconds(0.3), false);
-        
+        }, secondsToMilliseconds(0.3 as Seconds), false);
+
         taskScheduler.createTask("ScheduledProcessing", async () => {
             await this.#runScheduled();
-        }, hoursToMilliseconds(0.5), true);
+        }, hoursToMilliseconds(0.5 as Hours), true);
 
         process.once('SIGINT', () => this.#stop(bot, 'SIGINT'));
         process.once('SIGTERM', () => this.#stop(bot, 'SIGTERM'));
     }
 
-    #stop(bot: Telegraf, code: string){
+    #stop(bot: Telegraf, code: string) {
         bot.stop(code);
-        
-        setTimeout(() => process.exit(0), secondsToMilliseconds(1));
+
+        setTimeout(() => process.exit(0), secondsToMilliseconds(1 as Seconds));
     }
 
     async #runScheduled() {
@@ -78,7 +79,7 @@ export default class Bot {
         }
     }
 
-    async #processMessages(){
+    async #processMessages() {
         const msg = this.messageQueue.pop()!;
 
         for (const cmd of this.commands) {

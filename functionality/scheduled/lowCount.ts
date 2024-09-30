@@ -5,9 +5,10 @@ import { IMWApiResponse, IMWEventDetail } from '../../types/externalApiDefinitio
 import { ChatId } from '../../types/chatIds';
 import { hoursToSeconds } from '../../helpers/timeConvertions';
 import { Day } from '../../types/daysOfTheWeek';
+import { Hours } from '../../types/timeValues';
 
 export default new ScheduledActionBuilder("Scheduled.LowCount")
-    .at(8) //08:00 Kiev time
+    .runAt(8)
     .allowIn(ChatId.PioneerChat)
     .allowIn(ChatId.ModernChat)
     .do(async (ctx) => {
@@ -41,7 +42,7 @@ export default new ScheduledActionBuilder("Scheduled.LowCount")
             if (!target)
                 return;
 
-            if (today == Day.Sunday && target.time.start_time < hoursToSeconds(12))
+            if (today == Day.Sunday && target.time.start_time < hoursToSeconds(12 as Hours))
                 return;
 
             if (target.gt.used_space == 7 || target.gt.used_space == 9) {

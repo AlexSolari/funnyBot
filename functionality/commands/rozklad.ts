@@ -1,6 +1,7 @@
 import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import { load } from 'cheerio';
 import { ChatId } from '../../types/chatIds';
+import { Seconds } from '../../types/timeValues';
 
 export default new CommandActionBuilder("Reaction.Schedule")
     .on(["розклад"])
@@ -16,5 +17,5 @@ export default new CommandActionBuilder("Reaction.Schedule")
         ctx.replyWithText(`[Розклад на цей тиждень](https://t.me/${link})`);
 
     })
-    .cooldown(30)
+    .cooldown(30 as Seconds)
     .build();

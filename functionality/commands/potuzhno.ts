@@ -3,6 +3,7 @@ import { CommandActionBuilderWithState } from '../../helpers/builders/commandAct
 import { ChatId } from '../../types/chatIds';
 import randomInteger from '../../helpers/randomInt';
 import { hoursToSeconds } from '../../helpers/timeConvertions';
+import { Hours } from '../../types/timeValues';
 
 export default new CommandActionBuilderWithState<PotuzhnoState>("Reaction.Potuzhno", () => new PotuzhnoState())
     .on(/.+/i)
@@ -15,5 +16,5 @@ export default new CommandActionBuilderWithState<PotuzhnoState>("Reaction.Potuzh
         ctx.replyWithText("Потужно 💪");
     })
     .ignoreChat(ChatId.PauperChat)
-    .cooldown(hoursToSeconds(4))
+    .cooldown(hoursToSeconds(4 as Hours))
     .build();

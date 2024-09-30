@@ -11,13 +11,13 @@ import IActionState from '../../types/actionState';
 import { ScheduledHandler } from '../../types/handlers';
 import CachedStateFactory from '../cachedStateFactory';
 import { hoursToMilliseconds } from '../../helpers/timeConvertions';
-import { Hours } from '../../types/timeValues';
+import { HoursOfDay } from '../../types/timeValues';
 
 export default class ScheduledAction implements IActionWithState {
     static semaphore = new Semaphore(1);
     
     name: string;
-    timeinHours: Hours;
+    timeinHours: HoursOfDay;
     active: boolean;
     chatsWhitelist: number[];
     key: string;
@@ -30,7 +30,7 @@ export default class ScheduledAction implements IActionWithState {
     constructor(
         name: string, 
         handler: ScheduledHandler,
-        timeinHours: Hours, 
+        timeinHours: HoursOfDay, 
         active: boolean, 
         whitelist: number[],
         cachedStateFactories: Map<string, CachedStateFactory>) 
@@ -45,7 +45,7 @@ export default class ScheduledAction implements IActionWithState {
     }
 
     async exec(ctx: ChatContext) {
-        if (!this.active || this.chatsWhitelist.indexOf(ctx.chatId) == -1)
+        if (!this.active || !this.chatsWhitelist.includes(ctx.chatId))
             return;
 
         const state = await storage.getActionState(this, ctx.chatId);

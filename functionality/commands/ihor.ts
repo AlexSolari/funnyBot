@@ -2,6 +2,7 @@ import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilde
 import { ChatId } from '../../types/chatIds';
 import { hoursToSeconds } from '../../helpers/timeConvertions';
 import { SpecificUsers } from '../../types/userIds';
+import { Hours } from '../../types/timeValues';
 
 export default new CommandActionBuilder("Reaction.Ihor")
     .on(/мод[еє]рн/i)
@@ -10,6 +11,6 @@ export default new CommandActionBuilder("Reaction.Ihor")
     .do(async (ctx) => {
         ctx.replyWithImage("ihor");
     })
-    .cooldown(hoursToSeconds(2))
+    .cooldown(hoursToSeconds(2 as Hours))
     .disabled()
     .build();

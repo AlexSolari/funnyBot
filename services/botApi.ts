@@ -8,6 +8,7 @@ import logger from "./logger";
 import { Telegraf } from "telegraf";
 import IReplyMessage from "../types/replyMessage";
 import IncomingMessage from "../entities/incomingMessage";
+import { Milliseconds } from "../types/timeValues";
 
 export default class BotApiService {
     bot: Telegraf;
@@ -18,7 +19,7 @@ export default class BotApiService {
 
         taskScheduler.createTask("MessageSending", () => {
             this.#dequeueResponse();
-        }, 100, false);
+        }, 100 as Milliseconds, false);
     }
 
     async #dequeueResponse() {

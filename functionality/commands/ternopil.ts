@@ -3,6 +3,7 @@ import { ChatId } from '../../types/chatIds';
 import randomInteger from '../../helpers/randomInt';
 import { hoursToSeconds } from '../../helpers/timeConvertions';
 import { SpecificUsers } from '../../types/userIds';
+import { Hours } from '../../types/timeValues';
 
 export default new CommandActionBuilder("Reaction.Ternopil")
     .on(/.+/i)
@@ -32,5 +33,5 @@ export default new CommandActionBuilder("Reaction.Ternopil")
             }
         }
     })
-    .cooldown(hoursToSeconds(8))
+    .cooldown(hoursToSeconds(8 as Hours))
     .build();

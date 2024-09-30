@@ -1,11 +1,11 @@
 import ScheduledAction from "../../entities/actions/scheduledAction";
 import CachedStateFactory from "../../entities/cachedStateFactory";
 import { ScheduledHandler } from "../../types/handlers";
-import { Hours } from "../../types/timeValues";
+import { Hours, HoursOfDay } from "../../types/timeValues";
 
 export default class ScheduledActionBuilder {
     active = true;
-    time: Hours = 0;
+    time: HoursOfDay = 0;
     cachedStateFactories = new Map<string, CachedStateFactory>();
     whitelist: number[] = [];
 
@@ -24,7 +24,7 @@ export default class ScheduledActionBuilder {
         return this;
     }
 
-    at(time: Hours) {
+    runAt(time: HoursOfDay) {
         this.time = time;
 
         return this;
@@ -36,7 +36,7 @@ export default class ScheduledActionBuilder {
         return this;
     }
 
-    withSharedCache(key: string, itemFactory: () => Promise<unknown>, invalidationTimeoutInHours: Hours = 20) {
+    withSharedCache(key: string, itemFactory: () => Promise<unknown>, invalidationTimeoutInHours: Hours = 20 as Hours) {
         this.cachedStateFactories.set(key, new CachedStateFactory(itemFactory, invalidationTimeoutInHours));
 
         return this;
