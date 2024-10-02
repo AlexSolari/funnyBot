@@ -76,7 +76,7 @@ export default new ScheduledActionBuilder("Scheduled.Meta")
                     pioneerString = `Піонер: \n\n${pioneerTournaments}\n\n`;
                 }
                 if (pauperTournaments.length > 0) {
-                    pauperString = `Піонер: \n\n${pauperTournaments}\n\n`;
+                    pauperString = `Паупер: \n\n${pauperTournaments}\n\n`;
                 }
                 if (modernTournaments.length > 0) {
                     modernString = `Модерн: \n\n${modernTournaments}\n\n`;
