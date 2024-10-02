@@ -62,7 +62,7 @@ export default new ScheduledActionBuilder("Scheduled.Meta")
                 await sendRecentTournaments(Format.Pauper, ctx, getCached);
                 break;
             case ChatId.LvivChat: {
-                const pauperTournaments = await getCached<string>(Format.Standard);
+                const pauperTournaments = await getCached<string>(Format.Pauper);
                 const pioneerTournaments = await getCached<string>(Format.Pioneer)
                 const modernTournaments = await getCached<string>(Format.Modern);
                 const standardTournaments = await getCached<string>(Format.Standard);
