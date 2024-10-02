@@ -62,16 +62,21 @@ export default new ScheduledActionBuilder("Scheduled.Meta")
                 await sendRecentTournaments(Format.Pauper, ctx, getCached);
                 break;
             case ChatId.LvivChat: {
+                const pauperTournaments = await getCached<string>(Format.Standard);
                 const pioneerTournaments = await getCached<string>(Format.Pioneer)
                 const modernTournaments = await getCached<string>(Format.Modern);
                 const standardTournaments = await getCached<string>(Format.Standard);
 
+                let pauperString = '';
                 let pioneerString = '';
                 let modernString = '';
                 let standardString = '';
 
                 if (pioneerTournaments.length > 0) {
                     pioneerString = `Піонер: \n\n${pioneerTournaments}\n\n`;
+                }
+                if (pauperTournaments.length > 0) {
+                    pauperString = `Піонер: \n\n${pauperTournaments}\n\n`;
                 }
                 if (modernTournaments.length > 0) {
                     modernString = `Модерн: \n\n${modernTournaments}\n\n`;
@@ -83,7 +88,7 @@ export default new ScheduledActionBuilder("Scheduled.Meta")
                 if (pioneerString.length > 0
                     || modernString.length > 0
                     || standardString.length > 0) {
-                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n ${modernString} ${pioneerString} ${standardString}`);
+                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n ${pauperString} ${modernString} ${pioneerString} ${standardString}`);
                 }
                 break;
             }
