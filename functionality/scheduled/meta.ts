@@ -5,8 +5,9 @@ import moment from 'moment';
 import ChatContext from '../../entities/context/chatContext';
 import { ChatId } from '../../types/chatIds';
 import { CachedValueAccessor } from '../../types/cachedValueAccessor';
+import { Format } from '../../types/mtgFormats';
 
-async function loadTournaments(formatName: string): Promise<string> {
+async function loadTournaments(formatName: Format): Promise<string> {
     const today = moment().format('MM/DD/YYYY');
     const yesterday = moment().subtract(1, 'day').format('MM/DD/YYYY');
 
@@ -21,18 +22,11 @@ async function loadTournaments(formatName: string): Promise<string> {
     return parsedData.trim() ?? '';
 }
 
-enum Format {
-    Pioneer = 'pioneer',
-    Modern = 'modern',
-    Standard = 'standard',
-    Pauper = 'pauper'
-}
-
 async function sendRecentTournaments(format: Format, ctx: ChatContext, getCached: CachedValueAccessor) {
-    const pioneerTournaments = await getCached<string>(format);
+    const tournaments = await getCached<string>(format);
 
-    if (pioneerTournaments.length > 0) {
-        ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${pioneerTournaments}`);
+    if (tournaments.length > 0) {
+        ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${tournaments}`);
     }
 }
 
@@ -47,6 +41,7 @@ export default new ScheduledActionBuilder("Scheduled.Meta")
     .withSharedCache(Format.Modern, () => loadTournaments(Format.Modern))
     .withSharedCache(Format.Standard, () => loadTournaments(Format.Standard))
     .withSharedCache(Format.Pauper, () => loadTournaments(Format.Pauper))
+    .withSharedCache(Format.DuelCommander, () => loadTournaments(Format.DuelCommander))
     .do(async (ctx, getCached) => {
         switch (ctx.chatId) {
             case ChatId.PioneerChat:
@@ -66,11 +61,13 @@ export default new ScheduledActionBuilder("Scheduled.Meta")
                 const pioneerTournaments = await getCached<string>(Format.Pioneer)
                 const modernTournaments = await getCached<string>(Format.Modern);
                 const standardTournaments = await getCached<string>(Format.Standard);
+                const commander1v1Tournaments = await getCached<string>(Format.DuelCommander);
 
                 let pauperString = '';
                 let pioneerString = '';
                 let modernString = '';
                 let standardString = '';
+                let commander1v1String = '';
 
                 if (pioneerTournaments.length > 0) {
                     pioneerString = `Піонер: \n\n${pioneerTournaments}\n\n`;
@@ -82,13 +79,18 @@ export default new ScheduledActionBuilder("Scheduled.Meta")
                     modernString = `Модерн: \n\n${modernTournaments}\n\n`;
                 }
                 if (standardTournaments.length > 0) {
-                    standardString = `Стандарт: \n\n${standardTournaments}`;
+                    standardString = `Стандарт: \n\n${standardTournaments}\n\n`;
+                }
+                if (commander1v1Tournaments.length > 0) {
+                    commander1v1String = `Duel Commander: \n\n${commander1v1Tournaments}`;
                 }
 
                 if (pioneerString.length > 0
                     || modernString.length > 0
-                    || standardString.length > 0) {
-                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n ${pauperString} ${modernString} ${pioneerString} ${standardString}`);
+                    || standardString.length > 0
+                    || pauperString.length > 0
+                    || commander1v1String.length > 0) {
+                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n ${pauperString} ${modernString} ${pioneerString} ${standardString} ${commander1v1String}`);
                 }
                 break;
             }
