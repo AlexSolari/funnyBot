@@ -5,15 +5,28 @@ import { mkdir, readFile, writeFile } from "fs/promises";
 import ActionStateBase from "../entities/states/actionStateBase";
 import IActionState from "../types/actionState";
 import IActionWithState from "../types/actionWithState";
+import { Sema as Semaphore } from 'async-sema';
 
 class Storage {
+    static semaphore = new Semaphore(1);
     cache: Map<string, Record<number, ActionStateBase>>;
 
     constructor() {
         this.cache = new Map<string, Record<number, ActionStateBase>>();
     }
 
-    async load(key: string) {
+    async #lock<TType>(action: () => Promise<TType>) {
+        await Storage.semaphore.acquire();
+
+        try {
+            return action();
+        }
+        finally {
+            Storage.semaphore.release();
+        }
+    }
+
+    async #loadInternal(key: string) {
         if (!this.cache.has(key)) {
             const targetPath = this.#buidPathFromKey(key);
             if (!existsSync(targetPath)) {
@@ -50,19 +63,29 @@ class Storage {
         return 'storage/' + key.replaceAll(':', '/') + ".json";
     }
 
-    async getActionState<TActionState extends IActionState>(entity: IActionWithState, chatId: number): Promise<TActionState> {
-        const data = await this.load(entity.key);
+    async load(key: string) {
+        return await this.#lock(async () => {
+            return this.#loadInternal(key);
+        });
+    }
 
-        return data[chatId] as TActionState ?? entity.stateConstructor();
+    async getActionState<TActionState extends IActionState>(entity: IActionWithState, chatId: number): Promise<TActionState> {
+        return await this.#lock(async () => {
+            const data = await this.#loadInternal(entity.key);
+
+            return data[chatId] as TActionState ?? entity.stateConstructor();
+        });
     }
 
     async commitTransactionForAction(action: IActionWithState, chatId: number, transactionResult: TransactionResult): Promise<void> {
-        const data = await this.load(action.key);
+        await this.#lock(async () => {
+            const data = await this.#loadInternal(action.key);
 
-        if (transactionResult.shouldUpdate) {
-            data[chatId] = transactionResult.data;
-            await this.#save(data, action.key);
-        }
+            if (transactionResult.shouldUpdate) {
+                data[chatId] = transactionResult.data;
+                await this.#save(data, action.key);
+            }
+        });
     }
 }
 
