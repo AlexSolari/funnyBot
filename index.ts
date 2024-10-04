@@ -4,7 +4,7 @@ import { ChatId } from './types/chatIds.js';
 
 if (process.env.NODE_ENV == "production"){
     startBot("main", 'token.prod', [ChatId.ModernChat, ChatId.PioneerChat, ChatId.SpellSeeker, ChatId.StandardChat, ChatId.PauperChat]);
-    startBot("lviv", 'token.lviv', [ChatId.LvivChat]);
+    startBot("lviv", 'token.lviv', [ChatId.LvivChat, ChatId.FrankivskChat]);
 }
 else{
     startBot("test", 'token.test', [-1001759510701]);

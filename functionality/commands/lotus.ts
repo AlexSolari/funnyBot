@@ -19,5 +19,6 @@ export default new CommandActionBuilder("Reaction.Lotus")
     })
     .ignoreChat(ChatId.LvivChat)
     .ignoreChat(ChatId.PauperChat)
+    .ignoreChat(ChatId.FrankivskChat)
     .cooldown(hoursToSeconds(2 as Hours))
     .build();

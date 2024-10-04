@@ -37,6 +37,7 @@ export default new ScheduledActionBuilder("Scheduled.Meta")
     .allowIn(ChatId.LvivChat)
     .allowIn(ChatId.StandardChat)
     .allowIn(ChatId.PauperChat)
+    .allowIn(ChatId.FrankivskChat)
     .withSharedCache(Format.Pioneer, () => loadTournaments(Format.Pioneer))
     .withSharedCache(Format.Modern, () => loadTournaments(Format.Modern))
     .withSharedCache(Format.Standard, () => loadTournaments(Format.Standard))
@@ -91,6 +92,26 @@ export default new ScheduledActionBuilder("Scheduled.Meta")
                     || pauperString.length > 0
                     || commander1v1String.length > 0) {
                     ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n ${pauperString} ${modernString} ${pioneerString} ${standardString} ${commander1v1String}`);
+                }
+                break;
+            }
+            case ChatId.FrankivskChat: {
+                const pioneerTournaments = await getCached<string>(Format.Pioneer)
+                const standardTournaments = await getCached<string>(Format.Standard);
+
+                let pioneerString = '';
+                let standardString = '';
+
+                if (pioneerTournaments.length > 0) {
+                    pioneerString = `Піонер: \n\n${pioneerTournaments}\n\n`;
+                }
+                if (standardTournaments.length > 0) {
+                    standardString = `Стандарт: \n\n${standardTournaments}\n\n`;
+                }
+
+                if (pioneerString.length > 0
+                    || standardString.length > 0) {
+                    ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n ${pioneerString} ${standardString}`);
                 }
                 break;
             }
