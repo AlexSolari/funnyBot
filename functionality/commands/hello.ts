@@ -10,4 +10,5 @@ export default new CommandActionBuilder("Reaction.Hello")
     })
     .cooldown(hoursToSeconds(2 as Hours))
     .ignoreChat(ChatId.LvivChat)
+    .ignoreChat(ChatId.FrankivskChat)
     .build();

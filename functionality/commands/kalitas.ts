@@ -10,5 +10,6 @@ export default new CommandActionBuilder("Reaction.Kalitas")
     })
     .cooldown(hoursToSeconds(2 as Hours))
     .ignoreChat(ChatId.LvivChat)
+    .ignoreChat(ChatId.FrankivskChat)
     .disabled()
     .build();

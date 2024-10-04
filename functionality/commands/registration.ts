@@ -73,4 +73,5 @@ export default new CommandActionBuilder("Reaction.Registration")
     .cooldown(30 as Seconds)
     .ignoreChat(ChatId.LvivChat)
     .ignoreChat(ChatId.PauperChat)
+    .ignoreChat(ChatId.FrankivskChat)
     .build();

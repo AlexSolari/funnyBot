@@ -9,6 +9,7 @@ export default new CommandActionBuilder("Reaction.Black")
         ctx.replyWithImage("monoB");
     })
     .ignoreChat(ChatId.LvivChat)
+    .ignoreChat(ChatId.FrankivskChat)
     .cooldown(hoursToSeconds(2 as Hours))
     .disabled()
     .build();

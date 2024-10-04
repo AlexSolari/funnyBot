@@ -11,4 +11,5 @@ export default new CommandActionBuilder("Reaction.Kamaz")
     .cooldown(hoursToSeconds(2 as Hours))
     .ignoreChat(ChatId.LvivChat)
     .ignoreChat(ChatId.PauperChat)
+    .ignoreChat(ChatId.FrankivskChat)
     .build();

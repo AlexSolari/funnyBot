@@ -9,5 +9,6 @@ export default new CommandActionBuilder("Reaction.Slon")
         ctx.replyWithVideo("slon");
     })
     .ignoreChat(ChatId.PauperChat)
+    .ignoreChat(ChatId.FrankivskChat)
     .cooldown(hoursToSeconds(2 as Hours))
     .build();
