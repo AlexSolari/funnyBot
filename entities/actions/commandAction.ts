@@ -70,7 +70,11 @@ export default class CommandAction<TActionState extends IActionState> implements
         if (!shouldTrigger)
             return;
 
-        logger.logWithTraceId(ctx.traceId, ` - Executing [${this.name}] in ${ctx.chatId}`);
+        logger.logWithTraceId(
+            ctx.botName,
+            ctx.traceId, 
+            ` - Executing [${this.name}] in ${ctx.chatId}`
+        );
         ctx.matchResult = matchResult;
 
         await this.handler(ctx, state);

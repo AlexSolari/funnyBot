@@ -11,11 +11,13 @@ import IncomingMessage from "../entities/incomingMessage";
 import { Milliseconds } from "../types/timeValues";
 
 export default class BotApiService {
-    bot: Telegraf;
+    botName: string;
+    telegraf: Telegraf;
     messageQueue: Array<IReplyMessage> = [];
 
-    constructor(bot: Telegraf) {
-        this.bot = bot;
+    constructor(botName: string, telegraf: Telegraf) {
+        this.telegraf = telegraf;
+        this.botName = botName;
 
         taskScheduler.createTask("MessageSending", () => {
             this.#dequeueResponse();
@@ -32,21 +34,21 @@ export default class BotApiService {
             await this.#processResponse(message);
         }
         catch (error) {
-            logger.errorWithTraceId(message.traceId, error as (string | Error));
+            logger.errorWithTraceId(this.botName, message.traceId, error as (string | Error));
         }
     }
 
     async #processResponse(message: IReplyMessage) {
         switch (message.constructor) {
             case TextMessage:
-                await this.bot.telegram.sendMessage(message.chatId,
+                await this.telegraf.telegram.sendMessage(message.chatId,
                     message.content,
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     { reply_to_message_id: message.replyId, parse_mode: "MarkdownV2" } as any
                 );
                 break;
             case ImageMessage:
-                await this.bot.telegram.sendPhoto(
+                await this.telegraf.telegram.sendPhoto(
                     message.chatId,
                     message.content,
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,7 +56,7 @@ export default class BotApiService {
                 );
                 break;
             case VideoMessage:
-                await this.bot.telegram.sendVideo(
+                await this.telegraf.telegram.sendVideo(
                     message.chatId,
                     message.content,
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,7 +64,7 @@ export default class BotApiService {
                 );
                 break;
             default:
-                logger.errorWithTraceId(message.traceId, `Unknown message type: ${message.constructor}`);
+                logger.errorWithTraceId(this.botName, message.traceId, `Unknown message type: ${message.constructor}`);
                 break;
         }
     }
@@ -76,6 +78,7 @@ export default class BotApiService {
         const lastName = (incomingMessage.from?.last_name) ? ` ${incomingMessage.from?.last_name}` : '';
 
         return new MessageContext(
+            this.botName,
             (response) => this.#enqueueResponse(response),
             incomingMessage.chat.id,
             incomingMessage.message_id,
@@ -88,6 +91,7 @@ export default class BotApiService {
 
     createContextForChat(chatId: number, scheduledName: string) {
         return new ChatContext(
+            this.botName,
             (response) => this.#enqueueResponse(response),
             chatId,
             `Scheduled:${scheduledName}:${chatId}`);

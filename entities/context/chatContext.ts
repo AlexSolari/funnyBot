@@ -5,11 +5,13 @@ import VideoMessage from "../replyMessages/videoMessage";
 import { resolve } from "path";
 
 export default class ChatContext {
+    botName: string;
     enqueue: (message: IReplyMessage) => void;
     chatId: number;
     traceId: number | string;
 
-    constructor(enqueueMethod: (message: IReplyMessage) => void, chatId: number, traceId: number | string) {
+    constructor(botName: string, enqueueMethod: (message: IReplyMessage) => void, chatId: number, traceId: number | string) {
+        this.botName = botName;
         this.enqueue = enqueueMethod;
         this.chatId = chatId;
         this.traceId = traceId;

@@ -1,10 +1,10 @@
 class Logger {
-    logWithTraceId(traceId: string | number, text: string){
-        console.log(`TRACE${traceId} ${text}`);
+    logWithTraceId(botName: string, traceId: string | number, text: string){
+        console.log(`TRACE${traceId} ${botName}|${text}`);
     }
     
-    errorWithTraceId(traceId: string | number, errorObj: string | Error){
-        console.error(`TRACE${traceId} Error: ${errorObj} \n ${(errorObj instanceof Error) ? errorObj?.stack : ''}`);
+    errorWithTraceId(botName: string, traceId: string | number, errorObj: string | Error){
+        console.error(`TRACE${traceId} ${botName}|Error: ${errorObj} \n ${(errorObj instanceof Error) ? errorObj?.stack : ''}`);
     }
 }
 

@@ -52,7 +52,11 @@ export default class ScheduledAction implements IActionWithState {
         const isAllowedToTrigger = this.#shouldTrigger(state);
 
         if (isAllowedToTrigger) {
-            logger.logWithTraceId(ctx.traceId, ` - Executing [${this.name}] in ${ctx.chatId}`);
+            logger.logWithTraceId(
+                ctx. botName, 
+                ctx.traceId, 
+                ` - Executing [${this.name}] in ${ctx.chatId}`
+            );
 
             await this.handler(ctx, <TResult>(key: string) => this.#getCachedValue(key) as TResult);
 

@@ -17,7 +17,9 @@ export default class MessageContext<TActionState extends IActionState> extends C
     updateActions: Array<(state: TActionState) => void> = [];
     fromUserName: string;
 
-    constructor(enqueueMethod: (message: IReplyMessage) => void, 
+    constructor(
+        botName: string,
+        enqueueMethod: (message: IReplyMessage) => void, 
         chatId: number, 
         messageId: number, 
         messageText: string, 
@@ -25,7 +27,7 @@ export default class MessageContext<TActionState extends IActionState> extends C
         traceId: number | string, 
         fromUserName: string) 
     {
-        super(enqueueMethod, chatId, traceId);
+        super(botName, enqueueMethod, chatId, traceId);
 
         this.messageId = messageId;
         this.messageText = messageText;

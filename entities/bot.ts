@@ -29,13 +29,17 @@ export default class Bot {
     start(token: string) {
         const bot = new Telegraf(token);
 
-        this.api = new BotApiService(bot);
+        this.api = new BotApiService(this.name, bot);
 
         bot.on('message', async (ctx) => {
             const msg = new IncomingMessage(ctx.update.message);
             const messageContent = msg.text ?? '<non-text message>';
 
-            logger.logWithTraceId(msg.traceId, `${('title' in msg.chat) ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from?.first_name ?? "Unknown"} (${msg.from?.id ?? "Unknown"}): ${messageContent}`);
+            logger.logWithTraceId(
+                this.name, 
+                msg.traceId, 
+                `${('title' in msg.chat) ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from?.first_name ?? "Unknown"} (${msg.from?.id ?? "Unknown"}): ${messageContent}`
+            );
 
             if (msg.text) {
                 this.messageQueue.push(msg);
@@ -73,7 +77,7 @@ export default class Bot {
                     await trig.exec(ctx);
                 }
                 catch (error) {
-                    logger.errorWithTraceId(ctx.traceId, error as (string | Error));
+                    logger.errorWithTraceId(ctx.botName, ctx.traceId, error as (string | Error));
                 }
             }
         }
@@ -89,7 +93,7 @@ export default class Bot {
                 await cmd.exec(ctx);
             }
             catch (error) {
-                logger.errorWithTraceId(ctx.traceId, error as (string | Error));
+                logger.errorWithTraceId(ctx.botName, ctx.traceId, error as (string | Error));
             }
         }
     }
