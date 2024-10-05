@@ -3,5 +3,6 @@ export interface IScryfallCardInfo {
     oracle_text: string,
     name: string,
     mana_cost: string,
-    type_line: string
+    type_line: string,
+    oracle_id: string
 }
