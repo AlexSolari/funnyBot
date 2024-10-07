@@ -15,7 +15,7 @@ import { HoursOfDay } from '../../types/timeValues';
 
 export default class ScheduledAction implements IActionWithState {
     static semaphore = new Semaphore(1);
-    
+
     name: string;
     timeinHours: HoursOfDay;
     active: boolean;
@@ -28,13 +28,12 @@ export default class ScheduledAction implements IActionWithState {
     handler: ScheduledHandler;
 
     constructor(
-        name: string, 
+        name: string,
         handler: ScheduledHandler,
-        timeinHours: HoursOfDay, 
-        active: boolean, 
+        timeinHours: HoursOfDay,
+        active: boolean,
         whitelist: number[],
-        cachedStateFactories: Map<string, CachedStateFactory>) 
-    {
+        cachedStateFactories: Map<string, CachedStateFactory>) {
         this.name = name;
         this.handler = handler;
         this.timeinHours = timeinHours;
@@ -53,12 +52,12 @@ export default class ScheduledAction implements IActionWithState {
 
         if (isAllowedToTrigger) {
             logger.logWithTraceId(
-                ctx. botName, 
-                ctx.traceId, 
+                ctx.botName,
+                ctx.traceId,
                 ` - Executing [${this.name}] in ${ctx.chatId}`
             );
 
-            await this.handler(ctx, <TResult>(key: string) => this.#getCachedValue(key) as TResult);
+            await this.handler(ctx, <TResult>(key: string) => this.#getCachedValue(key, ctx.botName) as TResult);
 
             state.lastExecutedDate = moment().valueOf();
 
@@ -66,7 +65,7 @@ export default class ScheduledAction implements IActionWithState {
         }
     }
 
-    async #getCachedValue(key: string): Promise<unknown> {
+    async #getCachedValue(key: string, botName: string): Promise<unknown> {
         await ScheduledAction.semaphore.acquire();
 
         try {
@@ -82,7 +81,8 @@ export default class ScheduledAction implements IActionWithState {
                 taskScheduler.createOnetimeTask(
                     `Drop cached value [${this.name} : ${key}]`,
                     () => this.cachedState.delete(key),
-                    hoursToMilliseconds(cachedItemFactory.invalidationTimeoutInHours)
+                    hoursToMilliseconds(cachedItemFactory.invalidationTimeoutInHours),
+                    botName
                 );
 
                 return value;

@@ -11,8 +11,6 @@ else{
 }
 
 async function startBot(name: string, tokenFile: string, broadcastPool: number[]) {
-    console.log(`Initializing bot [${name}]...`);
-
     const bot = new Bot(name, broadcastPool);
     const token = await readFile(tokenFile, 'utf8');
 

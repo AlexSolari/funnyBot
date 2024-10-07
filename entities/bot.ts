@@ -9,6 +9,7 @@ import functionality from "../functionality/functionality";
 import IActionState from "../types/actionState";
 import { hoursToMilliseconds, secondsToMilliseconds } from "../helpers/timeConvertions";
 import { Hours, Seconds } from "../types/timeValues";
+import storage from "../services/storage";
 
 export default class Bot {
     name: string;
@@ -52,20 +53,24 @@ export default class Bot {
             while (this.messageQueue.length > 0) {
                 await this.#processMessages();
             }
-        }, secondsToMilliseconds(0.3 as Seconds), false);
+        }, secondsToMilliseconds(0.3 as Seconds), false, this.name);
 
         taskScheduler.createTask("ScheduledProcessing", async () => {
             await this.#runScheduled();
-        }, hoursToMilliseconds(0.5 as Hours), true);
+        }, hoursToMilliseconds(0.5 as Hours), true, this.name);
 
-        process.once('SIGINT', () => this.#stop(bot, 'SIGINT'));
-        process.once('SIGTERM', () => this.#stop(bot, 'SIGTERM'));
+        process.once('SIGINT', async () => await this.#stop(bot, 'SIGINT'));
+        process.once('SIGTERM', async () => await this.#stop(bot, 'SIGTERM'));
     }
 
-    #stop(bot: Telegraf, code: string) {
-        bot.stop(code);
+    async #stop(bot: Telegraf, code: string) {
+        await storage.semaphoreInstance.acquire();
 
-        setTimeout(() => process.exit(0), secondsToMilliseconds(1 as Seconds));
+        bot.stop(code);
+        taskScheduler.stopAll();
+        logger.logWithTraceId(this.name, 'System:Bot', 'Stopping bot in 3 seconds...')
+
+        setTimeout(() => process.exit(0), secondsToMilliseconds(3 as Seconds));
     }
 
     async #runScheduled() {

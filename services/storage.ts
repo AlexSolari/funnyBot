@@ -11,6 +11,10 @@ class Storage {
     static semaphore = new Semaphore(1);
     cache: Map<string, Record<number, ActionStateBase>>;
 
+    get semaphoreInstance(){
+        return Storage.semaphore;
+    }
+
     constructor() {
         this.cache = new Map<string, Record<number, ActionStateBase>>();
     }

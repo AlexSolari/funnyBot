@@ -21,7 +21,7 @@ export default class BotApiService {
 
         taskScheduler.createTask("MessageSending", () => {
             this.#dequeueResponse();
-        }, 100 as Milliseconds, false);
+        }, 100 as Milliseconds, false, this.botName);
     }
 
     async #dequeueResponse() {
