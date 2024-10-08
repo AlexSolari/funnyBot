@@ -9,11 +9,11 @@ import functionality from "../functionality/functionality";
 import IActionState from "../types/actionState";
 import { hoursToMilliseconds, secondsToMilliseconds } from "../helpers/timeConvertions";
 import { Hours, Seconds } from "../types/timeValues";
-import storage from "../services/storage";
 
 export default class Bot {
     name: string;
     api: BotApiService | null = null;
+    telegraf: Telegraf | null = null;
     commands: CommandAction<IActionState>[];
     scheduled: ScheduledAction[];
     broadcastPool: number[];
@@ -28,11 +28,12 @@ export default class Bot {
     }
 
     start(token: string) {
-        const bot = new Telegraf(token);
+        logger.logWithTraceId(this.name, 'System:Bot', 'Starting bot...');
+        this.telegraf = new Telegraf(token);
 
-        this.api = new BotApiService(this.name, bot);
+        this.api = new BotApiService(this.name, this.telegraf);
 
-        bot.on('message', async (ctx) => {
+        this.telegraf.on('message', async (ctx) => {
             const msg = new IncomingMessage(ctx.update.message);
             const messageContent = msg.text ?? '<non-text message>';
 
@@ -47,7 +48,7 @@ export default class Bot {
             }
         });
 
-        bot.launch();
+        this.telegraf.launch();
 
         taskScheduler.createTask("MessageProcessing", async () => {
             while (this.messageQueue.length > 0) {
@@ -58,19 +59,12 @@ export default class Bot {
         taskScheduler.createTask("ScheduledProcessing", async () => {
             await this.#runScheduled();
         }, hoursToMilliseconds(0.5 as Hours), true, this.name);
-
-        process.once('SIGINT', async () => await this.#stop(bot, 'SIGINT'));
-        process.once('SIGTERM', async () => await this.#stop(bot, 'SIGTERM'));
     }
 
-    async #stop(bot: Telegraf, code: string) {
-        await storage.semaphoreInstance.acquire();
+    stop(code: string) {
+        logger.logWithTraceId(this.name, 'System:Bot', 'Stopping bot...');
 
-        bot.stop(code);
-        taskScheduler.stopAll();
-        logger.logWithTraceId(this.name, 'System:Bot', 'Stopping bot in 3 seconds...')
-
-        setTimeout(() => process.exit(0), secondsToMilliseconds(3 as Seconds));
+        this.telegraf!.stop(code);
     }
 
     async #runScheduled() {

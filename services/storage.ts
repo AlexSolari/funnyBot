@@ -23,7 +23,7 @@ class Storage {
         await Storage.semaphore.acquire();
 
         try {
-            return action();
+            return await action();
         }
         finally {
             Storage.semaphore.release();
