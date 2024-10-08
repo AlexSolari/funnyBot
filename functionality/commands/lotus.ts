@@ -12,7 +12,7 @@ export default new CommandActionBuilder("Reaction.Lotus")
             : "dampingSphere";
 
         if (imageName == "dampingSphere_funny") {
-            imageName += randomInteger(1, 3);
+            imageName += randomInteger(1, 4);
         }
 
         ctx.replyWithImage(imageName);
