@@ -10,16 +10,23 @@ export default new CommandActionBuilderWithState<PotuzhnoState>("Reaction.Potuzh
     .when(async (ctx) => randomInteger(0, 99) == 0 && ctx.messageText != 'топ потужності')
     .do(async (ctx) => {
         const superPotuzhno = randomInteger(0, 99) == 0;
-        const scoredPoints = (superPotuzhno) ? 5 : 1;
+        const scoredPoints = (superPotuzhno) ? 15 : 1;
 
         ctx.updateState(state => {
             state.scoreBoard[ctx.fromUserName] = (state.scoreBoard[ctx.fromUserName] ?? 0) + scoredPoints;
         });
 
-        ctx.replyWithText(superPotuzhno 
-            ? "🎉😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО 💪\n🎉😳😳😳😳😳😳🎉"
-            : "Потужно 💪"
-        );
+        if (superPotuzhno) {
+            ctx.replyWithText("🎉😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО 💪\n🎉😳😳😳😳😳😳🎉");
+        }
+        else {
+            if (randomInteger(0, 4) == 0) {
+                ctx.replyWithVideo('potuzhno')
+            }
+            else {
+                ctx.replyWithText("Потужно 💪");
+            }
+        }
     })
     .ignoreChat(ChatId.PauperChat)
     .cooldown(hoursToSeconds(4 as Hours))
