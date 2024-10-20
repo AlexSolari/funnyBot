@@ -25,19 +25,19 @@ class TaskScheduler {
             setTimeout(action, secondsToMilliseconds(1 as Seconds));
         }
 
-        logger.logWithTraceId(ownerName, 'System:TaskScheduler', `Created task [${taskId}]${name}, that will run every ${interval}ms.`)
+        logger.logWithTraceId(ownerName, `System:TaskScheduler-${ownerName}-${name}`, `Created task [${taskId}]${name}, that will run every ${interval}ms.`)
 
         this.activeTasks.push(task);
     }
     
     createOnetimeTask(name: string, action: () => void, delay: Milliseconds, ownerName: string) {
         const actionWrapper = () => {
-            logger.logWithTraceId(ownerName, 'System:TaskScheduler', `Executing delayed oneshot [${taskId}]${name}`);
+            logger.logWithTraceId(ownerName, `System:TaskScheduler-${ownerName}-${name}`, `Executing delayed oneshot [${taskId}]${name}`);
             action();
         };
         const taskId = setTimeout(actionWrapper, delay);
 
-        logger.logWithTraceId(ownerName, 'System:TaskScheduler', `Created oneshot task [${taskId}]${name}, that will run in ${delay}ms.`);
+        logger.logWithTraceId(ownerName, `System:TaskScheduler-${ownerName}-${name}`, `Created oneshot task [${taskId}]${name}, that will run in ${delay}ms.`);
     }
 }
 

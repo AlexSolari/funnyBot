@@ -28,7 +28,7 @@ export default class Bot {
     }
 
     start(token: string) {
-        logger.logWithTraceId(this.name, 'System:Bot', 'Starting bot...');
+        logger.logWithTraceId(this.name, `System:Bot-${this.name}-Start`, 'Starting bot...');
         this.telegraf = new Telegraf(token);
 
         this.api = new BotApiService(this.name, this.telegraf);
@@ -62,7 +62,7 @@ export default class Bot {
     }
 
     stop(code: string) {
-        logger.logWithTraceId(this.name, 'System:Bot', 'Stopping bot...');
+        logger.logWithTraceId(this.name, `System:Bot-${this.name}-Stop`, 'Stopping bot...');
 
         this.telegraf!.stop(code);
     }
