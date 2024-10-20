@@ -73,6 +73,14 @@ class Storage {
         });
     }
 
+    async saveMetadata(actions: IActionWithState[], botName: string){
+        return await this.#lock(async () => {
+            const targetPath = this.#buidPathFromKey(`Metadata-${botName}`);
+    
+           await writeFile(targetPath, JSON.stringify(actions), { flag: 'w+' });
+        });
+    }
+
     async getActionState<TActionState extends IActionState>(entity: IActionWithState, chatId: number): Promise<TActionState> {
         return await this.#lock(async () => {
             const data = await this.#loadInternal(entity.key);

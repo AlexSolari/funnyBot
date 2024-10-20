@@ -9,6 +9,7 @@ import functionality from "../functionality/functionality";
 import IActionState from "../types/actionState";
 import { hoursToMilliseconds, secondsToMilliseconds } from "../helpers/timeConvertions";
 import { Hours, Seconds } from "../types/timeValues";
+import storage from "../services/storage";
 
 export default class Bot {
     name: string;
@@ -59,6 +60,8 @@ export default class Bot {
         taskScheduler.createTask("ScheduledProcessing", async () => {
             await this.#runScheduled();
         }, hoursToMilliseconds(0.5 as Hours), true, this.name);
+
+        storage.saveMetadata([...this.commands, ...this.scheduled], this.name);
     }
 
     stop(code: string) {

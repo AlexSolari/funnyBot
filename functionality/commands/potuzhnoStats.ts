@@ -6,7 +6,7 @@ import escapeMarkdown from '../../helpers/escapeMarkdown';
 export default new CommandActionBuilder("Reaction.PotuzhnoStats")
     .on('топ потужності')
     .do(async (ctx) => {
-        const scoreBoard = (await ctx.loadStateOf<PotuzhnoState>('Reaction.Potuzhno')).scoreBoard;
+        const scoreBoard = (await ctx.loadStateOf<PotuzhnoState>('Reaction.Potuzhno')).scoreBoard ?? {};
         const allEntries = [];
         for (const [key, value] of Object.entries(scoreBoard)) {
             allEntries.push({ key, value });

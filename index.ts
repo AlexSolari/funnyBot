@@ -15,11 +15,15 @@ if (process.env.NODE_ENV == "production"){
     startBot("botseiju", 'token.lviv', [ChatId.LvivChat, ChatId.FrankivskChat]);
 }
 else{
-    startBot("test", 'token.test', [-1001759510701]);
+    startBot("test", 'token.test', [ChatId.TestChat]);
 }
 
 process.once('SIGINT', () => stopBots('SIGINT'));
 process.once('SIGTERM', () => stopBots('SIGTERM'));
+
+function log(text: string){
+    logger.logWithTraceId('ALL BOTS', 'System:Bot', text);
+}
 
 async function startBot(name: string, tokenFile: string, broadcastPool: number[]) {
     const bot = new Bot(name, broadcastPool);
@@ -30,17 +34,17 @@ async function startBot(name: string, tokenFile: string, broadcastPool: number[]
 }
 
 async function stopBots(reason: string){
-    logger.logWithTraceId('ALL BOTS', 'System:Bot', `Recieved termination code: ${reason}`);
+    log(`Recieved termination code: ${reason}`);
     taskScheduler.stopAll();
-    logger.logWithTraceId('ALL BOTS', 'System:Bot', 'Acquiring storage semaphore...');
+    log('Acquiring storage semaphore...');
     await storage.semaphoreInstance.acquire();
 
-    logger.logWithTraceId('ALL BOTS', 'System:Bot', 'Stopping bots...');
+    log('Stopping bots...');
     for (const bot of bots) {
         bot.stop(reason);
     }
 
-    logger.logWithTraceId('ALL BOTS', 'System:Bot', 'Shutdown in 3 seconds...');
+    log('Shutdown in 3 seconds...');
     await setTimeout(secondsToMilliseconds(3 as Seconds));
 
     process.exit(0);
