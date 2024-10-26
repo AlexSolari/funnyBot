@@ -33,7 +33,7 @@ export default class BotApiService {
     async #dequeueResponse() {
         const message = this.messageQueue.pop();
 
-        if (message == undefined) return;
+        if (!message) return;
 
         try {
             await this.#processResponse(message);

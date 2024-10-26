@@ -20,12 +20,12 @@ class Storage {
     }
 
     async #lock<TType>(action: () => Promise<TType>) {
-        await Storage.semaphore.acquire();
+        await this.semaphoreInstance.acquire();
 
         try {
             return await action();
         } finally {
-            Storage.semaphore.release();
+            this.semaphoreInstance.release();
         }
     }
 
@@ -84,7 +84,7 @@ class Storage {
     async getActionState<TActionState extends IActionState>(
         entity: IActionWithState,
         chatId: number
-    ): Promise<TActionState> {
+    ) {
         return await this.#lock(async () => {
             const data = await this.#loadInternal(entity.key);
 
@@ -96,7 +96,7 @@ class Storage {
         action: IActionWithState,
         chatId: number,
         transactionResult: TransactionResult
-    ): Promise<void> {
+    ) {
         await this.#lock(async () => {
             const data = await this.#loadInternal(action.key);
 

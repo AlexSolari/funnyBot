@@ -2,15 +2,14 @@ import ScheduledAction from '../../entities/actions/scheduledAction';
 import CachedStateFactory from '../../entities/cachedStateFactory';
 import { ScheduledHandler } from '../../types/handlers';
 import { Hours, HoursOfDay } from '../../types/timeValues';
+import Noop from '../noop';
 
 export default class ScheduledActionBuilder {
     active = true;
     time: HoursOfDay = 0;
     cachedStateFactories = new Map<string, CachedStateFactory>();
     whitelist: number[] = [];
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    handler: ScheduledHandler = async (ctx, getCached) => {};
+    handler: ScheduledHandler = Noop.call;
 
     name: string;
 

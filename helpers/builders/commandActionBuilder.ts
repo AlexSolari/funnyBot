@@ -1,4 +1,3 @@
-import MessageContext from '../../entities/context/messageContext';
 import CommandAction from '../../entities/actions/commandAction';
 import ActionStateBase from '../../entities/states/actionStateBase';
 import toArray from '../toArray';
@@ -6,6 +5,7 @@ import IActionState from '../../types/actionState';
 import { CommandHandler } from '../../types/handlers';
 import { CommandCondition } from '../../types/commandCondition';
 import { Seconds } from '../../types/timeValues';
+import Noop from '../noop';
 
 export class CommandActionBuilderWithState<TActionState extends IActionState> {
     name: string;
@@ -16,10 +16,8 @@ export class CommandActionBuilderWithState<TActionState extends IActionState> {
     blacklist: number[] = [];
     allowedUsers: number[] = [];
     stateConstructor: () => TActionState;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    handler: CommandHandler<TActionState> = async (ctx, state) => {};
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    condition: CommandCondition<TActionState> = async (ctx) => true;
+    handler: CommandHandler<TActionState> = Noop.call;
+    condition: CommandCondition<TActionState> = Noop.true;
 
     constructor(name: string, stateConstructor: () => TActionState) {
         this.name = name;
@@ -44,7 +42,7 @@ export class CommandActionBuilderWithState<TActionState extends IActionState> {
         return this;
     }
 
-    when(condition: (ctx: MessageContext<TActionState>) => Promise<boolean>) {
+    when(condition: CommandCondition<TActionState>) {
         this.condition = condition;
 
         return this;

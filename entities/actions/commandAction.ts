@@ -22,7 +22,7 @@ export default class CommandAction<TActionState extends IActionState>
     active: boolean;
     chatsBlacklist: number[];
     allowedUsers: number[];
-    condition: (ctx: MessageContext<TActionState>) => Promise<boolean>;
+    condition: CommandCondition<TActionState>;
     stateConstructor: () => TActionState;
     key: string;
 
