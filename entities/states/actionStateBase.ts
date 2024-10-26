@@ -1,5 +1,5 @@
-import IActionState from "../../types/actionState";
+import IActionState from '../../types/actionState';
 
-export default class ActionStateBase implements IActionState{
+export default class ActionStateBase implements IActionState {
     lastExecutedDate = 0;
 }

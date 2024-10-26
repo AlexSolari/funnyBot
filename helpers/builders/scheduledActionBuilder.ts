@@ -1,7 +1,7 @@
-import ScheduledAction from "../../entities/actions/scheduledAction";
-import CachedStateFactory from "../../entities/cachedStateFactory";
-import { ScheduledHandler } from "../../types/handlers";
-import { Hours, HoursOfDay } from "../../types/timeValues";
+import ScheduledAction from '../../entities/actions/scheduledAction';
+import CachedStateFactory from '../../entities/cachedStateFactory';
+import { ScheduledHandler } from '../../types/handlers';
+import { Hours, HoursOfDay } from '../../types/timeValues';
 
 export default class ScheduledActionBuilder {
     active = true;
@@ -36,8 +36,15 @@ export default class ScheduledActionBuilder {
         return this;
     }
 
-    withSharedCache(key: string, itemFactory: () => Promise<unknown>, invalidationTimeoutInHours: Hours = 20 as Hours) {
-        this.cachedStateFactories.set(key, new CachedStateFactory(itemFactory, invalidationTimeoutInHours));
+    withSharedCache(
+        key: string,
+        itemFactory: () => Promise<unknown>,
+        invalidationTimeoutInHours: Hours = 20 as Hours
+    ) {
+        this.cachedStateFactories.set(
+            key,
+            new CachedStateFactory(itemFactory, invalidationTimeoutInHours)
+        );
 
         return this;
     }
@@ -49,6 +56,13 @@ export default class ScheduledActionBuilder {
     }
 
     build() {
-        return new ScheduledAction(this.name, this.handler, this.time, this.active, this.whitelist, this.cachedStateFactories);
+        return new ScheduledAction(
+            this.name,
+            this.handler,
+            this.time,
+            this.active,
+            this.whitelist,
+            this.cachedStateFactories
+        );
     }
-};
+}

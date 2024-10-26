@@ -1,3 +1,3 @@
-export default interface IActionState{
+export default interface IActionState {
     lastExecutedDate: number;
 }

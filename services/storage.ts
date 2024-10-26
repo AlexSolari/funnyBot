@@ -1,17 +1,17 @@
-import { existsSync } from "fs";
+import { existsSync } from 'fs';
 import { dirname } from 'path';
-import TransactionResult from "../entities/transactionResult";
-import { mkdir, readFile, writeFile } from "fs/promises";
-import ActionStateBase from "../entities/states/actionStateBase";
-import IActionState from "../types/actionState";
-import IActionWithState from "../types/actionWithState";
+import TransactionResult from '../entities/transactionResult';
+import { mkdir, readFile, writeFile } from 'fs/promises';
+import ActionStateBase from '../entities/states/actionStateBase';
+import IActionState from '../types/actionState';
+import IActionWithState from '../types/actionWithState';
 import { Sema as Semaphore } from 'async-sema';
 
 class Storage {
     static semaphore = new Semaphore(1);
     cache: Map<string, Record<number, ActionStateBase>>;
 
-    get semaphoreInstance(){
+    get semaphoreInstance() {
         return Storage.semaphore;
     }
 
@@ -24,8 +24,7 @@ class Storage {
 
         try {
             return await action();
-        }
-        finally {
+        } finally {
             Storage.semaphore.release();
         }
     }
@@ -44,7 +43,6 @@ class Storage {
 
                 this.cache.set(key, data);
             }
-
         }
 
         return this.cache.get(key) ?? {};
@@ -64,7 +62,7 @@ class Storage {
     }
 
     #buidPathFromKey(key: string) {
-        return 'storage/' + key.replaceAll(':', '/') + ".json";
+        return 'storage/' + key.replaceAll(':', '/') + '.json';
     }
 
     async load(key: string) {
@@ -73,23 +71,32 @@ class Storage {
         });
     }
 
-    async saveMetadata(actions: IActionWithState[], botName: string){
+    async saveMetadata(actions: IActionWithState[], botName: string) {
         return await this.#lock(async () => {
             const targetPath = this.#buidPathFromKey(`Metadata-${botName}`);
-    
-           await writeFile(targetPath, JSON.stringify(actions), { flag: 'w+' });
+
+            await writeFile(targetPath, JSON.stringify(actions), {
+                flag: 'w+'
+            });
         });
     }
 
-    async getActionState<TActionState extends IActionState>(entity: IActionWithState, chatId: number): Promise<TActionState> {
+    async getActionState<TActionState extends IActionState>(
+        entity: IActionWithState,
+        chatId: number
+    ): Promise<TActionState> {
         return await this.#lock(async () => {
             const data = await this.#loadInternal(entity.key);
 
-            return data[chatId] as TActionState ?? entity.stateConstructor();
+            return (data[chatId] as TActionState) ?? entity.stateConstructor();
         });
     }
 
-    async commitTransactionForAction(action: IActionWithState, chatId: number, transactionResult: TransactionResult): Promise<void> {
+    async commitTransactionForAction(
+        action: IActionWithState,
+        chatId: number,
+        transactionResult: TransactionResult
+    ): Promise<void> {
         await this.#lock(async () => {
             const data = await this.#loadInternal(action.key);
 

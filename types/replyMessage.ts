@@ -4,4 +4,4 @@ export default interface IReplyMessage {
     chatId: number;
     replyId: number | undefined;
     traceId: number | string;
-};
+}

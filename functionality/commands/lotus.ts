@@ -4,14 +4,14 @@ import randomInteger from '../../helpers/randomInt';
 import { hoursToSeconds } from '../../helpers/timeConvertions';
 import { Hours } from '../../types/timeValues';
 
-export default new CommandActionBuilder("Reaction.Lotus")
+export default new CommandActionBuilder('Reaction.Lotus')
     .on(/лотус/i)
     .do(async (ctx) => {
         let imageName = randomInteger(0, 1)
-            ? "dampingSphere_funny"
-            : "dampingSphere";
+            ? 'dampingSphere_funny'
+            : 'dampingSphere';
 
-        if (imageName == "dampingSphere_funny") {
+        if (imageName == 'dampingSphere_funny') {
             imageName += randomInteger(1, 4);
         }
 

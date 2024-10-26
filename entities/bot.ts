@@ -1,15 +1,18 @@
-import { Telegraf } from "telegraf";
+import { Telegraf } from 'telegraf';
 import BotApiService from '../services/botApi';
-import IncomingMessage from "./incomingMessage";
+import IncomingMessage from './incomingMessage';
 import taskScheduler from '../services/taskScheduler';
-import logger from "../services/logger";
-import CommandAction from "./actions/commandAction";
-import ScheduledAction from "./actions/scheduledAction";
-import functionality from "../functionality/functionality";
-import IActionState from "../types/actionState";
-import { hoursToMilliseconds, secondsToMilliseconds } from "../helpers/timeConvertions";
-import { Hours, Seconds } from "../types/timeValues";
-import storage from "../services/storage";
+import logger from '../services/logger';
+import CommandAction from './actions/commandAction';
+import ScheduledAction from './actions/scheduledAction';
+import functionality from '../functionality/functionality';
+import IActionState from '../types/actionState';
+import {
+    hoursToMilliseconds,
+    secondsToMilliseconds
+} from '../helpers/timeConvertions';
+import { Hours, Seconds } from '../types/timeValues';
+import storage from '../services/storage';
 
 export default class Bot {
     name: string;
@@ -29,7 +32,11 @@ export default class Bot {
     }
 
     start(token: string) {
-        logger.logWithTraceId(this.name, `System:Bot-${this.name}-Start`, 'Starting bot...');
+        logger.logWithTraceId(
+            this.name,
+            `System:Bot-${this.name}-Start`,
+            'Starting bot...'
+        );
         this.telegraf = new Telegraf(token);
 
         this.api = new BotApiService(this.name, this.telegraf);
@@ -38,10 +45,14 @@ export default class Bot {
             const msg = new IncomingMessage(ctx.update.message);
             const messageContent = msg.text ?? '<non-text message>';
 
+            const chatTitle =
+                'title' in msg.chat ? msg.chat.title + ' ' + msg.chat.id : 'DM';
+            const messageFromName = msg.from?.first_name ?? 'Unknown';
+            const messageFromId = msg.from?.id ?? 'Unknown';
             logger.logWithTraceId(
-                this.name, 
-                msg.traceId, 
-                `${('title' in msg.chat) ? msg.chat.title + " " + msg.chat.id : "DM"} | ${msg.from?.first_name ?? "Unknown"} (${msg.from?.id ?? "Unknown"}): ${messageContent}`
+                this.name,
+                msg.traceId,
+                `${chatTitle} | ${messageFromName} (${messageFromId}): ${messageContent}`
             );
 
             if (msg.text) {
@@ -51,21 +62,37 @@ export default class Bot {
 
         this.telegraf.launch();
 
-        taskScheduler.createTask("MessageProcessing", async () => {
-            while (this.messageQueue.length > 0) {
-                await this.#processMessages();
-            }
-        }, secondsToMilliseconds(0.3 as Seconds), false, this.name);
+        taskScheduler.createTask(
+            'MessageProcessing',
+            async () => {
+                while (this.messageQueue.length > 0) {
+                    await this.#processMessages();
+                }
+            },
+            secondsToMilliseconds(0.3 as Seconds),
+            false,
+            this.name
+        );
 
-        taskScheduler.createTask("ScheduledProcessing", async () => {
-            await this.#runScheduled();
-        }, hoursToMilliseconds(0.5 as Hours), true, this.name);
+        taskScheduler.createTask(
+            'ScheduledProcessing',
+            async () => {
+                await this.#runScheduled();
+            },
+            hoursToMilliseconds(0.5 as Hours),
+            true,
+            this.name
+        );
 
         storage.saveMetadata([...this.commands, ...this.scheduled], this.name);
     }
 
     stop(code: string) {
-        logger.logWithTraceId(this.name, `System:Bot-${this.name}-Stop`, 'Stopping bot...');
+        logger.logWithTraceId(
+            this.name,
+            `System:Bot-${this.name}-Stop`,
+            'Stopping bot...'
+        );
 
         this.telegraf!.stop(code);
     }
@@ -77,9 +104,12 @@ export default class Bot {
 
                 try {
                     await trig.exec(ctx);
-                }
-                catch (error) {
-                    logger.errorWithTraceId(ctx.botName, ctx.traceId, error as (string | Error));
+                } catch (error) {
+                    logger.errorWithTraceId(
+                        ctx.botName,
+                        ctx.traceId,
+                        error as string | Error
+                    );
                 }
             }
         }
@@ -93,10 +123,13 @@ export default class Bot {
 
             try {
                 await cmd.exec(ctx);
-            }
-            catch (error) {
-                logger.errorWithTraceId(ctx.botName, ctx.traceId, error as (string | Error));
+            } catch (error) {
+                logger.errorWithTraceId(
+                    ctx.botName,
+                    ctx.traceId,
+                    error as string | Error
+                );
             }
         }
     }
-};
+}

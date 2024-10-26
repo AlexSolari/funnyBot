@@ -3,10 +3,10 @@ import { ChatId } from '../../types/chatIds';
 import { hoursToSeconds } from '../../helpers/timeConvertions';
 import { Hours } from '../../types/timeValues';
 
-export default new CommandActionBuilder("Reaction.Pizda")
-    .on("да")
+export default new CommandActionBuilder('Reaction.Pizda')
+    .on('да')
     .do(async (ctx) => {
-        ctx.replyWithText("пизда");
+        ctx.replyWithText('пизда');
     })
     .cooldown(hoursToSeconds(2 as Hours))
     .ignoreChat(ChatId.LvivChat)

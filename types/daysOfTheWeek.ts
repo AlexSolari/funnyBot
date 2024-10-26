@@ -1,4 +1,4 @@
-export enum Day{
+export enum Day {
     Sunday = 0,
     Monday = 1,
     Tuesday = 2,
@@ -6,4 +6,4 @@ export enum Day{
     Thursday = 4,
     Friday = 5,
     Saturday = 6
-};
+}

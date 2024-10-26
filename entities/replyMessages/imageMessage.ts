@@ -1,5 +1,5 @@
-import { InputFile } from "telegraf/types";
-import IReplyMessage from "../../types/replyMessage";
+import { InputFile } from 'telegraf/types';
+import IReplyMessage from '../../types/replyMessage';
 
 export default class ImageMessage implements IReplyMessage {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -8,10 +8,15 @@ export default class ImageMessage implements IReplyMessage {
     replyId: number | undefined;
     traceId: string | number;
 
-    constructor(image: InputFile, chatId: number, replyId: number | undefined, traceId: number | string){
+    constructor(
+        image: InputFile,
+        chatId: number,
+        replyId: number | undefined,
+        traceId: number | string
+    ) {
         this.content = image;
         this.chatId = chatId;
         this.replyId = replyId;
         this.traceId = traceId;
     }
-};
+}

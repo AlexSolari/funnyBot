@@ -1,4 +1,4 @@
-import IActionState from "./actionState";
+import IActionState from './actionState';
 
 export default interface IActionWithState {
     key: string;

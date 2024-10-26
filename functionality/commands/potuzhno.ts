@@ -5,26 +5,33 @@ import randomInteger from '../../helpers/randomInt';
 import { hoursToSeconds } from '../../helpers/timeConvertions';
 import { Hours } from '../../types/timeValues';
 
-export default new CommandActionBuilderWithState<PotuzhnoState>("Reaction.Potuzhno", () => new PotuzhnoState())
+export default new CommandActionBuilderWithState<PotuzhnoState>(
+    'Reaction.Potuzhno',
+    () => new PotuzhnoState()
+)
     .on(/.+/i)
-    .when(async (ctx) => randomInteger(0, 99) == 0 && ctx.messageText != 'топ потужності')
+    .when(
+        async (ctx) =>
+            randomInteger(0, 99) == 0 && ctx.messageText != 'топ потужності'
+    )
     .do(async (ctx) => {
         const superPotuzhno = randomInteger(0, 99) == 0;
-        const scoredPoints = (superPotuzhno) ? 15 : 1;
+        const scoredPoints = superPotuzhno ? 15 : 1;
 
-        ctx.updateState(state => {
-            state.scoreBoard[ctx.fromUserName] = (state.scoreBoard[ctx.fromUserName] ?? 0) + scoredPoints;
+        ctx.updateState((state) => {
+            state.scoreBoard[ctx.fromUserName] =
+                (state.scoreBoard[ctx.fromUserName] ?? 0) + scoredPoints;
         });
 
         if (superPotuzhno) {
-            ctx.replyWithText("🎉😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО 💪\n🎉😳😳😳😳😳😳🎉");
-        }
-        else {
+            ctx.replyWithText(
+                '🎉😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО 💪\n🎉😳😳😳😳😳😳🎉'
+            );
+        } else {
             if (randomInteger(0, 4) == 0) {
-                ctx.replyWithVideo('potuzhno')
-            }
-            else {
-                ctx.replyWithText("Потужно 💪");
+                ctx.replyWithVideo('potuzhno');
+            } else {
+                ctx.replyWithText('Потужно 💪');
             }
         }
     })

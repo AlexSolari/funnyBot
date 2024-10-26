@@ -4,7 +4,7 @@ import scheduled from './gen_scheduled';
 import commands from './gen_commands';
 import IActionState from '../types/actionState';
 
-interface IFunctionalityData{
+interface IFunctionalityData {
     commands: CommandAction<IActionState>[];
     scheduled: ScheduledAction[];
 }

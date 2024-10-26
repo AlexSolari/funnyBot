@@ -10,22 +10,31 @@ import logger from './services/logger.js';
 
 const bots: Bot[] = [];
 
-if (process.env.NODE_ENV == "production"){
-    startBot("kekruga", 'token.prod', [ChatId.ModernChat, ChatId.PioneerChat, ChatId.SpellSeeker, ChatId.StandardChat, ChatId.PauperChat]);
-    startBot("botseiju", 'token.lviv', [ChatId.LvivChat, ChatId.FrankivskChat]);
-}
-else{
-    startBot("test", 'token.test', [ChatId.TestChat]);
+if (process.env.NODE_ENV == 'production') {
+    startBot('kekruga', 'token.prod', [
+        ChatId.ModernChat,
+        ChatId.PioneerChat,
+        ChatId.SpellSeeker,
+        ChatId.StandardChat,
+        ChatId.PauperChat
+    ]);
+    startBot('botseiju', 'token.lviv', [ChatId.LvivChat, ChatId.FrankivskChat]);
+} else {
+    startBot('test', 'token.test', [ChatId.TestChat]);
 }
 
 process.once('SIGINT', () => stopBots('SIGINT'));
 process.once('SIGTERM', () => stopBots('SIGTERM'));
 
-function log(text: string){
+function log(text: string) {
     logger.logWithTraceId('ALL BOTS', 'System:Bot', text);
 }
 
-async function startBot(name: string, tokenFile: string, broadcastPool: number[]) {
+async function startBot(
+    name: string,
+    tokenFile: string,
+    broadcastPool: number[]
+) {
     const bot = new Bot(name, broadcastPool);
     const token = await readFile(tokenFile, 'utf8');
 
@@ -33,7 +42,7 @@ async function startBot(name: string, tokenFile: string, broadcastPool: number[]
     bots.push(bot);
 }
 
-async function stopBots(reason: string){
+async function stopBots(reason: string) {
     log(`Recieved termination code: ${reason}`);
     taskScheduler.stopAll();
     log('Acquiring storage semaphore...');

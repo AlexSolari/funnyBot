@@ -4,20 +4,20 @@ import randomInteger from '../../helpers/randomInt';
 import { hoursToSeconds } from '../../helpers/timeConvertions';
 import { Hours } from '../../types/timeValues';
 
-export default new CommandActionBuilder("Reaction.Fang")
+export default new CommandActionBuilder('Reaction.Fang')
     .on(/(фанг|мотом[иы]ш)/i)
     .do(async (ctx) => {
         const i = randomInteger(0, 2);
 
         switch (i) {
             case 0:
-                ctx.replyWithImage("fangAbzan");
+                ctx.replyWithImage('fangAbzan');
                 break;
             case 1:
-                ctx.replyWithImage("fangEsper");
+                ctx.replyWithImage('fangEsper');
                 break;
             case 2:
-                ctx.replyWithImage("fangLove");
+                ctx.replyWithImage('fangLove');
                 break;
             default:
                 break;

@@ -4,12 +4,12 @@ import { hoursToSeconds } from '../../helpers/timeConvertions';
 import { SpecificUsers } from '../../types/userIds';
 import { Hours } from '../../types/timeValues';
 
-export default new CommandActionBuilder("Reaction.Ihor")
+export default new CommandActionBuilder('Reaction.Ihor')
     .on(/мод[еє]рн/i)
     .from(SpecificUsers.ihor)
     .when(async (ctx) => ctx.chatId == ChatId.LvivChat)
     .do(async (ctx) => {
-        ctx.replyWithImage("ihor");
+        ctx.replyWithImage('ihor');
     })
     .cooldown(hoursToSeconds(2 as Hours))
     .disabled()

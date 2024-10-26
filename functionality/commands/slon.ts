@@ -3,10 +3,10 @@ import { ChatId } from '../../types/chatIds';
 import { hoursToSeconds } from '../../helpers/timeConvertions';
 import { Hours } from '../../types/timeValues';
 
-export default new CommandActionBuilder("Reaction.Slon")
+export default new CommandActionBuilder('Reaction.Slon')
     .on(/слон/i)
     .do(async (ctx) => {
-        ctx.replyWithVideo("slon");
+        ctx.replyWithVideo('slon');
     })
     .ignoreChat(ChatId.PauperChat)
     .ignoreChat(ChatId.FrankivskChat)

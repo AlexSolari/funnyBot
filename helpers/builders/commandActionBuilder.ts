@@ -1,16 +1,16 @@
-import MessageContext from "../../entities/context/messageContext";
-import CommandAction from "../../entities/actions/commandAction";
-import ActionStateBase from "../../entities/states/actionStateBase";
-import toArray from "../toArray";
-import IActionState from "../../types/actionState";
-import { CommandHandler } from "../../types/handlers";
-import { CommandCondition } from "../../types/commandCondition";
-import { Seconds } from "../../types/timeValues";
+import MessageContext from '../../entities/context/messageContext';
+import CommandAction from '../../entities/actions/commandAction';
+import ActionStateBase from '../../entities/states/actionStateBase';
+import toArray from '../toArray';
+import IActionState from '../../types/actionState';
+import { CommandHandler } from '../../types/handlers';
+import { CommandCondition } from '../../types/commandCondition';
+import { Seconds } from '../../types/timeValues';
 
 export class CommandActionBuilderWithState<TActionState extends IActionState> {
     name: string;
     trigger: string | RegExp | Array<string> | Array<RegExp> = [];
-    
+
     active = true;
     cooldownSeconds: Seconds = 0 as Seconds;
     blacklist: number[] = [];
@@ -69,7 +69,8 @@ export class CommandActionBuilderWithState<TActionState extends IActionState> {
     }
 
     build() {
-        return new CommandAction(this.trigger,
+        return new CommandAction(
+            this.trigger,
             this.handler,
             this.name,
             this.active,
@@ -77,12 +78,13 @@ export class CommandActionBuilderWithState<TActionState extends IActionState> {
             this.blacklist,
             this.allowedUsers,
             this.condition,
-            this.stateConstructor);
+            this.stateConstructor
+        );
     }
-};
+}
 
 export class CommandActionBuilder extends CommandActionBuilderWithState<ActionStateBase> {
-    constructor(name: string){
+    constructor(name: string) {
         super(name, () => new ActionStateBase());
     }
-};
+}

@@ -1,22 +1,22 @@
-import { Seconds } from "../timeValues";
+import { Seconds } from '../timeValues';
 
-export interface IMWEventDetail{
-    date: Date | string,
-    id: number,
+export interface IMWEventDetail {
+    date: Date | string;
+    id: number;
     gt: {
-        name: string,
-        space: number,
-        used_space: number,
-        service: { name: string }
-    },
-    time: { start_time: Seconds }
-};
+        name: string;
+        space: number;
+        used_space: number;
+        service: { name: string };
+    };
+    time: { start_time: Seconds };
+}
 
-export interface IMwApiResponseDateSlot{ 
-    date: Date; 
-    slots: IMWEventDetail[]; 
-};
+export interface IMwApiResponseDateSlot {
+    date: Date;
+    slots: IMWEventDetail[];
+}
 
-export interface IMWApiResponse{
-    slots: { date_slots: IMwApiResponseDateSlot[] }[] 
+export interface IMWApiResponse {
+    slots: { date_slots: IMwApiResponseDateSlot[] }[];
 }

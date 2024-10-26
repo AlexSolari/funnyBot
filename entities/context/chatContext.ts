@@ -1,8 +1,8 @@
-import ImageMessage from "../replyMessages/imageMessage";
-import IReplyMessage from "../../types/replyMessage";
-import TextMessage from "../replyMessages/textMessage";
-import VideoMessage from "../replyMessages/videoMessage";
-import { resolve } from "path";
+import ImageMessage from '../replyMessages/imageMessage';
+import IReplyMessage from '../../types/replyMessage';
+import TextMessage from '../replyMessages/textMessage';
+import VideoMessage from '../replyMessages/videoMessage';
+import { resolve } from 'path';
 
 export default class ChatContext {
     botName: string;
@@ -10,7 +10,12 @@ export default class ChatContext {
     chatId: number;
     traceId: number | string;
 
-    constructor(botName: string, enqueueMethod: (message: IReplyMessage) => void, chatId: number, traceId: number | string) {
+    constructor(
+        botName: string,
+        enqueueMethod: (message: IReplyMessage) => void,
+        chatId: number,
+        traceId: number | string
+    ) {
         this.botName = botName;
         this.enqueue = enqueueMethod;
         this.chatId = chatId;
@@ -18,27 +23,32 @@ export default class ChatContext {
     }
 
     sendTextToChat(text: string) {
-        this.enqueue(new TextMessage(text,
-            this.chatId,
-            undefined,
-            this.traceId));
+        this.enqueue(
+            new TextMessage(text, this.chatId, undefined, this.traceId)
+        );
     }
 
     sendImageToChat(name: string) {
         const filePath = `./content/${name}.png`;
-        this.enqueue(new ImageMessage(
-            { source: resolve(filePath) },
-            this.chatId,
-            undefined,
-            this.traceId))
+        this.enqueue(
+            new ImageMessage(
+                { source: resolve(filePath) },
+                this.chatId,
+                undefined,
+                this.traceId
+            )
+        );
     }
 
     sendVideoToChat(name: string) {
         const filePath = `./content/${name}.mp4`;
-        this.enqueue(new VideoMessage(
-            { source: resolve(filePath) },
-            this.chatId,
-            undefined,
-            this.traceId))
+        this.enqueue(
+            new VideoMessage(
+                { source: resolve(filePath) },
+                this.chatId,
+                undefined,
+                this.traceId
+            )
+        );
     }
-};
+}

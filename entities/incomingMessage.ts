@@ -1,5 +1,5 @@
-import { Chat, User } from "telegraf/types";
-import randomInteger from "../helpers/randomInt";
+import { Chat, User } from 'telegraf/types';
+import randomInteger from '../helpers/randomInt';
 
 export default class IncomingMessage {
     message_id: number;
@@ -15,4 +15,4 @@ export default class IncomingMessage {
         this.from = ctxMessage.from;
         this.text = ctxMessage.text;
     }
-};
+}

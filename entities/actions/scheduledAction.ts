@@ -1,6 +1,6 @@
 import storage from '../../services/storage';
 import TransactionResult from '../transactionResult';
-import moment from "moment";
+import moment from 'moment';
 import logger from '../../services/logger';
 import taskScheduler from '../../services/taskScheduler';
 import { Sema as Semaphore } from 'async-sema';
@@ -33,7 +33,8 @@ export default class ScheduledAction implements IActionWithState {
         timeinHours: HoursOfDay,
         active: boolean,
         whitelist: number[],
-        cachedStateFactories: Map<string, CachedStateFactory>) {
+        cachedStateFactories: Map<string, CachedStateFactory>
+    ) {
         this.name = name;
         this.handler = handler;
         this.timeinHours = timeinHours;
@@ -44,8 +45,7 @@ export default class ScheduledAction implements IActionWithState {
     }
 
     async exec(ctx: ChatContext) {
-        if (!this.active || !this.chatsWhitelist.includes(ctx.chatId))
-            return;
+        if (!this.active || !this.chatsWhitelist.includes(ctx.chatId)) return;
 
         const state = await storage.getActionState(this, ctx.chatId);
         const isAllowedToTrigger = this.#shouldTrigger(state);
@@ -57,11 +57,19 @@ export default class ScheduledAction implements IActionWithState {
                 ` - Executing [${this.name}] in ${ctx.chatId}`
             );
 
-            await this.handler(ctx, <TResult>(key: string) => this.#getCachedValue(key, ctx.botName) as TResult);
+            await this.handler(
+                ctx,
+                <TResult>(key: string) =>
+                    this.#getCachedValue(key, ctx.botName) as TResult
+            );
 
             state.lastExecutedDate = moment().valueOf();
 
-            await storage.commitTransactionForAction(this, ctx.chatId, new TransactionResult(state, isAllowedToTrigger))
+            await storage.commitTransactionForAction(
+                this,
+                ctx.chatId,
+                new TransactionResult(state, isAllowedToTrigger)
+            );
         }
     }
 
@@ -81,7 +89,9 @@ export default class ScheduledAction implements IActionWithState {
                 taskScheduler.createOnetimeTask(
                     `Drop cached value [${this.name} : ${key}]`,
                     () => this.cachedState.delete(key),
-                    hoursToMilliseconds(cachedItemFactory.invalidationTimeoutInHours),
+                    hoursToMilliseconds(
+                        cachedItemFactory.invalidationTimeoutInHours
+                    ),
                     botName
                 );
 
@@ -97,10 +107,10 @@ export default class ScheduledAction implements IActionWithState {
     #shouldTrigger(state: IActionState): boolean {
         const today = moment().startOf('day').valueOf();
 
-        const isAllowedToTrigger = moment().hour().valueOf() >= this.timeinHours;
+        const isAllowedToTrigger =
+            moment().hour().valueOf() >= this.timeinHours;
         const hasTriggeredToday = state.lastExecutedDate >= today;
 
-        return isAllowedToTrigger
-            && !hasTriggeredToday;
+        return isAllowedToTrigger && !hasTriggeredToday;
     }
-};
+}
