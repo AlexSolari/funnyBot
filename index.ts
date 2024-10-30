@@ -35,11 +35,9 @@ async function startBot(
     tokenFile: string,
     broadcastPool: number[]
 ) {
-    const bot = new Bot(name, broadcastPool);
     const token = await readFile(tokenFile, 'utf8');
 
-    bot.start(token);
-    bots.push(bot);
+    bots.push(new Bot(name, token, broadcastPool));
 }
 
 async function stopBots(reason: string) {

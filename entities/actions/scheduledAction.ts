@@ -57,10 +57,8 @@ export default class ScheduledAction implements IActionWithState {
                 ` - Executing [${this.name}] in ${ctx.chatId}`
             );
 
-            await this.handler(
-                ctx,
-                <TResult>(key: string) =>
-                    this.#getCachedValue(key, ctx.botName) as TResult
+            await this.handler(ctx, <TResult>(key: string) =>
+                this.#getCachedValue<TResult>(key, ctx.botName)
             );
 
             state.lastExecutedDate = moment().valueOf();
@@ -73,32 +71,38 @@ export default class ScheduledAction implements IActionWithState {
         }
     }
 
-    async #getCachedValue(key: string, botName: string): Promise<unknown> {
+    async #getCachedValue<TResult>(
+        key: string,
+        botName: string
+    ): Promise<TResult> {
+        if (!this.cachedStateFactories.has(key)) {
+            throw new Error(
+                `No shared cache was set up for the key [${key}] in action '${this.name}'`
+            );
+        }
+
         await ScheduledAction.semaphore.acquire();
 
         try {
             if (this.cachedState.has(key)) {
-                return this.cachedState.get(key) ?? null;
+                return this.cachedState.get(key) as TResult;
             }
 
-            if (this.cachedStateFactories.has(key)) {
-                const cachedItemFactory = this.cachedStateFactories.get(key)!;
-                const value = await cachedItemFactory.getValue();
+            const cachedItemFactory = this.cachedStateFactories.get(key)!;
+            const value = await cachedItemFactory.getValue();
 
-                this.cachedState.set(key, value);
-                taskScheduler.createOnetimeTask(
-                    `Drop cached value [${this.name} : ${key}]`,
-                    () => this.cachedState.delete(key),
-                    hoursToMilliseconds(
-                        cachedItemFactory.invalidationTimeoutInHours
-                    ),
-                    botName
-                );
+            this.cachedState.set(key, value);
 
-                return value;
-            }
+            taskScheduler.createOnetimeTask(
+                `Drop cached value [${this.name} : ${key}]`,
+                () => this.cachedState.delete(key),
+                hoursToMilliseconds(
+                    cachedItemFactory.invalidationTimeoutInHours
+                ),
+                botName
+            );
 
-            return null;
+            return value as TResult;
         } finally {
             ScheduledAction.semaphore.release();
         }

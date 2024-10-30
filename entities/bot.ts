@@ -16,22 +16,19 @@ import storage from '../services/storage';
 
 export default class Bot {
     name: string;
-    api: BotApiService | null = null;
-    telegraf: Telegraf | null = null;
+    api: BotApiService;
+    telegraf: Telegraf;
     commands: CommandAction<IActionState>[];
     scheduled: ScheduledAction[];
     broadcastPool: number[];
-    messageQueue: IncomingMessage[];
+    messageQueue: IncomingMessage[] = [];
 
-    constructor(name: string, broadcastPool: number[]) {
+    constructor(name: string, token: string, broadcastPool: number[]) {
         this.name = name;
         this.commands = functionality.commands;
         this.scheduled = functionality.scheduled;
         this.broadcastPool = broadcastPool;
-        this.messageQueue = [];
-    }
 
-    start(token: string) {
         logger.logWithTraceId(
             this.name,
             `System:Bot-${this.name}-Start`,
@@ -94,13 +91,13 @@ export default class Bot {
             'Stopping bot...'
         );
 
-        this.telegraf!.stop(code);
+        this.telegraf.stop(code);
     }
 
     async #runScheduled() {
         for (const chatId of this.broadcastPool) {
             for (const trig of this.scheduled) {
-                const ctx = this.api!.createContextForChat(chatId, trig.name);
+                const ctx = this.api.createContextForChat(chatId, trig.name);
 
                 try {
                     await trig.exec(ctx);
@@ -119,7 +116,7 @@ export default class Bot {
         const msg = this.messageQueue.pop()!;
 
         for (const cmd of this.commands) {
-            const ctx = this.api!.createContextForMessage(msg);
+            const ctx = this.api.createContextForMessage(msg);
 
             try {
                 await cmd.exec(ctx);
