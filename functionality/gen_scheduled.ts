@@ -2,4 +2,4 @@
 import lowCount from './scheduled/lowCount';
 import meta from './scheduled/meta';
 
-export default [lowCount, meta].filter((x) => x.active);
+export default [lowCount,meta].filter(x => x.active);

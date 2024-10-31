@@ -10,5 +10,6 @@ export default new CommandActionBuilder('Reaction.Slon')
     })
     .ignoreChat(ChatId.PauperChat)
     .ignoreChat(ChatId.FrankivskChat)
+    .ignoreChat(ChatId.FnmChat)
     .cooldown(hoursToSeconds(2 as Hours))
     .build();

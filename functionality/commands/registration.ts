@@ -97,4 +97,5 @@ export default new CommandActionBuilder('Reaction.Registration')
     .ignoreChat(ChatId.LvivChat)
     .ignoreChat(ChatId.PauperChat)
     .ignoreChat(ChatId.FrankivskChat)
+    .ignoreChat(ChatId.FnmChat)
     .build();

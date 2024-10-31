@@ -12,5 +12,6 @@ export default new CommandActionBuilder('Reaction.Control')
     .ignoreChat(ChatId.LvivChat)
     .ignoreChat(ChatId.PauperChat)
     .ignoreChat(ChatId.FrankivskChat)
+    .ignoreChat(ChatId.FnmChat)
     .disabled()
     .build();
