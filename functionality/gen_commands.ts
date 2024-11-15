@@ -10,6 +10,7 @@ import kalitas from './commands/kalitas';
 import kamaz from './commands/kamaz';
 import lotus from './commands/lotus';
 import pizda from './commands/pizda';
+import ponyav from './commands/ponyav';
 import potuzhno from './commands/potuzhno';
 import potuzhnoStats from './commands/potuzhnoStats';
 import rakdos from './commands/rakdos';
@@ -21,4 +22,4 @@ import slon from './commands/slon';
 import ternopil from './commands/ternopil';
 import vitalii from './commands/vitalii';
 
-export default [black,cardSearch,cardSearch_small,control,fang,hello,ihor,kalitas,kamaz,lotus,pizda,potuzhno,potuzhnoStats,rakdos,rating,registration,ring,rozklad,slon,ternopil,vitalii].filter(x => x.active);
+export default [black,cardSearch,cardSearch_small,control,fang,hello,ihor,kalitas,kamaz,lotus,pizda,ponyav,potuzhno,potuzhnoStats,rakdos,rating,registration,ring,rozklad,slon,ternopil,vitalii].filter(x => x.active);
