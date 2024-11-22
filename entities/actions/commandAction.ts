@@ -62,7 +62,7 @@ export default class CommandAction<TActionState extends IActionState>
             ctx.chatId
         );
 
-        const { shouldTrigger, matchResult, skipCooldown } = this.triggers
+        const { shouldTrigger, matchResults, skipCooldown } = this.triggers
             .map((x) => this.#checkTrigger(ctx, x, state))
             .reduce(
                 (acc, curr) => acc.mergeWith(curr),
@@ -76,7 +76,7 @@ export default class CommandAction<TActionState extends IActionState>
             ctx.traceId,
             ` - Executing [${this.name}] in ${ctx.chatId}`
         );
-        ctx.matchResult = matchResult;
+        ctx.matchResults = matchResults;
 
         await this.handler(ctx, state);
 
@@ -103,7 +103,7 @@ export default class CommandAction<TActionState extends IActionState>
         state: IActionState
     ) {
         let shouldTrigger = false;
-        let matchResult: RegExpExecArray | null = null;
+        const matchResults: RegExpExecArray[] = [];
 
         if (!ctx.fromUserId)
             return CommandTriggerCheckResult.DontTriggerAndSkipCooldown;
@@ -122,15 +122,18 @@ export default class CommandAction<TActionState extends IActionState>
             if (typeof trigger == 'string') {
                 shouldTrigger = ctx.messageText.toLowerCase() == trigger;
             } else {
-                matchResult = trigger.exec(ctx.messageText);
-                shouldTrigger =
-                    (matchResult && matchResult.length > 0) || false;
+                let execResult: RegExpExecArray | null;
+                do {
+                    execResult = trigger.exec(ctx.messageText);
+                    if (execResult) matchResults.push(execResult);
+                } while (execResult != null);
+                shouldTrigger = matchResults.length > 0;
             }
         }
 
         return new CommandTriggerCheckResult(
             shouldTrigger,
-            matchResult,
+            matchResults,
             !isUserAllowed
         );
     }

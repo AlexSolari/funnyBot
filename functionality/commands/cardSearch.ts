@@ -14,22 +14,24 @@ function getCardText(card: IScryfallCardInfo, fallback: { normal: string }) {
 }
 
 export default new CommandActionBuilder('Reaction.CardSearch')
-    .on(/\[\[(.+)\]\]/i)
+    .on(/\[\[([^[]+)\]\]/gi)
     .do(async (ctx) => {
-        const response = await fetch(
-            `https://api.scryfall.com/cards/named?fuzzy=${ctx.matchResult![1]}`
-        );
-        const data = await response.json();
+        for (const matchResult of ctx.matchResults) {
+            const response = await fetch(
+                `https://api.scryfall.com/cards/named?fuzzy=${matchResult[1]}`
+            );
+            const data = await response.json();
 
-        if (data.status == 404) return;
+            if (data.status == 404) return;
 
-        const cards: IScryfallCardInfo[] = data.card_faces
-            ? data.card_faces
-            : [data];
-        const text = cards
-            .map((x) => getCardText(x, data.image_uris))
-            .join('\n\n➡️➡️➡️➡️➡️⤵️\n\n');
+            const cards: IScryfallCardInfo[] = data.card_faces
+                ? data.card_faces
+                : [data];
+            const text = cards
+                .map((x) => getCardText(x, data.image_uris))
+                .join('\n\n➡️➡️➡️➡️➡️⤵️\n\n');
 
-        ctx.replyWithText(escapeMarkdown(text));
+            ctx.replyWithText(escapeMarkdown(text));
+        }
     })
     .build();

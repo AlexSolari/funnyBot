@@ -13,7 +13,7 @@ export default class MessageContext<
 > extends ChatContext {
     messageId: number;
     messageText: string;
-    matchResult: RegExpMatchArray | null = null;
+    matchResults: RegExpMatchArray[] = [];
     fromUserId: number | undefined;
     startCooldown: boolean = true;
     updateActions: Array<(state: TActionState) => void> = [];
