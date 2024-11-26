@@ -122,12 +122,14 @@ export default class CommandAction<TActionState extends IActionState>
             if (typeof trigger == 'string') {
                 shouldTrigger = ctx.messageText.toLowerCase() == trigger;
             } else {
-                let execResult: RegExpExecArray | null;
-                do {
-                    execResult = trigger.exec(ctx.messageText);
-                    if (execResult) matchResults.push(execResult);
-                } while (execResult != null);
-                shouldTrigger = matchResults.length > 0;
+                let matchCount = ctx.messageText.match(trigger)?.length ?? 0;
+                if (matchCount > 0) {
+                    for (; matchCount > 0; matchCount--) {
+                        const execResult = trigger.exec(ctx.messageText);
+                        if (execResult) matchResults.push(execResult);
+                    }
+                    shouldTrigger = true;
+                }
             }
         }
 
