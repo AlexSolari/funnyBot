@@ -1,66 +1,64 @@
-import { IScryfallCardInfo } from '../../types/externalApiDefinitions/scryfall';
+import {
+    IScryfallCard,
+    IScryfallCardFace,
+    IScryfallFuzzyResponse,
+    IScryfallQueryResponse
+} from '../../types/externalApiDefinitions/scryfall';
 import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 
-function getCardText(card: IScryfallCardInfo, fallback: { normal: string }) {
-    const images = card.image_uris ?? fallback;
-
-    if (images) return `${images.normal}`;
-
-    return card.oracle_text;
-}
+const cardBack =
+    'https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg';
 
 export default new CommandActionBuilder('Reaction.CardSearch_Small')
     .on(/\[([^[]+)\]/gi)
-    .when(async (ctx) => !ctx.messageText.includes('[['))
     .do(async (ctx) => {
         for (const matchResult of ctx.matchResults) {
-            let images: string[];
-            if (matchResult[1].includes('|')) {
-                let useBack = false;
+            const firstRegexMatch = matchResult[1];
+            let cards: IScryfallCardFace[];
+            let fallbackImage: string;
+            let useBack = false;
+
+            if (firstRegexMatch.includes('|')) {
                 const cardName = matchResult[1].split('|')[0];
                 let subquery = matchResult[1].split('|')[1];
 
-                if (subquery == 'flip') {
+                if (subquery.includes('flip')) {
                     useBack = true;
-                    subquery = '';
+                    subquery = subquery.replace('flip', '');
                 }
                 const response = await fetch(
                     `https://api.scryfall.com/cards/search?q=${cardName} ${subquery}`
                 );
-                const data = await response.json();
+                const data = (await response.json()) as IScryfallQueryResponse;
 
-                if (data.status == 404) continue;
+                if ('status' in data) continue;
 
-                const firstMatch = data.data[0];
+                const firstMatch = data.data[0] as IScryfallCard;
+                fallbackImage =
+                    'image_uris' in firstMatch
+                        ? firstMatch.image_uris.normal
+                        : cardBack;
 
-                const cards: IScryfallCardInfo[] = firstMatch.card_faces
+                cards = firstMatch.card_faces
                     ? firstMatch.card_faces
                     : [firstMatch];
-                images = cards.map((x) =>
-                    getCardText(x, firstMatch.image_uris)
-                );
-
-                if (useBack) images.shift();
             } else {
                 const response = await fetch(
-                    `https://api.scryfall.com/cards/named?fuzzy=${matchResult[1]}`
+                    `https://api.scryfall.com/cards/named?fuzzy=${firstRegexMatch}`
                 );
-                const data = await response.json();
+                const data = (await response.json()) as IScryfallFuzzyResponse;
 
-                if (data.status == 404) continue;
+                if ('status' in data) continue;
 
-                const cards: IScryfallCardInfo[] = data.card_faces
-                    ? data.card_faces
-                    : [data];
-                images = cards.map((x) => getCardText(x, data.image_uris));
+                cards = data.card_faces ? data.card_faces : [data];
             }
 
-            ctx.replyWithText(
-                `[\\.](${
-                    images[0] ??
-                    'https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg'
-                })`
+            const images = cards.map(
+                (card) => card.image_uris.normal ?? fallbackImage
             );
+            if (useBack) images.shift();
+
+            ctx.replyWithText(`[\\.](${images[0] ?? cardBack})`);
         }
     })
     .build();
