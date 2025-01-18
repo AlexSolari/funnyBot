@@ -25,7 +25,7 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
 
         if (superPotuzhno) {
             ctx.replyWithText(
-                '🎉😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО 💪\n🎉😳😳😳😳😳😳🎉'
+                '🎉😳😳😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО 💪\n🎉😳😳😳😳😳😳😳😳🎉'
             );
         } else {
             if (randomInteger(0, 4) == 0) {
