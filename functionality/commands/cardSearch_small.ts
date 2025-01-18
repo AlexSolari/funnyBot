@@ -39,9 +39,11 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
                         ? firstMatch.image_uris.normal
                         : cardBack;
 
-                cards = firstMatch.card_faces
-                    ? firstMatch.card_faces
-                    : [firstMatch];
+                cards =
+                    firstMatch.card_faces &&
+                    'image_uris' in firstMatch.card_faces[0]
+                        ? firstMatch.card_faces
+                        : [firstMatch];
             } else {
                 const response = await fetch(
                     `https://api.scryfall.com/cards/named?fuzzy=${firstRegexMatch}`
@@ -50,7 +52,10 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
 
                 if ('status' in data) continue;
 
-                cards = data.card_faces ? data.card_faces : [data];
+                cards =
+                    data.card_faces && 'image_uris' in data.card_faces[0]
+                        ? data.card_faces
+                        : [data];
             }
 
             const images = cards.map(
