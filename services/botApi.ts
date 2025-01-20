@@ -22,7 +22,7 @@ export default class BotApiService {
         taskScheduler.createTask(
             'MessageSending',
             () => {
-                this.#dequeueResponse();
+                this.dequeueResponse();
             },
             100 as Milliseconds,
             false,
@@ -30,13 +30,13 @@ export default class BotApiService {
         );
     }
 
-    async #dequeueResponse() {
+    private async dequeueResponse() {
         const message = this.messageQueue.pop();
 
         if (!message) return;
 
         try {
-            await this.#processResponse(message);
+            await this.processResponse(message);
         } catch (error) {
             logger.errorWithTraceId(
                 this.botName,
@@ -46,7 +46,7 @@ export default class BotApiService {
         }
     }
 
-    async #processResponse(message: IReplyMessage) {
+    private async processResponse(message: IReplyMessage) {
         switch (message.constructor) {
             case TextMessage:
                 await this.telegraf.telegram.sendMessage(
@@ -89,7 +89,7 @@ export default class BotApiService {
         }
     }
 
-    #enqueueResponse(response: IReplyMessage) {
+    private enqueueResponse(response: IReplyMessage) {
         this.messageQueue.push(response);
     }
 
@@ -101,7 +101,7 @@ export default class BotApiService {
 
         return new MessageContext(
             this.botName,
-            (response) => this.#enqueueResponse(response),
+            (response) => this.enqueueResponse(response),
             incomingMessage.chat.id,
             incomingMessage.message_id,
             incomingMessage.text,
@@ -114,7 +114,7 @@ export default class BotApiService {
     createContextForChat(chatId: number, scheduledName: string) {
         return new ChatContext(
             this.botName,
-            (response) => this.#enqueueResponse(response),
+            (response) => this.enqueueResponse(response),
             chatId,
             `Scheduled:${scheduledName}:${chatId}`
         );

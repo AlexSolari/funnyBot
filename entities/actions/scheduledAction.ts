@@ -48,7 +48,7 @@ export default class ScheduledAction implements IActionWithState {
         if (!this.active || !this.chatsWhitelist.includes(ctx.chatId)) return;
 
         const state = await storage.getActionState(this, ctx.chatId);
-        const isAllowedToTrigger = this.#shouldTrigger(state);
+        const isAllowedToTrigger = this.shouldTrigger(state);
 
         if (isAllowedToTrigger) {
             logger.logWithTraceId(
@@ -58,7 +58,7 @@ export default class ScheduledAction implements IActionWithState {
             );
 
             await this.handler(ctx, <TResult>(key: string) =>
-                this.#getCachedValue<TResult>(key, ctx.botName)
+                this.getCachedValue<TResult>(key, ctx.botName)
             );
 
             state.lastExecutedDate = moment().valueOf();
@@ -71,7 +71,7 @@ export default class ScheduledAction implements IActionWithState {
         }
     }
 
-    async #getCachedValue<TResult>(
+    private async getCachedValue<TResult>(
         key: string,
         botName: string
     ): Promise<TResult> {
@@ -108,7 +108,7 @@ export default class ScheduledAction implements IActionWithState {
         }
     }
 
-    #shouldTrigger(state: IActionState): boolean {
+    private shouldTrigger(state: IActionState): boolean {
         const today = moment().startOf('day').valueOf();
 
         const isAllowedToTrigger =

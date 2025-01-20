@@ -63,7 +63,7 @@ export default class Bot {
             'MessageProcessing',
             async () => {
                 while (this.messageQueue.length > 0) {
-                    await this.#processMessages();
+                    await this.processMessages();
                 }
             },
             secondsToMilliseconds(0.3 as Seconds),
@@ -74,7 +74,7 @@ export default class Bot {
         taskScheduler.createTask(
             'ScheduledProcessing',
             async () => {
-                await this.#runScheduled();
+                await this.runScheduled();
             },
             hoursToMilliseconds(0.5 as Hours),
             true,
@@ -94,7 +94,7 @@ export default class Bot {
         this.telegraf.stop(code);
     }
 
-    async #runScheduled() {
+    private async runScheduled() {
         for (const chatId of this.broadcastPool) {
             for (const trig of this.scheduled) {
                 const ctx = this.api.createContextForChat(chatId, trig.name);
@@ -112,7 +112,7 @@ export default class Bot {
         }
     }
 
-    async #processMessages() {
+    private async processMessages() {
         const msg = this.messageQueue.pop()!;
 
         for (const cmd of this.commands) {

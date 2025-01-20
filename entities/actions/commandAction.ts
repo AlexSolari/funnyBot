@@ -63,7 +63,7 @@ export default class CommandAction<TActionState extends IActionState>
         );
 
         const { shouldTrigger, matchResults, skipCooldown } = this.triggers
-            .map((x) => this.#checkTrigger(ctx, x, state))
+            .map((x) => this.checkTrigger(ctx, x, state))
             .reduce(
                 (acc, curr) => acc.mergeWith(curr),
                 CommandTriggerCheckResult.DoNotTrigger
@@ -97,7 +97,7 @@ export default class CommandAction<TActionState extends IActionState>
         );
     }
 
-    #checkTrigger(
+    private checkTrigger(
         ctx: MessageContext<TActionState>,
         trigger: RegExp | string,
         state: IActionState

@@ -19,7 +19,7 @@ class Storage {
         this.cache = new Map<string, Record<number, ActionStateBase>>();
     }
 
-    async #lock<TType>(action: () => Promise<TType>) {
+    private async lock<TType>(action: () => Promise<TType>) {
         await this.semaphoreInstance.acquire();
 
         try {
@@ -29,9 +29,9 @@ class Storage {
         }
     }
 
-    async #loadInternal(key: string) {
+    private async loadInternal(key: string) {
         if (!this.cache.has(key)) {
-            const targetPath = this.#buidPathFromKey(key);
+            const targetPath = this.buidPathFromKey(key);
             if (!existsSync(targetPath)) {
                 return {};
             }
@@ -48,10 +48,10 @@ class Storage {
         return this.cache.get(key) ?? {};
     }
 
-    async #save(data: Record<number, ActionStateBase>, key: string) {
+    private async save(data: Record<number, ActionStateBase>, key: string) {
         this.cache.delete(key);
 
-        const targetPath = this.#buidPathFromKey(key);
+        const targetPath = this.buidPathFromKey(key);
         const folderName = dirname(targetPath);
 
         if (!existsSync(folderName)) {
@@ -61,19 +61,19 @@ class Storage {
         await writeFile(targetPath, JSON.stringify(data), { flag: 'w+' });
     }
 
-    #buidPathFromKey(key: string) {
+    private buidPathFromKey(key: string) {
         return 'storage/' + key.replaceAll(':', '/') + '.json';
     }
 
     async load(key: string) {
-        return await this.#lock(async () => {
-            return this.#loadInternal(key);
+        return await this.lock(async () => {
+            return this.loadInternal(key);
         });
     }
 
     async saveMetadata(actions: IActionWithState[], botName: string) {
-        return await this.#lock(async () => {
-            const targetPath = this.#buidPathFromKey(`Metadata-${botName}`);
+        return await this.lock(async () => {
+            const targetPath = this.buidPathFromKey(`Metadata-${botName}`);
 
             await writeFile(targetPath, JSON.stringify(actions), {
                 flag: 'w+'
@@ -85,8 +85,8 @@ class Storage {
         entity: IActionWithState,
         chatId: number
     ) {
-        return await this.#lock(async () => {
-            const data = await this.#loadInternal(entity.key);
+        return await this.lock(async () => {
+            const data = await this.loadInternal(entity.key);
 
             return (data[chatId] as TActionState) ?? entity.stateConstructor();
         });
@@ -97,12 +97,12 @@ class Storage {
         chatId: number,
         transactionResult: TransactionResult
     ) {
-        await this.#lock(async () => {
-            const data = await this.#loadInternal(action.key);
+        await this.lock(async () => {
+            const data = await this.loadInternal(action.key);
 
             if (transactionResult.shouldUpdate) {
                 data[chatId] = transactionResult.data;
-                await this.#save(data, action.key);
+                await this.save(data, action.key);
             }
         });
     }
