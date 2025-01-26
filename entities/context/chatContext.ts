@@ -1,36 +1,36 @@
-import ImageMessage from '../replyMessages/imageMessage';
-import IReplyMessage from '../../types/replyMessage';
-import TextMessage from '../replyMessages/textMessage';
-import VideoMessage from '../replyMessages/videoMessage';
+import ImageMessage from '../responses/imageMessage';
+import TextMessage from '../responses/textMessage';
+import VideoMessage from '../responses/videoMessage';
 import { resolve } from 'path';
+import { IBotApiInteractions } from '../../services/botApi';
 
 export default class ChatContext {
     botName: string;
-    enqueue: (message: IReplyMessage) => void;
+    interactions: IBotApiInteractions;
     chatId: number;
     traceId: number | string;
 
     constructor(
         botName: string,
-        enqueueMethod: (message: IReplyMessage) => void,
+        interactions: IBotApiInteractions,
         chatId: number,
         traceId: number | string
     ) {
         this.botName = botName;
-        this.enqueue = enqueueMethod;
+        this.interactions = interactions;
         this.chatId = chatId;
         this.traceId = traceId;
     }
 
     sendTextToChat(text: string) {
-        this.enqueue(
+        this.interactions.respond(
             new TextMessage(text, this.chatId, undefined, this.traceId)
         );
     }
 
     sendImageToChat(name: string) {
         const filePath = `./content/${name}.png`;
-        this.enqueue(
+        this.interactions.respond(
             new ImageMessage(
                 { source: resolve(filePath) },
                 this.chatId,
@@ -42,7 +42,7 @@ export default class ChatContext {
 
     sendVideoToChat(name: string) {
         const filePath = `./content/${name}.mp4`;
-        this.enqueue(
+        this.interactions.respond(
             new VideoMessage(
                 { source: resolve(filePath) },
                 this.chatId,

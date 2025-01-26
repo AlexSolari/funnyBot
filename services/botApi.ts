@@ -1,19 +1,20 @@
 import MessageContext from '../entities/context/messageContext';
 import ChatContext from '../entities/context/chatContext';
-import ImageMessage from '../entities/replyMessages/imageMessage';
-import TextMessage from '../entities/replyMessages/textMessage';
-import VideoMessage from '../entities/replyMessages/videoMessage';
+import ImageMessage from '../entities/responses/imageMessage';
+import TextMessage from '../entities/responses/textMessage';
+import VideoMessage from '../entities/responses/videoMessage';
 import taskScheduler from './taskScheduler';
 import logger from './logger';
 import { Telegraf } from 'telegraf';
 import IReplyMessage from '../types/replyMessage';
 import IncomingMessage from '../entities/incomingMessage';
 import { Milliseconds } from '../types/timeValues';
+import Reaction from '../entities/responses/reaction';
 
 export default class BotApiService {
     botName: string;
     telegraf: Telegraf;
-    messageQueue: Array<IReplyMessage> = [];
+    messageQueue: Array<IReplyMessage | Reaction> = [];
 
     constructor(botName: string, telegraf: Telegraf) {
         this.telegraf = telegraf;
@@ -46,14 +47,30 @@ export default class BotApiService {
         }
     }
 
-    private async processResponse(message: IReplyMessage) {
-        switch (message.constructor) {
+    private async processResponse(response: IReplyMessage | Reaction) {
+        if ('emoji' in response) {
+            this.telegraf.telegram.setMessageReaction(
+                response.chatId,
+                response.messageId,
+                [
+                    {
+                        type: 'emoji',
+                        emoji: response.emoji
+                    }
+                ],
+                true
+            );
+
+            return;
+        }
+
+        switch (response.constructor) {
             case TextMessage:
                 await this.telegraf.telegram.sendMessage(
-                    message.chatId,
-                    message.content,
+                    response.chatId,
+                    response.content,
                     {
-                        reply_to_message_id: message.replyId,
+                        reply_to_message_id: response.replyId,
                         parse_mode: 'MarkdownV2'
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     } as any
@@ -61,29 +78,29 @@ export default class BotApiService {
                 break;
             case ImageMessage:
                 await this.telegraf.telegram.sendPhoto(
-                    message.chatId,
-                    message.content,
-                    message.replyId
+                    response.chatId,
+                    response.content,
+                    response.replyId
                         ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          ({ reply_to_message_id: message.replyId } as any)
+                          ({ reply_to_message_id: response.replyId } as any)
                         : undefined
                 );
                 break;
             case VideoMessage:
                 await this.telegraf.telegram.sendVideo(
-                    message.chatId,
-                    message.content,
-                    message.replyId
+                    response.chatId,
+                    response.content,
+                    response.replyId
                         ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          ({ reply_to_message_id: message.replyId } as any)
+                          ({ reply_to_message_id: response.replyId } as any)
                         : undefined
                 );
                 break;
             default:
                 logger.errorWithTraceId(
                     this.botName,
-                    message.traceId,
-                    `Unknown message type: ${message.constructor}`
+                    response.traceId,
+                    `Unknown message type: ${response.constructor}`
                 );
                 break;
         }
@@ -91,6 +108,17 @@ export default class BotApiService {
 
     private enqueueResponse(response: IReplyMessage) {
         this.messageQueue.push(response);
+    }
+
+    private enqueueReaction(reaction: Reaction) {
+        this.messageQueue.push(reaction);
+    }
+
+    private getInteractions() {
+        return {
+            react: (reaction) => this.enqueueReaction(reaction),
+            respond: (response) => this.enqueueResponse(response)
+        } as IBotApiInteractions;
     }
 
     createContextForMessage(incomingMessage: IncomingMessage) {
@@ -101,7 +129,7 @@ export default class BotApiService {
 
         return new MessageContext(
             this.botName,
-            (response) => this.enqueueResponse(response),
+            this.getInteractions(),
             incomingMessage.chat.id,
             incomingMessage.message_id,
             incomingMessage.text,
@@ -114,9 +142,14 @@ export default class BotApiService {
     createContextForChat(chatId: number, scheduledName: string) {
         return new ChatContext(
             this.botName,
-            (response) => this.enqueueResponse(response),
+            this.getInteractions(),
             chatId,
             `Scheduled:${scheduledName}:${chatId}`
         );
     }
+}
+
+export interface IBotApiInteractions {
+    respond: (response: IReplyMessage) => void;
+    react: (reaction: Reaction) => void;
 }

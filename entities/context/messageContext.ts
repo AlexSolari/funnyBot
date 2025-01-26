@@ -1,12 +1,14 @@
 import ActionStateBase from '../states/actionStateBase';
-import ImageMessage from '../replyMessages/imageMessage';
-import TextMessage from '../replyMessages/textMessage';
-import VideoMessage from '../replyMessages/videoMessage';
+import ImageMessage from '../responses/imageMessage';
+import TextMessage from '../responses/textMessage';
+import VideoMessage from '../responses/videoMessage';
 import ChatContext from './chatContext';
 import storage from '../../services/storage';
 import { resolve } from 'path';
-import IReplyMessage from '../../types/replyMessage';
 import IActionState from '../../types/actionState';
+import { IBotApiInteractions } from '../../services/botApi';
+import { TelegramEmoji } from 'telegraf/types';
+import Reaction from '../responses/reaction';
 
 export default class MessageContext<
     TActionState extends IActionState
@@ -21,7 +23,7 @@ export default class MessageContext<
 
     constructor(
         botName: string,
-        enqueueMethod: (message: IReplyMessage) => void,
+        interactions: IBotApiInteractions,
         chatId: number,
         messageId: number,
         messageText: string,
@@ -29,7 +31,7 @@ export default class MessageContext<
         traceId: number | string,
         fromUserName: string
     ) {
-        super(botName, enqueueMethod, chatId, traceId);
+        super(botName, interactions, chatId, traceId);
 
         this.messageId = messageId;
         this.messageText = messageText;
@@ -54,14 +56,14 @@ export default class MessageContext<
     }
 
     replyWithText(text: string) {
-        this.enqueue(
+        this.interactions.respond(
             new TextMessage(text, this.chatId, this.messageId, this.traceId)
         );
     }
 
     replyWithImage(name: string) {
         const filePath = `./content/${name}.png`;
-        this.enqueue(
+        this.interactions.respond(
             new ImageMessage(
                 { source: resolve(filePath) },
                 this.chatId,
@@ -73,13 +75,19 @@ export default class MessageContext<
 
     replyWithVideo(name: string) {
         const filePath = `./content/${name}.mp4`;
-        this.enqueue(
+        this.interactions.respond(
             new VideoMessage(
                 { source: resolve(filePath) },
                 this.chatId,
                 this.messageId,
                 this.traceId
             )
+        );
+    }
+
+    react(emoji: TelegramEmoji) {
+        this.interactions.react(
+            new Reaction(this.traceId, this.chatId, this.messageId, emoji)
         );
     }
 }
