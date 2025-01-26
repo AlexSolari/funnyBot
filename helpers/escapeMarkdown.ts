@@ -6,5 +6,7 @@ export default function escapeMarkdown(text: string) {
         .replaceAll(/-/g, '\\-')
         .replaceAll(/\+/g, '\\+')
         .replaceAll(/\{/g, '\\{')
+        .replaceAll(/!/g, '\\!')
+        .replaceAll(/\|/g, '\\|')
         .replaceAll(/\}/g, '\\}');
 }
