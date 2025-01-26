@@ -10,10 +10,10 @@ export default new CommandActionBuilder('Reaction.Ternopil')
     .from([SpecificUsers.pontiff, SpecificUsers.trigan, SpecificUsers.zohan])
     .when(async (ctx) => ctx.chatId == ChatId.LvivChat)
     .do(async (ctx) => {
-        if (randomInteger(0, 1) == 0) {
+        if (randomInteger(0, 2) == 0) {
             ctx.replyWithImage('ternopil');
         } else {
-            switch (randomInteger(0, 3)) {
+            switch (randomInteger(0, 10)) {
                 case 0:
                     ctx.replyWithText('🫵🤣');
                     break;
@@ -28,6 +28,18 @@ export default new CommandActionBuilder('Reaction.Ternopil')
                     break;
                 case 4:
                     ctx.replyWithText('🤫🧏‍♂️🤫');
+                    break;
+                case 5:
+                    ctx.react('🤯');
+                    break;
+                case 6:
+                    ctx.react('👍');
+                    break;
+                case 7:
+                    ctx.react('💅');
+                    break;
+                default:
+                    ctx.startCooldown = false;
                     break;
             }
         }

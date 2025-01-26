@@ -34,6 +34,7 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
                 ctx.replyWithText('Потужно 💪');
             }
         }
+        ctx.react('🎉');
     })
     .ignoreChat(ChatId.PauperChat)
     .cooldown(hoursToSeconds(4 as Hours))
