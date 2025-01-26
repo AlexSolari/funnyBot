@@ -105,7 +105,8 @@ export default class Bot {
                     logger.errorWithTraceId(
                         ctx.botName,
                         ctx.traceId,
-                        error as string | Error
+                        error as string | Error,
+                        ctx
                     );
                 }
             }
@@ -124,7 +125,8 @@ export default class Bot {
                 logger.errorWithTraceId(
                     ctx.botName,
                     ctx.traceId,
-                    error as string | Error
+                    error as string | Error,
+                    ctx
                 );
             }
         }

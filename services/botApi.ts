@@ -42,7 +42,8 @@ export default class BotApiService {
             logger.errorWithTraceId(
                 this.botName,
                 message.traceId,
-                error as string | Error
+                error as string | Error,
+                message
             );
         }
     }
@@ -100,7 +101,8 @@ export default class BotApiService {
                 logger.errorWithTraceId(
                     this.botName,
                     response.traceId,
-                    `Unknown message type: ${response.constructor}`
+                    `Unknown message type: ${response.constructor}`,
+                    response
                 );
                 break;
         }
