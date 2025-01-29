@@ -1,8 +1,7 @@
 import IReplyMessage from '../../types/replyMessage';
 
-export default class TextMessage implements IReplyMessage {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    content: any;
+export default class TextMessage implements IReplyMessage<string> {
+    content: string;
     chatId: number;
     replyId: number | undefined;
     traceId: string | number;

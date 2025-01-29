@@ -1,6 +1,5 @@
-export default interface IReplyMessage {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    content: any;
+export default interface IReplyMessage<TType> {
+    content: TType;
     chatId: number;
     replyId: number | undefined;
     traceId: number | string;

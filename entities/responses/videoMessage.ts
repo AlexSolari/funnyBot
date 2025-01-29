@@ -1,9 +1,8 @@
 import { InputFile } from 'telegraf/types';
 import IReplyMessage from '../../types/replyMessage';
 
-export default class VideoMessage implements IReplyMessage {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    content: any;
+export default class VideoMessage implements IReplyMessage<InputFile> {
+    content: InputFile;
     chatId: number;
     replyId: number | undefined;
     traceId: string | number;

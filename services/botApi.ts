@@ -10,11 +10,12 @@ import IReplyMessage from '../types/replyMessage';
 import IncomingMessage from '../entities/incomingMessage';
 import { Milliseconds } from '../types/timeValues';
 import Reaction from '../entities/responses/reaction';
+import { InputFile } from 'telegraf/types';
 
 export default class BotApiService {
     botName: string;
     telegraf: Telegraf;
-    messageQueue: Array<IReplyMessage | Reaction> = [];
+    messageQueue: Array<IReplyMessage<unknown> | Reaction> = [];
 
     constructor(botName: string, telegraf: Telegraf) {
         this.telegraf = telegraf;
@@ -48,7 +49,9 @@ export default class BotApiService {
         }
     }
 
-    private async processResponse(response: IReplyMessage | Reaction) {
+    private async processResponse<TType>(
+        response: IReplyMessage<TType> | Reaction
+    ) {
         if ('emoji' in response) {
             this.telegraf.telegram.setMessageReaction(
                 response.chatId,
@@ -69,7 +72,7 @@ export default class BotApiService {
             case TextMessage:
                 await this.telegraf.telegram.sendMessage(
                     response.chatId,
-                    response.content,
+                    response.content as string,
                     {
                         reply_to_message_id: response.replyId,
                         parse_mode: 'MarkdownV2'
@@ -80,7 +83,7 @@ export default class BotApiService {
             case ImageMessage:
                 await this.telegraf.telegram.sendPhoto(
                     response.chatId,
-                    response.content,
+                    response.content as InputFile,
                     response.replyId
                         ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           ({ reply_to_message_id: response.replyId } as any)
@@ -90,7 +93,7 @@ export default class BotApiService {
             case VideoMessage:
                 await this.telegraf.telegram.sendVideo(
                     response.chatId,
-                    response.content,
+                    response.content as InputFile,
                     response.replyId
                         ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           ({ reply_to_message_id: response.replyId } as any)
@@ -108,7 +111,7 @@ export default class BotApiService {
         }
     }
 
-    private enqueueResponse(response: IReplyMessage) {
+    private enqueueResponse<TType>(response: IReplyMessage<TType>) {
         this.messageQueue.push(response);
     }
 
@@ -152,6 +155,6 @@ export default class BotApiService {
 }
 
 export interface IBotApiInteractions {
-    respond: (response: IReplyMessage) => void;
+    respond: <TType>(response: IReplyMessage<TType>) => void;
     react: (reaction: Reaction) => void;
 }
