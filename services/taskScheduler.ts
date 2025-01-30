@@ -30,6 +30,7 @@ class TaskScheduler {
         logger.logWithTraceId(
             ownerName,
             `System:TaskScheduler-${ownerName}-${name}`,
+            'System',
             `Created task [${taskId}]${name}, that will run every ${interval}ms.`
         );
 
@@ -46,6 +47,7 @@ class TaskScheduler {
             logger.logWithTraceId(
                 ownerName,
                 `System:TaskScheduler-${ownerName}-${name}`,
+                'System',
                 `Executing delayed oneshot [${taskId}]${name}`
             );
             action();
@@ -55,6 +57,7 @@ class TaskScheduler {
         logger.logWithTraceId(
             ownerName,
             `System:TaskScheduler-${ownerName}-${name}`,
+            'System',
             `Created oneshot task [${taskId}]${name}, that will run in ${delay}ms.`
         );
     }

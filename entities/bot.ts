@@ -13,6 +13,7 @@ import {
 } from '../helpers/timeConvertions';
 import { Hours, Seconds } from '../types/timeValues';
 import storage from '../services/storage';
+import { ChatId } from '../types/chatIds';
 
 export default class Bot {
     name: string;
@@ -32,6 +33,7 @@ export default class Bot {
         logger.logWithTraceId(
             this.name,
             `System:Bot-${this.name}-Start`,
+            'System',
             'Starting bot...'
         );
         this.telegraf = new Telegraf(token);
@@ -40,7 +42,7 @@ export default class Bot {
 
         this.telegraf.on('message', async (ctx) => {
             const msg = new IncomingMessage(ctx.update.message);
-            const messageContent = msg.text ?? '<non-text message>';
+            const messageContent = msg.text || '<non-text message>';
 
             const chatTitle =
                 'title' in msg.chat ? msg.chat.title + ' ' + msg.chat.id : 'DM';
@@ -49,7 +51,8 @@ export default class Bot {
             logger.logWithTraceId(
                 this.name,
                 msg.traceId,
-                `${chatTitle} | ${messageFromName} (${messageFromId}): ${messageContent}`
+                chatTitle,
+                `${messageFromName} (${messageFromId}): ${messageContent}`
             );
 
             if (msg.text) {
@@ -88,6 +91,7 @@ export default class Bot {
         logger.logWithTraceId(
             this.name,
             `System:Bot-${this.name}-Stop`,
+            'System',
             'Stopping bot...'
         );
 
@@ -105,6 +109,7 @@ export default class Bot {
                     logger.errorWithTraceId(
                         ctx.botName,
                         ctx.traceId,
+                        ChatId[ctx.chatId],
                         error as string | Error,
                         ctx
                     );
@@ -125,6 +130,7 @@ export default class Bot {
                 logger.errorWithTraceId(
                     ctx.botName,
                     ctx.traceId,
+                    ChatId[ctx.chatId],
                     error as string | Error,
                     ctx
                 );

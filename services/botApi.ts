@@ -11,6 +11,7 @@ import IncomingMessage from '../entities/incomingMessage';
 import { Milliseconds } from '../types/timeValues';
 import Reaction from '../entities/responses/reaction';
 import { InputFile } from 'telegraf/types';
+import { ChatId } from '../types/chatIds';
 
 export default class BotApiService {
     botName: string;
@@ -43,6 +44,7 @@ export default class BotApiService {
             logger.errorWithTraceId(
                 this.botName,
                 message.traceId,
+                ChatId[message.chatId],
                 error as string | Error,
                 message
             );
@@ -104,6 +106,7 @@ export default class BotApiService {
                 logger.errorWithTraceId(
                     this.botName,
                     response.traceId,
+                    ChatId[response.chatId],
                     `Unknown message type: ${response.constructor}`,
                     response
                 );
@@ -136,6 +139,9 @@ export default class BotApiService {
             this.botName,
             this.getInteractions(),
             incomingMessage.chat.id,
+            'title' in incomingMessage.chat
+                ? incomingMessage.chat.title + ' ' + incomingMessage.chat.id
+                : 'DM',
             incomingMessage.message_id,
             incomingMessage.text,
             incomingMessage.from?.id,
@@ -149,6 +155,7 @@ export default class BotApiService {
             this.botName,
             this.getInteractions(),
             chatId,
+            ChatId[chatId],
             `Scheduled:${scheduledName}:${chatId}`
         );
     }

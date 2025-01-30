@@ -74,6 +74,7 @@ export default class CommandAction<TActionState extends IActionState>
         logger.logWithTraceId(
             ctx.botName,
             ctx.traceId,
+            ctx.chatName,
             ` - Executing [${this.name}] in ${ctx.chatId}`
         );
         ctx.matchResults = matchResults;

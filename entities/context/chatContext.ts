@@ -8,17 +8,20 @@ export default class ChatContext {
     botName: string;
     interactions: IBotApiInteractions;
     chatId: number;
+    chatName: string;
     traceId: number | string;
 
     constructor(
         botName: string,
         interactions: IBotApiInteractions,
         chatId: number,
+        chatName: string,
         traceId: number | string
     ) {
         this.botName = botName;
         this.interactions = interactions;
         this.chatId = chatId;
+        this.chatName = chatName;
         this.traceId = traceId;
     }
 

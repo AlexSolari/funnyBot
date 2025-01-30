@@ -25,13 +25,14 @@ export default class MessageContext<
         botName: string,
         interactions: IBotApiInteractions,
         chatId: number,
+        chatName: string,
         messageId: number,
         messageText: string,
         fromUserId: number | undefined,
         traceId: number | string,
         fromUserName: string
     ) {
-        super(botName, interactions, chatId, traceId);
+        super(botName, interactions, chatId, chatName, traceId);
 
         this.messageId = messageId;
         this.messageText = messageText;

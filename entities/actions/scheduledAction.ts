@@ -54,6 +54,7 @@ export default class ScheduledAction implements IActionWithState {
             logger.logWithTraceId(
                 ctx.botName,
                 ctx.traceId,
+                ctx.chatName,
                 ` - Executing [${this.name}] in ${ctx.chatId}`
             );
 

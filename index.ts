@@ -27,7 +27,7 @@ process.once('SIGINT', () => stopBots('SIGINT'));
 process.once('SIGTERM', () => stopBots('SIGTERM'));
 
 function log(text: string) {
-    logger.logWithTraceId('ALL BOTS', 'System:Bot', text);
+    logger.logWithTraceId('ALL BOTS', 'System:Bot', 'System', text);
 }
 
 async function startBot(
