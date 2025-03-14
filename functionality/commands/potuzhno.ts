@@ -1,4 +1,4 @@
-import PotuzhnoState from '../../entities/states/potuzhnoState';
+import PotuzhnoState from '../../entities/potuzhnoState';
 import { CommandActionBuilderWithState, Hours } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
