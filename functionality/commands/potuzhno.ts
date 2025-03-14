@@ -1,9 +1,8 @@
 import PotuzhnoState from '../../entities/states/potuzhnoState';
-import { CommandActionBuilderWithState } from '../../helpers/builders/commandActionBuilder';
+import { CommandActionBuilderWithState, Hours } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
-import randomInteger from '../../helpers/randomInt';
-import { hoursToSeconds } from '../../helpers/timeConvertions';
-import { Hours } from '../../types/timeValues';
+import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
+import { randomInt } from 'crypto';
 
 export default new CommandActionBuilderWithState<PotuzhnoState>(
     'Reaction.Potuzhno',
@@ -12,10 +11,10 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
     .on(/.+/i)
     .when(
         async (ctx) =>
-            randomInteger(0, 99) == 0 && ctx.messageText != 'топ потужності'
+            randomInt(0, 99) == 0 && ctx.messageText != 'топ потужності'
     )
     .do(async (ctx) => {
-        const superPotuzhno = randomInteger(0, 99) == 0;
+        const superPotuzhno = randomInt(0, 99) == 0;
         const scoredPoints = superPotuzhno ? 15 : 1;
 
         ctx.updateState((state) => {
@@ -28,7 +27,7 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
                 '🎉😳😳😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО 💪\n🎉😳😳😳😳😳😳😳😳🎉'
             );
         } else {
-            if (randomInteger(0, 4) == 0) {
+            if (randomInt(0, 4) == 0) {
                 ctx.replyWithVideo('potuzhno');
             } else {
                 ctx.replyWithText('Потужно 💪');

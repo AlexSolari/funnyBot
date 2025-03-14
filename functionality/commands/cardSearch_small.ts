@@ -1,10 +1,10 @@
+import { CommandActionBuilder } from 'chz-telegram-bot';
 import {
     IScryfallCard,
     IScryfallCardFace,
     IScryfallFuzzyResponse,
     IScryfallQueryResponse
 } from '../../types/externalApiDefinitions/scryfall';
-import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 
 const cardBack =
     'https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg';

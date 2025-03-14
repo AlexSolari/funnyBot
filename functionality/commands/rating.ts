@@ -1,12 +1,11 @@
-import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
+import { CommandActionBuilder, Hours } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
-import randomInteger from '../../helpers/randomInt';
-import { hoursToSeconds } from '../../helpers/timeConvertions';
-import { Hours } from '../../types/timeValues';
+import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
+import { randomInt } from 'crypto';
 
 export default new CommandActionBuilder('Reaction.Rating')
     .on(/youtube\.com\/watch\?/i)
-    .when(async () => randomInteger(0, 1) == 0)
+    .when(async () => randomInt(0, 1) == 0)
     .do(async (ctx) => {
         ctx.replyWithImage('bad');
     })

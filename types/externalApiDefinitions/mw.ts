@@ -1,4 +1,4 @@
-import { Seconds } from '../timeValues';
+import { Seconds } from 'chz-telegram-bot';
 
 export interface IMWEventDetail {
     date: Date | string;

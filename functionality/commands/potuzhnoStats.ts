@@ -1,7 +1,7 @@
-import PotuzhnoState from '../../entities/states/potuzhnoState';
-import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
+import { CommandActionBuilder } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
+import PotuzhnoState from '../../entities/states/potuzhnoState';
 
 export default new CommandActionBuilder('Reaction.PotuzhnoStats')
     .on('топ потужності')

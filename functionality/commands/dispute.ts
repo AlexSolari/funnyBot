@@ -1,9 +1,8 @@
-import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import { load } from 'cheerio';
+import { CommandActionBuilder, Hours } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
-import { Hours } from '../../types/timeValues';
-import randomInteger from '../../helpers/randomInt';
-import { hoursToSeconds } from '../../helpers/timeConvertions';
+import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
+import { randomInt } from 'crypto';
 
 export default new CommandActionBuilder('Reaction.Dispute')
     .on(/mtggoldfish\.com\/deck\/(\d+)/i)
@@ -19,7 +18,7 @@ export default new CommandActionBuilder('Reaction.Dispute')
         const hasDispute = cards.indexOf('Deadly Dispute') != -1;
 
         if (hasDispute) {
-            ctx.replyWithImage(`dispute${randomInteger(0, 2)}`);
+            ctx.replyWithImage(`dispute${randomInt(0, 2)}`);
         }
     })
     .cooldown(hoursToSeconds(2 as Hours))

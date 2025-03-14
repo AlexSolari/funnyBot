@@ -1,18 +1,17 @@
-import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
+import { CommandActionBuilder, Hours } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
-import randomInteger from '../../helpers/randomInt';
-import { hoursToSeconds } from '../../helpers/timeConvertions';
-import { Hours } from '../../types/timeValues';
+import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
+import { randomInt } from 'crypto';
 
 export default new CommandActionBuilder('Reaction.Lotus')
     .on(/лотус/i)
     .do(async (ctx) => {
-        let imageName = randomInteger(0, 1)
+        let imageName = randomInt(0, 1)
             ? 'dampingSphere_funny'
             : 'dampingSphere';
 
         if (imageName == 'dampingSphere_funny') {
-            imageName += randomInteger(1, 4);
+            imageName += randomInt(1, 4);
         }
 
         ctx.replyWithImage(imageName);

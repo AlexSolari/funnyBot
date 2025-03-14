@@ -1,11 +1,11 @@
-import ScheduledActionBuilder from '../../helpers/builders/scheduledActionBuilder';
 import { load } from 'cheerio';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import moment from 'moment';
-import ChatContext from '../../entities/context/chatContext';
 import { ChatId } from '../../types/chatIds';
-import { CachedValueAccessor } from '../../types/cachedValueAccessor';
 import { Format } from '../../types/mtgFormats';
+import { CachedValueAccessor } from 'chz-telegram-bot/dist/types/cachedValueAccessor';
+import ChatContext from 'chz-telegram-bot/dist/entities/context/chatContext';
+import ScheduledActionBuilder from 'chz-telegram-bot/dist/helpers/builders/scheduledActionBuilder';
 
 async function loadTournaments(formatName: Format): Promise<string> {
     const today = moment().format('MM/DD/YYYY');

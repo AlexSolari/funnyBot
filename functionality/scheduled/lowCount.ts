@@ -1,4 +1,3 @@
-import ScheduledActionBuilder from '../../helpers/builders/scheduledActionBuilder';
 import getCurrentWeek from '../../helpers/getWeek';
 import moment from 'moment';
 import {
@@ -6,9 +5,10 @@ import {
     IMWEventDetail
 } from '../../types/externalApiDefinitions/mw';
 import { ChatId } from '../../types/chatIds';
-import { hoursToSeconds } from '../../helpers/timeConvertions';
 import { Day } from '../../types/daysOfTheWeek';
-import { Hours } from '../../types/timeValues';
+import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
+import { Hours } from 'chz-telegram-bot';
+import ScheduledActionBuilder from 'chz-telegram-bot/dist/helpers/builders/scheduledActionBuilder';
 
 export default new ScheduledActionBuilder('Scheduled.LowCount')
     .runAt(8)

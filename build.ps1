@@ -29,6 +29,7 @@ Out-File -Encoding utf8 -FilePath .\gen_scheduled.ts -InputObject $t
 Set-Location ..
 Remove-Item -r -fo build
 mkdir build
+Copy-Item "package.json" -Destination "build\" -Force
 Copy-Item "token.*" -Destination "build\" -Force
 Copy-Item ".\content\" -Destination "build\content\" -Force -Recurse
 npm run build

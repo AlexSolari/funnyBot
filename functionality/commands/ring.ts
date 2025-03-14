@@ -1,13 +1,12 @@
-import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
+import { CommandActionBuilder, Hours } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
-import randomInteger from '../../helpers/randomInt';
-import { hoursToSeconds } from '../../helpers/timeConvertions';
-import { Hours } from '../../types/timeValues';
+import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
+import { randomInt } from 'crypto';
 
 export default new CommandActionBuilder('Reaction.Ring')
     .on(/кольц/i)
     .do(async (ctx) => {
-        const seed = randomInteger(0, 2);
+        const seed = randomInt(0, 2);
 
         switch (seed) {
             case 0:

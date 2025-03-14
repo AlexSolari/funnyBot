@@ -1,7 +1,6 @@
-import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import { load } from 'cheerio';
+import { CommandActionBuilder, Seconds } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
-import { Seconds } from '../../types/timeValues';
 
 export default new CommandActionBuilder('Reaction.Schedule')
     .on(['розклад'])

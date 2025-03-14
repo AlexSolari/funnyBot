@@ -1,4 +1,3 @@
-import { CommandActionBuilder } from '../../helpers/builders/commandActionBuilder';
 import getCurrentWeek from '../../helpers/getWeek';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import {
@@ -6,7 +5,7 @@ import {
     IMwApiResponseDateSlot
 } from '../../types/externalApiDefinitions/mw';
 import { ChatId } from '../../types/chatIds';
-import { Seconds } from '../../types/timeValues';
+import { CommandActionBuilder, Seconds } from 'chz-telegram-bot';
 
 export default new CommandActionBuilder('Reaction.Registration')
     .on(['рега', 'Рега'])
