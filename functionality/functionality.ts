@@ -6,7 +6,7 @@ import { ScheduledAction } from 'chz-telegram-bot/dist/entities/actions/schedule
 
 interface IFunctionalityData {
     commands: CommandAction<IActionState>[];
-    scheduled: ScheduledAction[];
+    scheduled: ScheduledAction<IActionState>[];
 }
 
 export default {
