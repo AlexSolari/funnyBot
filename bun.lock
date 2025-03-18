@@ -4,7 +4,7 @@
     "": {
       "dependencies": {
         "cheerio": "^1.0.0-rc.12",
-        "chz-telegram-bot": "^0.0.22",
+        "chz-telegram-bot": "^0.0.24",
         "markdown-escape": "^2.0.0",
       },
       "devDependencies": {
@@ -149,7 +149,7 @@
 
     "cheerio-select": ["cheerio-select@2.1.0", "", { "dependencies": { "boolbase": "^1.0.0", "css-select": "^5.1.0", "css-what": "^6.1.0", "domelementtype": "^2.3.0", "domhandler": "^5.0.3", "domutils": "^3.0.1" } }, "sha512-9v9kG0LvzrlcungtnJtpGNxY+fzECQKhK4EGJX2vByejiMX84MFNQw4UxPJl3bFbTMw+Dfs37XaIkCwTZfLh4g=="],
 
-    "chz-telegram-bot": ["chz-telegram-bot@0.0.22", "", { "dependencies": { "async-sema": "^3.1.1", "moment": "^2.29.4", "telegraf": "^4.16.3" } }, "sha512-v+k7dqRBvKjZ1hwQNaQvvebhZXudco9fADqgKhXozpJ5DYm1+xh93SUtYCdIDegFMgpz+GT49+h5jI4syKnJ2w=="],
+    "chz-telegram-bot": ["chz-telegram-bot@0.0.24", "", { "dependencies": { "async-sema": "^3.1.1", "moment": "^2.29.4", "telegraf": "^4.16.3" } }, "sha512-LqXtqGvGvUTk3dORxk2YErLowlU8R+159JIPBVN0l9BC29QEr7zaKfBBmd9m68hwvmlA2oayDRZL8bbBWREZCg=="],
 
     "color-convert": ["color-convert@2.0.1", "", { "dependencies": { "color-name": "~1.1.4" } }, "sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ=="],
 

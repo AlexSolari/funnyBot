@@ -8,27 +8,23 @@ if (process.env.NODE_ENV == 'production') {
         tokenFilePath: 'token.prod',
         commands: functionality.commands,
         scheduled: functionality.scheduled,
-        chats: new Map<string, number>(
-            Object.entries({
-                ModernChat: ChatId.ModernChat,
-                PioneerChat: ChatId.PioneerChat,
-                SpellSeeker: ChatId.SpellSeeker,
-                StandardChat: ChatId.StandardChat,
-                PauperChat: ChatId.PauperChat
-            })
-        )
+        chats: {
+            ModernChat: ChatId.ModernChat,
+            PioneerChat: ChatId.PioneerChat,
+            SpellSeeker: ChatId.SpellSeeker,
+            StandardChat: ChatId.StandardChat,
+            PauperChat: ChatId.PauperChat
+        }
     });
     startBot({
         name: 'botseiju',
         tokenFilePath: 'token.lviv',
         commands: functionality.commands,
         scheduled: functionality.scheduled,
-        chats: new Map<string, number>(
-            Object.entries({
-                LvivChat: ChatId.LvivChat,
-                FrankivskChat: ChatId.FrankivskChat
-            })
-        )
+        chats: {
+            LvivChat: ChatId.LvivChat,
+            FrankivskChat: ChatId.FrankivskChat
+        }
     });
 } else {
     startBot({
@@ -36,11 +32,9 @@ if (process.env.NODE_ENV == 'production') {
         tokenFilePath: 'token.test',
         commands: functionality.commands,
         scheduled: functionality.scheduled,
-        chats: new Map<string, number>(
-            Object.entries({
-                TestChat: ChatId.TestChat
-            })
-        )
+        chats: {
+            TestChat: ChatId.TestChat
+        }
     });
 }
 
