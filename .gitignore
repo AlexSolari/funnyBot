@@ -1,6 +1,7 @@
 token.test
 node_modules/
 package-lock.json
+bun.lock
 .vscode/
 token.prod
 token.lviv
@@ -9,4 +10,3 @@ start.ps1
 build/
 types/chatIds.ts
 types/userIds.ts
-bun.lock

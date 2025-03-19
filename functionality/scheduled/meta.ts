@@ -4,7 +4,7 @@ import moment from 'moment';
 import { ChatId } from '../../types/chatIds';
 import { Format } from '../../types/mtgFormats';
 import { CachedValueAccessor } from 'chz-telegram-bot/dist/types/cachedValueAccessor';
-import { ScheduledActionBuilder } from 'chz-telegram-bot';
+import { IActionState, ScheduledActionBuilder } from 'chz-telegram-bot';
 import { ChatContext } from 'chz-telegram-bot/dist/entities/context/chatContext';
 
 async function loadTournaments(formatName: Format): Promise<string> {
@@ -30,9 +30,9 @@ async function loadTournaments(formatName: Format): Promise<string> {
     return parsedData.trim() ?? '';
 }
 
-async function sendRecentTournaments(
+async function sendRecentTournaments<TActionState extends IActionState>(
     format: Format,
-    ctx: ChatContext,
+    ctx: ChatContext<TActionState>,
     getCached: CachedValueAccessor
 ) {
     const tournaments = await getCached<string>(format);
