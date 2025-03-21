@@ -38,5 +38,11 @@ if (process.env.NODE_ENV == 'production') {
     });
 }
 
-process.once('SIGINT', () => stopBots('SIGINT'));
-process.once('SIGTERM', () => stopBots('SIGTERM'));
+process.once('SIGINT', () => {
+    stopBots('SIGINT');
+    process.exit(0);
+});
+process.once('SIGTERM', () => {
+    stopBots('SIGTERM');
+    process.exit(0);
+});

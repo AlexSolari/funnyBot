@@ -32,7 +32,9 @@ export default new CommandActionBuilder('Reaction.Registration')
             weekday: 'long',
             year: 'numeric',
             month: 'numeric',
-            day: 'numeric'
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric'
         } as Intl.DateTimeFormatOptions;
 
         const response = await fetch(
