@@ -6,6 +6,7 @@ import {
 } from '../../types/externalApiDefinitions/mw';
 import { ChatId } from '../../types/chatIds';
 import { CommandActionBuilder, Seconds } from 'chz-telegram-bot';
+import { secondsToMilliseconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
 
 export default new CommandActionBuilder('Reaction.Registration')
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
@@ -46,7 +47,7 @@ export default new CommandActionBuilder('Reaction.Registration')
                 x.date_slots.map(
                     (ds) =>
                         ({
-                            date: new Date(ds.date),
+                            date: new Date(ds.date + 'T00:00:00'),
                             slots: ds.slots
                         } as IMwApiResponseDateSlot)
                 )
@@ -57,7 +58,10 @@ export default new CommandActionBuilder('Reaction.Registration')
             .sort((a, b) => a.date.getTime() - b.date.getTime())
             .map(({ date, slots }) =>
                 slots.map((x) => {
-                    x.date = date.toLocaleDateString('uk-UA', options);
+                    x.date = new Date(
+                        date.valueOf() +
+                            secondsToMilliseconds(x.time.start_time)
+                    ).toLocaleDateString('uk-UA', options);
                     return x;
                 })
             )
