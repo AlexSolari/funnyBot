@@ -8,7 +8,7 @@ import { ChatId } from '../../types/chatIds';
 import { CommandActionBuilder, Seconds } from 'chz-telegram-bot';
 
 export default new CommandActionBuilder('Reaction.Registration')
-    .on(['рега', 'Рега'])
+    .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
     .do(async (ctx) => {
         let serviceName = '';
 
