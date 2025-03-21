@@ -1,7 +1,8 @@
 import { Seconds } from 'chz-telegram-bot';
+import { Moment } from 'moment';
 
 export interface IMWEventDetail {
-    date: Date | string;
+    date: string;
     id: number;
     gt: {
         name: string;
@@ -13,7 +14,7 @@ export interface IMWEventDetail {
 }
 
 export interface IMwApiResponseDateSlot {
-    date: Date;
+    date: Moment;
     slots: IMWEventDetail[];
 }
 

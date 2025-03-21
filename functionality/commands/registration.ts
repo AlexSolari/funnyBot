@@ -7,6 +7,7 @@ import {
 import { ChatId } from '../../types/chatIds';
 import { CommandActionBuilder, Seconds } from 'chz-telegram-bot';
 import { secondsToMilliseconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
+import moment from 'moment';
 
 export default new CommandActionBuilder('Reaction.Registration')
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
@@ -29,14 +30,6 @@ export default new CommandActionBuilder('Reaction.Registration')
         }
 
         const currentWeek = getCurrentWeek();
-        const options = {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'numeric',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric'
-        } as Intl.DateTimeFormatOptions;
 
         const response = await fetch(
             `https://api.wlaunch.net/v1/company/7ea091e0-359a-11eb-86df-9f45a44f29bd/branch/7ea10724-359a-11eb-86df-9f45a44f29bd/slot/gt/resource?start=${currentWeek.firstDay}&end=${currentWeek.lastDay}&source=WIDGET&withDiscounts=true&preventBookingEnabled=true`
@@ -47,21 +40,39 @@ export default new CommandActionBuilder('Reaction.Registration')
                 x.date_slots.map(
                     (ds) =>
                         ({
-                            date: new Date(ds.date + 'T00:00:00'),
+                            date: moment.utc(ds.date),
                             slots: ds.slots
                         } as IMwApiResponseDateSlot)
                 )
             )
             .flat(Infinity) as IMwApiResponseDateSlot[];
+
+        const daysMap = {
+            неділя: 'неділю',
+            понеділок: 'понеділок',
+            вівторок: 'вівторок',
+            середа: 'середу',
+            четвер: 'четвер',
+            'п’ятниця': 'п’ятницю',
+            субота: 'суботу'
+        } as Record<string, string>;
+
         const resources = slots
             .filter((x) => x.slots.length > 0)
-            .sort((a, b) => a.date.getTime() - b.date.getTime())
+            .sort((a, b) => a.date.valueOf() - b.date.valueOf())
             .map(({ date, slots }) =>
                 slots.map((x) => {
-                    x.date = new Date(
-                        date.valueOf() +
-                            secondsToMilliseconds(x.time.start_time)
-                    ).toLocaleDateString('uk-UA', options);
+                    x.date = moment
+                        .utc(
+                            date.valueOf() +
+                                secondsToMilliseconds(x.time.start_time)
+                        )
+                        .locale('uk')
+                        .format('dddd, DD MMMM, HH:mm')
+                        .replace(
+                            /неділя|понеділок|вівторок|середа|четвер|п’ятниця|субота/,
+                            (day) => daysMap[day]
+                        );
                     return x;
                 })
             )
