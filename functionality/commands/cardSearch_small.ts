@@ -1,10 +1,13 @@
-import { CommandActionBuilder } from 'chz-telegram-bot';
+import { CommandActionBuilder, Milliseconds } from 'chz-telegram-bot';
 import {
     IScryfallCard,
     IScryfallCardFace,
     IScryfallFuzzyResponse,
     IScryfallQueryResponse
 } from '../../types/externalApiDefinitions/scryfall';
+import { setTimeout } from 'timers/promises';
+
+const SCRYFALL_RATELIMIT_DELAY = 75 as Milliseconds;
 
 const cardBack =
     'https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg';
@@ -64,6 +67,8 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
             if (useBack) images.shift();
 
             ctx.replyWithText(`[\\.](${images[0] ?? cardBack})`);
+
+            await setTimeout(SCRYFALL_RATELIMIT_DELAY);
         }
     })
     .build();

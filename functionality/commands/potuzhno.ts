@@ -2,7 +2,6 @@ import PotuzhnoState from '../../entities/potuzhnoState';
 import { CommandActionBuilderWithState, Hours } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
-import { randomInt } from 'crypto';
 
 export default new CommandActionBuilderWithState<PotuzhnoState>(
     'Reaction.Potuzhno',
@@ -11,10 +10,10 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
     .on(/.+/i)
     .when(
         async (ctx) =>
-            randomInt(0, 99) == 0 && ctx.messageText != 'топ потужності'
+            Math.random() < 0.01 && ctx.messageText != 'топ потужності'
     )
     .do(async (ctx) => {
-        const superPotuzhno = randomInt(0, 99) == 0;
+        const superPotuzhno = Math.random() < 0.01;
         const scoredPoints = superPotuzhno ? 15 : 1;
 
         ctx.updateState((state) => {
@@ -27,7 +26,7 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
                 '🎉😳😳😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО 💪\n🎉😳😳😳😳😳😳😳😳🎉'
             );
         } else {
-            if (randomInt(0, 4) == 0) {
+            if (Math.random() < 0.2) {
                 ctx.replyWithVideo('potuzhno');
             } else {
                 ctx.replyWithText('Потужно 💪');
