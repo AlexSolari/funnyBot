@@ -15,10 +15,26 @@ export default new CommandActionBuilder('Reaction.Dispute')
         const findInDOM = load(text);
         const cards = findInDOM('.copy-paste-box').text();
 
-        const hasDispute = cards.indexOf('Deadly Dispute') != -1;
+        const hasOffering = cards.indexOf('Fanatical Offering') != -1;
+        const hasEnforcer = cards.indexOf('Myr Enforcer') != -1;
 
-        if (hasDispute) {
-            ctx.replyWithImage(`dispute${randomInt(0, 2)}`);
+        const isRakdos =
+            cards.indexOf('Mountain') != -1 &&
+            cards.indexOf('Swamp') != -1 &&
+            cards.indexOf('Island') == -1 &&
+            cards.indexOf('Plains') == -1 &&
+            cards.indexOf('Forest') == -1;
+
+        if (isRakdos) {
+            ctx.replyWithText('ми досі про ракдос дрочню?');
+        } else if (hasOffering) {
+            ctx.replyWithImage(`offering`);
+        } else if (hasEnforcer) {
+            ctx.replyWithText(
+                'ВААААУ! вперше бачу такий набір карт. автор геній!'
+            );
+        } else if (randomInt(0, 1) == 0) {
+            ctx.react('🍌');
         }
     })
     .cooldown(hoursToSeconds(2 as Hours))
