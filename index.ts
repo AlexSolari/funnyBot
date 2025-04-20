@@ -1,6 +1,6 @@
 import functionality from './functionality/functionality.js';
 import { ChatId } from './types/chatIds.js';
-import { startBot, stopBots } from 'chz-telegram-bot';
+import { Seconds, startBot, stopBots } from 'chz-telegram-bot';
 
 if (process.env.NODE_ENV == 'production') {
     startBot({
@@ -14,7 +14,8 @@ if (process.env.NODE_ENV == 'production') {
             SpellSeeker: ChatId.SpellSeeker,
             StandardChat: ChatId.StandardChat,
             PauperChat: ChatId.PauperChat
-        }
+        },
+        scheduledPeriod: (60 * 5) as Seconds
     });
     startBot({
         name: 'botseiju',
@@ -24,7 +25,8 @@ if (process.env.NODE_ENV == 'production') {
         chats: {
             LvivChat: ChatId.LvivChat,
             FrankivskChat: ChatId.FrankivskChat
-        }
+        },
+        scheduledPeriod: (60 * 5) as Seconds
     });
 } else {
     startBot({
@@ -34,7 +36,8 @@ if (process.env.NODE_ENV == 'production') {
         scheduled: functionality.scheduled,
         chats: {
             TestChat: ChatId.TestChat
-        }
+        },
+        scheduledPeriod: 60 as Seconds
     });
 }
 
