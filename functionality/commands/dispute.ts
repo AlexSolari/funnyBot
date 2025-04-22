@@ -2,7 +2,7 @@ import { load } from 'cheerio';
 import { CommandActionBuilder, Hours } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
-import { randomInt } from 'crypto';
+import { randomInt } from '../../helpers/randomInt';
 
 export default new CommandActionBuilder('Reaction.Dispute')
     .on(/mtggoldfish\.com\/deck\/(\d+)/i)
