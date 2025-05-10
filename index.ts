@@ -37,7 +37,8 @@ if (process.env.NODE_ENV == 'production') {
         chats: {
             TestChat: ChatId.TestChat
         },
-        scheduledPeriod: 60 as Seconds
+        scheduledPeriod: 60 as Seconds,
+        verboseLoggingForIncomingMessage: true
     });
 }
 
