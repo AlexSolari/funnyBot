@@ -9,7 +9,7 @@ import SpamState from '../../entities/spamState';
 
 export default new CommandActionBuilderWithState(
     'Reaction.Spamlol',
-    () => new SpamState(25)
+    () => new SpamState(36)
 )
     .on(MessageType.NewChatMember)
     .from(SpecificUsers.m_1kyyqq)
@@ -20,17 +20,23 @@ export default new CommandActionBuilderWithState(
             state.count = newCountValue;
         });
 
+        if (newCountValue % 69 == 0) {
+            ctx.replyWithImage('spam69');
+            return;
+        }
+
         const remainder = newCountValue % 10;
         if (remainder == 0) {
             ctx.replyWithImage('spam');
-        } else {
-            let suffix = 'ів';
-
-            if (remainder == 1) suffix = '';
-            else if (remainder >= 2 && remainder <= 4) suffix = 'и';
-
-            ctx.replyWithText(`Бот заходив вже ${newCountValue} раз${suffix}`);
+            return;
         }
+
+        let suffix = 'ів';
+
+        if (remainder == 1) suffix = '';
+        else if (remainder >= 2 && remainder <= 4) suffix = 'и';
+
+        ctx.replyWithText(`Бот заходив вже ${newCountValue} раз${suffix}`);
     })
     .cooldown(0 as Seconds)
     .build();
