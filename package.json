@@ -2,7 +2,7 @@
     "type": "module",
     "dependencies": {
         "cheerio": "^1.0.0-rc.12",
-        "chz-telegram-bot": "^0.0.46",
+        "chz-telegram-bot": "^0.0.47",
         "markdown-escape": "^2.0.0",
         "moment": "^2.30.1"
     },
