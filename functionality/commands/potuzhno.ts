@@ -1,5 +1,9 @@
 import PotuzhnoState from '../../entities/potuzhnoState';
-import { CommandActionBuilderWithState, Hours } from 'chz-telegram-bot';
+import {
+    CommandActionBuilderWithState,
+    Hours,
+    MessageType
+} from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
 
@@ -7,14 +11,14 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
     'Reaction.Potuzhno',
     () => new PotuzhnoState()
 )
-    .on(/.+/i)
+    .on(MessageType.Text)
     .when(
         async (ctx) =>
             Math.random() < 0.01 && ctx.messageText != 'топ потужності'
     )
-    .do(async (ctx) => {
+    .do(async (ctx, state) => {
         const superPotuzhno = Math.random() < 0.01;
-        const scoredPoints = superPotuzhno ? 15 : 1;
+        const scoredPoints = superPotuzhno ? 15 * state.superCharge : 1;
 
         ctx.updateState((state) => {
             state.scoreBoard[ctx.fromUserName] =
@@ -23,8 +27,11 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
 
         if (superPotuzhno) {
             ctx.replyWithText(
-                '🎉😳😳😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО 💪\n🎉😳😳😳😳😳😳😳😳🎉'
+                `🎉😳😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО \\+${scoredPoints} 💪\n🎉😳😳😳😳😳😳😳🎉`
             );
+            ctx.updateState((state) => {
+                state.superCharge += 1;
+            });
         } else {
             if (Math.random() < 0.2) {
                 ctx.replyWithVideo('potuzhno');
