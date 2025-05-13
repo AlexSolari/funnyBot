@@ -9,6 +9,16 @@ import { CommandActionBuilder, Seconds } from 'chz-telegram-bot';
 import { secondsToMilliseconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
 import moment from 'moment';
 
+const daysMap = {
+    неділя: 'неділю',
+    понеділок: 'понеділок',
+    вівторок: 'вівторок',
+    середа: 'середу',
+    четвер: 'четвер',
+    'п’ятниця': 'п’ятницю',
+    субота: 'суботу'
+} as Record<string, string>;
+
 export default new CommandActionBuilder('Reaction.Registration')
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
     .do(async (ctx) => {
@@ -46,16 +56,6 @@ export default new CommandActionBuilder('Reaction.Registration')
                 )
             )
             .flat(Infinity) as IMwApiResponseDateSlot[];
-
-        const daysMap = {
-            неділя: 'неділю',
-            понеділок: 'понеділок',
-            вівторок: 'вівторок',
-            середа: 'середу',
-            четвер: 'четвер',
-            'п’ятниця': 'п’ятницю',
-            субота: 'суботу'
-        } as Record<string, string>;
 
         const resources = slots
             .filter((x) => x.slots.length > 0)

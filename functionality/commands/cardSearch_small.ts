@@ -15,6 +15,8 @@ const cardBack =
 export default new CommandActionBuilder('Reaction.CardSearch_Small')
     .on(/\[([^[]+)\]/gi)
     .do(async (ctx) => {
+        let waitCounter = ctx.matchResults.length - 1;
+
         for (const matchResult of ctx.matchResults) {
             const firstRegexMatch = matchResult[1];
             let cards: IScryfallCardFace[];
@@ -68,7 +70,10 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
 
             ctx.replyWithText(`[\\.](${images[0] ?? cardBack})`);
 
-            await setTimeout(SCRYFALL_RATELIMIT_DELAY);
+            if (waitCounter > 0) {
+                waitCounter -= 1;
+                await setTimeout(SCRYFALL_RATELIMIT_DELAY);
+            }
         }
     })
     .build();

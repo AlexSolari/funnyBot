@@ -18,13 +18,16 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
     )
     .do(async (ctx, state) => {
         const superPotuzhno = Math.random() < 0.01;
-        const scoredPoints = superPotuzhno ? 15 * state.superCharge : 1;
+        const scoredPoints = superPotuzhno
+            ? PotuzhnoState.superChargeMultiplier * state.superCharge
+            : 1;
 
         ctx.updateState((state) => {
             state.scoreBoard[ctx.fromUserName] =
                 (state.scoreBoard[ctx.fromUserName] ?? 0) + scoredPoints;
         });
 
+        ctx.react('🎉');
         if (superPotuzhno) {
             ctx.replyWithText(
                 `🎉😳😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО \\+${scoredPoints} 💪\n🎉😳😳😳😳😳😳😳🎉`
@@ -39,7 +42,6 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
                 ctx.replyWithText('Потужно 💪');
             }
         }
-        ctx.react('🎉');
     })
     .ignoreChat(ChatId.PauperChat)
     .cooldown(hoursToSeconds(4 as Hours))

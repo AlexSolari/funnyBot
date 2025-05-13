@@ -6,9 +6,11 @@ import PotuzhnoState from '../../entities/potuzhnoState';
 export default new CommandActionBuilder('Reaction.PotuzhnoStats')
     .on('топ потужності')
     .do(async (ctx) => {
-        const scoreBoard =
-            (await ctx.loadStateOf<PotuzhnoState>('Reaction.Potuzhno'))
-                .scoreBoard ?? {};
+        const loadedState = await ctx.loadStateOf<PotuzhnoState>(
+            'Reaction.Potuzhno'
+        );
+        const scoreBoard = loadedState.scoreBoard ?? {};
+        const superChargeCount = loadedState.superCharge ?? 1;
         const allEntries = [];
         for (const [key, value] of Object.entries(scoreBoard)) {
             allEntries.push({ key, value });
@@ -21,7 +23,11 @@ export default new CommandActionBuilder('Reaction.PotuzhnoStats')
             .join('\n');
 
         ctx.replyWithText(
-            escapeMarkdown(`💪 TOП-10 потужності: 💪 \n\n` + topTen)
+            escapeMarkdown(
+                `💪 TOП-10 потужності: 💪 \n\n${topTen}\n\nНаступна суперпотужність зарядженна на ${
+                    superChargeCount * PotuzhnoState.superChargeMultiplier
+                } Ватт`
+            )
         );
     })
     .ignoreChat(ChatId.PauperChat)

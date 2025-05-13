@@ -21,6 +21,7 @@ import rozklad from './commands/rozklad';
 import slon from './commands/slon';
 import spamlol from './commands/spamlol';
 import ternopil from './commands/ternopil';
+import test from './commands/test';
 import vitalii from './commands/vitalii';
 
-export default [black,cardSearch_small,control,dispute,fang,hello,ihor,kalitas,kamaz,lotus,pizda,ponyav,potuzhno,potuzhnoStats,rakdos,rating,registration,ring,rozklad,slon,spamlol,ternopil,vitalii].filter(x => x.active);
+export default [black,cardSearch_small,control,dispute,fang,hello,ihor,kalitas,kamaz,lotus,pizda,ponyav,potuzhno,potuzhnoStats,rakdos,rating,registration,ring,rozklad,slon,spamlol,ternopil,test,vitalii].filter(x => x.active);

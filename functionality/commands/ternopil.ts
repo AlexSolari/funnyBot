@@ -1,6 +1,9 @@
-import { CommandActionBuilder, Hours } from 'chz-telegram-bot';
+import { CommandActionBuilder, Hours, Seconds } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
-import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
+import {
+    hoursToSeconds,
+    secondsToMilliseconds
+} from 'chz-telegram-bot/dist/helpers/timeConvertions';
 import { SpecificUsers } from '../../types/userIds';
 import { randomInt } from '../../helpers/randomInt';
 
@@ -9,8 +12,15 @@ export default new CommandActionBuilder('Reaction.Ternopil')
     .from([SpecificUsers.pontiff, SpecificUsers.trigan, SpecificUsers.zohan])
     .when(async (ctx) => ctx.chatId == ChatId.LvivChat)
     .do(async (ctx) => {
-        if (randomInt(0, 2) == 0) {
+        const rnd = randomInt(0, 4);
+        if (rnd == 0) {
             ctx.replyWithImage('ternopil');
+        } else if (rnd == 1) {
+            ctx.delayNextResponse(secondsToMilliseconds(5 as Seconds));
+            ctx.replyWithText('Добре, цього разу без кібербулінгу');
+            ctx.delayNextResponse(secondsToMilliseconds(5 as Seconds));
+            ctx.replyWithText('SIKE');
+            ctx.replyWithImage('lolcat');
         } else {
             switch (randomInt(0, 10)) {
                 case 0:
