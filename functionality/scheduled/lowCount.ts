@@ -24,7 +24,7 @@ export default new ScheduledActionBuilder('Scheduled.LowCount')
             let prefix = '';
             let serviceName = '';
 
-            switch (ctx.chatId) {
+            switch (ctx.chatInfo.id) {
                 case ChatId.PioneerChat:
                     prefix = 'pioneer_';
                     serviceName = 'Піонер';

@@ -6,7 +6,7 @@ import { SpecificUsers } from '../../types/userIds';
 export default new CommandActionBuilder('Reaction.Vitalii')
     .on(/маліфо/i)
     .from(SpecificUsers.vitalii)
-    .when(async (ctx) => ctx.chatId == ChatId.LvivChat)
+    .when(async (ctx) => ctx.chatInfo.id == ChatId.LvivChat)
     .do(async (ctx) => {
         ctx.replyWithImage('malifo');
     })

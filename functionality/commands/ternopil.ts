@@ -10,7 +10,7 @@ import { randomInt } from '../../helpers/randomInt';
 export default new CommandActionBuilder('Reaction.Ternopil')
     .on(/.+/i)
     .from([SpecificUsers.pontiff, SpecificUsers.trigan, SpecificUsers.zohan])
-    .when(async (ctx) => ctx.chatId == ChatId.LvivChat)
+    .when(async (ctx) => ctx.chatInfo.id == ChatId.LvivChat)
     .do(async (ctx) => {
         const rnd = randomInt(0, 4);
         if (rnd == 0) {

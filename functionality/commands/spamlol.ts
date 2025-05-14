@@ -13,7 +13,7 @@ export default new CommandActionBuilderWithState(
 )
     .on(MessageType.NewChatMember)
     .from(SpecificUsers.m_1kyyqq)
-    .when(async (ctx) => ctx.chatId == ChatId.LvivChat)
+    .when(async (ctx) => ctx.chatInfo.id == ChatId.LvivChat)
     .do(async (ctx, state) => {
         const newCountValue = state.count + 1;
         ctx.updateState((state) => {

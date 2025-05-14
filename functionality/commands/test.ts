@@ -4,7 +4,7 @@ import { ChatId } from '../../types/chatIds';
 
 export default new CommandActionBuilder('Reaction.Test')
     .on('test')
-    .when(async (ctx) => ctx.chatId == ChatId.TestChat)
+    .when(async (ctx) => ctx.chatInfo.id == ChatId.TestChat)
     .do(async (ctx) => {})
     .disabled()
     .build();

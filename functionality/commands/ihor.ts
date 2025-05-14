@@ -6,7 +6,7 @@ import { SpecificUsers } from '../../types/userIds';
 export default new CommandActionBuilder('Reaction.Ihor')
     .on(/мод[еє]рн/i)
     .from(SpecificUsers.ihor)
-    .when(async (ctx) => ctx.chatId == ChatId.LvivChat)
+    .when(async (ctx) => ctx.chatInfo.id == ChatId.LvivChat)
     .do(async (ctx) => {
         ctx.replyWithImage('ihor');
     })

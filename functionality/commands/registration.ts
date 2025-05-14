@@ -24,7 +24,7 @@ export default new CommandActionBuilder('Reaction.Registration')
     .do(async (ctx) => {
         let serviceName = '';
 
-        switch (ctx.chatId) {
+        switch (ctx.chatInfo.id) {
             case ChatId.PioneerChat:
                 serviceName = 'Піонер';
                 break;

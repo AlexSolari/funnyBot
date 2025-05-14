@@ -58,7 +58,7 @@ export default new ScheduledActionBuilder('Scheduled.Meta')
         loadTournaments(Format.DuelCommander)
     )
     .do(async (ctx, getCached) => {
-        switch (ctx.chatId) {
+        switch (ctx.chatInfo.id) {
             case ChatId.PioneerChat:
                 await sendRecentTournaments(Format.Pioneer, ctx, getCached);
                 break;
