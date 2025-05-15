@@ -13,19 +13,16 @@ export default new CommandActionBuilderWithState(
 )
     .on(MessageType.NewChatMember)
     .from(SpecificUsers.m_1kyyqq)
-    .when(async (ctx) => ctx.chatInfo.id == ChatId.LvivChat)
+    .when((ctx) => ctx.chatInfo.id == ChatId.LvivChat)
     .do(async (ctx, state) => {
-        const newCountValue = state.count + 1;
-        ctx.updateState((state) => {
-            state.count = newCountValue;
-        });
+        state.count += 1;
 
-        if (newCountValue % 69 == 0) {
+        if (state.count % 69 == 0) {
             ctx.replyWithImage('spam69');
             return;
         }
 
-        const remainder = newCountValue % 10;
+        const remainder = state.count % 10;
         if (remainder == 0) {
             ctx.replyWithImage('spam');
             return;
@@ -36,7 +33,7 @@ export default new CommandActionBuilderWithState(
         if (remainder == 1) suffix = '';
         else if (remainder >= 2 && remainder <= 4) suffix = 'и';
 
-        ctx.replyWithText(`Бот заходив вже ${newCountValue} раз${suffix}`);
+        ctx.replyWithText(`Бот заходив вже ${state.count} раз${suffix}`);
     })
     .cooldown(0 as Seconds)
     .build();

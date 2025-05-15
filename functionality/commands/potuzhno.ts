@@ -12,29 +12,22 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
     () => new PotuzhnoState()
 )
     .on(MessageType.Text)
-    .when(
-        async (ctx) =>
-            Math.random() < 0.01 && ctx.messageText != 'топ потужності'
-    )
+    .when((ctx) => Math.random() < 0.01 && ctx.messageText != 'топ потужності')
     .do(async (ctx, state) => {
         const superPotuzhno = Math.random() < 0.01;
         const scoredPoints = superPotuzhno
             ? PotuzhnoState.superChargeMultiplier * state.superCharge
             : 1;
 
-        ctx.updateState((state) => {
-            state.scoreBoard[ctx.fromUserName] =
-                (state.scoreBoard[ctx.fromUserName] ?? 0) + scoredPoints;
-        });
+        state.scoreBoard[ctx.fromUserName] =
+            (state.scoreBoard[ctx.fromUserName] ?? 0) + scoredPoints;
 
         ctx.react('🎉');
         if (superPotuzhno) {
             ctx.replyWithText(
                 `🎉😳😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО \\+${scoredPoints} 💪\n🎉😳😳😳😳😳😳😳🎉`
             );
-            ctx.updateState((state) => {
-                state.superCharge += 1;
-            });
+            state.superCharge += 1;
         } else {
             if (Math.random() < 0.2) {
                 ctx.replyWithVideo('potuzhno');

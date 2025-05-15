@@ -5,7 +5,7 @@ import { randomInt } from '../../helpers/randomInt';
 
 export default new CommandActionBuilder('Reaction.Rating')
     .on(/youtube\.com\/watch\?/i)
-    .when(async () => randomInt(0, 1) == 0)
+    .when(() => randomInt(0, 1) == 0)
     .do(async (ctx) => {
         ctx.replyWithImage('bad');
     })

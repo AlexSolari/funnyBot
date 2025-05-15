@@ -4,7 +4,7 @@ import { ChatId } from '../../types/chatIds';
 
 export default new CommandActionBuilder('Reaction.Schedule')
     .on(['розклад'])
-    .when(async (ctx) => ctx.chatInfo.id == ChatId.LvivChat)
+    .when((ctx) => ctx.chatInfo.id == ChatId.LvivChat)
     .do(async (ctx) => {
         const response = await fetch(
             `https://t.me/s/otawaratcg?q=%D1%80%D0%BE%D0%B7%D0%BA%D0%BB%D0%B0%D0%B4`
