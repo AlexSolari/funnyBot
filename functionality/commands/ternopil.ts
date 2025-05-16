@@ -16,11 +16,28 @@ export default new CommandActionBuilder('Reaction.Ternopil')
         if (rnd == 0) {
             ctx.replyWithImage('ternopil');
         } else if (rnd == 1) {
-            ctx.delayNextResponse(secondsToMilliseconds(5 as Seconds));
-            ctx.replyWithText('Добре, цього разу без кібербулінгу');
-            ctx.delayNextResponse(secondsToMilliseconds(5 as Seconds));
-            ctx.replyWithText('SIKE');
-            ctx.replyWithImage('lolcat');
+            const rnd2 = randomInt(0, 5);
+            if (rnd2 == 0) {
+                ctx.delayNextResponse(secondsToMilliseconds(5 as Seconds));
+                ctx.replyWithText('Добре, цього разу без кібербулінгу');
+                ctx.delayNextResponse(secondsToMilliseconds(5 as Seconds));
+                ctx.replyWithText('SIKE');
+                ctx.replyWithImage('lolcat');
+            } else {
+                const rnd3 = randomInt(0, 2);
+                switch (rnd3) {
+                    case 0:
+                        ctx.replyWithText('В респонс');
+                        ctx.replyWithImage('silence');
+                        break;
+                    case 1:
+                        ctx.replyWithText('краще б в церкву сходив...');
+                        break;
+                    default:
+                        ctx.replyWithVideo('nowords');
+                        break;
+                }
+            }
         } else {
             switch (randomInt(0, 10)) {
                 case 0:
