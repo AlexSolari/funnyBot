@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { CommandActionBuilderWithState } from 'chz-telegram-bot';
+import { CommandActionBuilderWithState, Milliseconds } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import TestState from '../../entities/testState';
 

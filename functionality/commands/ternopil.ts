@@ -18,9 +18,9 @@ export default new CommandActionBuilder('Reaction.Ternopil')
         } else if (rnd == 1) {
             const rnd2 = randomInt(0, 5);
             if (rnd2 == 0) {
-                ctx.delayNextResponse(secondsToMilliseconds(5 as Seconds));
+                ctx.wait(secondsToMilliseconds(5 as Seconds));
                 ctx.replyWithText('Добре, цього разу без кібербулінгу');
-                ctx.delayNextResponse(secondsToMilliseconds(5 as Seconds));
+                ctx.wait(secondsToMilliseconds(5 as Seconds));
                 ctx.replyWithText('SIKE');
                 ctx.replyWithImage('lolcat');
             } else {
