@@ -6,6 +6,7 @@ import {
 } from 'chz-telegram-bot/dist/helpers/timeConvertions';
 import { SpecificUsers } from '../../types/userIds';
 import { randomInt } from '../../helpers/randomInt';
+import escapeMarkdown from '../../helpers/escapeMarkdown';
 
 export default new CommandActionBuilder('Reaction.Ternopil')
     .on(/.+/i)
@@ -31,7 +32,9 @@ export default new CommandActionBuilder('Reaction.Ternopil')
                         ctx.replyWithImage('silence');
                         break;
                     case 1:
-                        ctx.replyWithText('краще б в церкву сходив...');
+                        ctx.replyWithText(
+                            escapeMarkdown('краще б в церкву сходив...')
+                        );
                         break;
                     default:
                         ctx.replyWithVideo('nowords');
