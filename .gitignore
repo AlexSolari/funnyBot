@@ -3,8 +3,7 @@ node_modules/
 package-lock.json
 bun.lock
 .vscode/
-token.prod
-token.lviv
+token.*
 storage/
 start.ps1
 build/
