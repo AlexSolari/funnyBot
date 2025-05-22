@@ -25,6 +25,13 @@ export default new CommandActionBuilder('Reaction.Banner')
         const bannerPage = await fetch(`${domain}${bannerUrl}`);
         const bannerPageText = await bannerPage.text();
         const findInBannerPageDOM = load(bannerPageText);
+
+        const image = findInBannerPageDOM('a.image-thumbnail').toArray()[0];
+        if (image) {
+            ctx.replyWithText(`[\\.](${image.attribs.href})`);
+            return;
+        }
+
         const characterCards = findInBannerPageDOM(
             '.wish-pool-table:first-of-type'
         )

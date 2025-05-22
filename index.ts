@@ -1,4 +1,8 @@
-import functionality from './functionality/functionality.js';
+import {
+    genshinCommands,
+    mtgCommands,
+    testCommands
+} from './actions/actionGroups.js';
 import { ChatId } from './types/chatIds.js';
 import { Seconds, startBot, stopBots } from 'chz-telegram-bot';
 
@@ -6,8 +10,8 @@ if (process.env.NODE_ENV == 'production') {
     startBot({
         name: 'kekruga',
         tokenFilePath: 'token.prod',
-        commands: functionality.commands,
-        scheduled: functionality.scheduled,
+        commands: mtgCommands.commands,
+        scheduled: mtgCommands.scheduled,
         chats: {
             ModernChat: ChatId.ModernChat,
             PioneerChat: ChatId.PioneerChat,
@@ -20,8 +24,8 @@ if (process.env.NODE_ENV == 'production') {
     startBot({
         name: 'botseiju',
         tokenFilePath: 'token.lviv',
-        commands: functionality.commands,
-        scheduled: functionality.scheduled,
+        commands: mtgCommands.commands,
+        scheduled: mtgCommands.scheduled,
         chats: {
             LvivChat: ChatId.LvivChat,
             FrankivskChat: ChatId.FrankivskChat
@@ -31,8 +35,8 @@ if (process.env.NODE_ENV == 'production') {
     startBot({
         name: 'xiao',
         tokenFilePath: 'token.genshit',
-        commands: functionality.commands,
-        scheduled: functionality.scheduled,
+        commands: genshinCommands.commands,
+        scheduled: genshinCommands.scheduled,
         chats: {
             GenshinChat: ChatId.GenshinChat
         },
@@ -42,8 +46,8 @@ if (process.env.NODE_ENV == 'production') {
     startBot({
         name: 'test',
         tokenFilePath: 'token.test',
-        commands: functionality.commands,
-        scheduled: functionality.scheduled,
+        commands: testCommands.commands,
+        scheduled: testCommands.scheduled,
         chats: {
             TestChat: ChatId.TestChat
         },
@@ -52,11 +56,11 @@ if (process.env.NODE_ENV == 'production') {
     });
 }
 
-process.once('SIGINT', () => {
-    stopBots('SIGINT');
+process.once('SIGINT', async () => {
+    await stopBots('SIGINT');
     process.exit(0);
 });
-process.once('SIGTERM', () => {
-    stopBots('SIGTERM');
+process.once('SIGTERM', async () => {
+    await stopBots('SIGTERM');
     process.exit(0);
 });

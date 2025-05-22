@@ -1,16 +1,16 @@
 import { CommandActionBuilder, Hours } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
+import { ChatId } from '../../../types/chatIds';
 import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
 
-export default new CommandActionBuilder('Reaction.Rakdos')
-    .on(/(ракдос|рб|бр)(?![a-zA-Z0-9а-яА-Я])/i)
+export default new CommandActionBuilder('Reaction.Black')
+    .on(/моноб/i)
     .do(async (ctx) => {
-        ctx.replyWithImage('rakdos');
+        ctx.replyWithImage('monoB');
     })
-    .cooldown(hoursToSeconds(2 as Hours))
     .ignoreChat(ChatId.LvivChat)
-    .ignoreChat(ChatId.PauperChat)
     .ignoreChat(ChatId.FrankivskChat)
+    .ignoreChat(ChatId.FnmChat)
     .ignoreChat(ChatId.GenshinChat)
+    .cooldown(hoursToSeconds(2 as Hours))
     .disabled()
     .build();
