@@ -45,4 +45,5 @@ export default new CommandActionBuilder('Reaction.Dispute')
     .ignoreChat(ChatId.PioneerChat)
     .ignoreChat(ChatId.SpellSeeker)
     .ignoreChat(ChatId.StandardChat)
+    .ignoreChat(ChatId.GenshinChat)
     .build();

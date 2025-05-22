@@ -8,11 +8,9 @@ export default new CommandActionBuilder('Reaction.Ponyav')
         ctx.replyWithText('в штани намоняв');
     })
     .cooldown(hoursToSeconds(2 as Hours))
-    .ignoreChat(ChatId.LvivChat)
     .ignoreChat(ChatId.PauperChat)
     .ignoreChat(ChatId.FrankivskChat)
-    .ignoreChat(ChatId.ModernChat)
     .ignoreChat(ChatId.SpellSeeker)
-    .ignoreChat(ChatId.PioneerChat)
     .ignoreChat(ChatId.StandardChat)
+    .ignoreChat(ChatId.GenshinChat)
     .build();

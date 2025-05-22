@@ -28,6 +28,16 @@ if (process.env.NODE_ENV == 'production') {
         },
         scheduledPeriod: (60 * 5) as Seconds
     });
+    startBot({
+        name: 'xiao',
+        tokenFilePath: 'token.genshit',
+        commands: functionality.commands,
+        scheduled: functionality.scheduled,
+        chats: {
+            GenshinChat: ChatId.GenshinChat
+        },
+        scheduledPeriod: (60 * 5) as Seconds
+    });
 } else {
     startBot({
         name: 'test',

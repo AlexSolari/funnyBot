@@ -11,5 +11,6 @@ export default new CommandActionBuilder('Reaction.Kalitas')
     .ignoreChat(ChatId.LvivChat)
     .ignoreChat(ChatId.FrankivskChat)
     .ignoreChat(ChatId.FnmChat)
+    .ignoreChat(ChatId.GenshinChat)
     .disabled()
     .build();

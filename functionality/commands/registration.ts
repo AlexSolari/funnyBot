@@ -114,4 +114,5 @@ export default new CommandActionBuilder('Reaction.Registration')
     .ignoreChat(ChatId.PauperChat)
     .ignoreChat(ChatId.FrankivskChat)
     .ignoreChat(ChatId.FnmChat)
+    .ignoreChat(ChatId.GenshinChat)
     .build();

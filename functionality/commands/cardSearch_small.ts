@@ -6,6 +6,7 @@ import {
     IScryfallQueryResponse
 } from '../../types/externalApiDefinitions/scryfall';
 import { setTimeout } from 'timers/promises';
+import { ChatId } from '../../types/chatIds';
 
 const SCRYFALL_RATELIMIT_DELAY = 75 as Milliseconds;
 
@@ -76,4 +77,5 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
             }
         }
     })
+    .ignoreChat(ChatId.GenshinChat)
     .build();
