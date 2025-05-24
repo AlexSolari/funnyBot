@@ -14,44 +14,47 @@ export default new CommandActionBuilder('Reaction.Banner')
         const bannerTable = findInUpcomingPageDOM(
             'h3:has(span#Upcoming)+table'
         );
-        const bannerUrl = bannerTable
+        const bannerUrls = bannerTable
             .find('tr')
             .eq(2)
             .find('td')
             .eq(1)
-            .find('a')
-            .attr('href');
+            .find('a:has(img)')
+            .toArray()
+            .map((x) => x.attribs.href);
 
-        const bannerPage = await fetch(`${domain}${bannerUrl}`);
-        const bannerPageText = await bannerPage.text();
-        const findInBannerPageDOM = load(bannerPageText);
+        for (const bannerUrl of bannerUrls) {
+            const bannerPage = await fetch(`${domain}${bannerUrl}`);
+            const bannerPageText = await bannerPage.text();
+            const findInBannerPageDOM = load(bannerPageText);
 
-        const image = findInBannerPageDOM('a.image-thumbnail').toArray()[0];
-        if (image) {
-            ctx.replyWithText(`[\\.](${image.attribs.href})`);
-            return;
-        }
-
-        const characterCards = findInBannerPageDOM(
-            '.wish-pool-table:first-of-type'
-        )
-            .find('td')
-            .find('.card-caption')
-            .find('a');
-        const characterInfos = characterCards.toArray().map((x) => ({
-            name: x.attribs.title,
-            link: domain + x.attribs.href
-        }));
-
-        ctx.replyWithText(
-            'Персонажи в некст баннере:\n\n' +
-                characterInfos
-                    .map((x) => `[${escapeMarkdown(x.name)}](${x.link})`)
-                    .join('\n'),
-            {
-                disableWebPreview: true
+            const image = findInBannerPageDOM('a.image-thumbnail').toArray()[0];
+            if (image) {
+                ctx.replyWithText(`[\\.](${image.attribs.href})`);
+                continue;
             }
-        );
+
+            const characterCards = findInBannerPageDOM(
+                '.wish-pool-table:first-of-type'
+            )
+                .find('td')
+                .find('.card-caption')
+                .find('a');
+            const characterInfos = characterCards.toArray().map((x) => ({
+                name: x.attribs.title,
+                link: domain + x.attribs.href
+            }));
+
+            ctx.replyWithText(
+                'Персонажи в некст баннере:\n\n' +
+                    characterInfos
+                        .map((x) => `[${escapeMarkdown(x.name)}](${x.link})`)
+                        .join('\n'),
+                {
+                    disableWebPreview: true
+                }
+            );
+        }
     })
     .cooldown(30 as Seconds)
     .ignoreChat(ChatId.LvivChat)
