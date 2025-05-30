@@ -27,4 +27,5 @@ export default new CommandActionBuilder('Reaction.Fang')
     .ignoreChat(ChatId.PauperChat)
     .ignoreChat(ChatId.FrankivskChat)
     .ignoreChat(ChatId.GenshinChat)
+    .ignoreChat(ChatId.CbgChat)
     .build();

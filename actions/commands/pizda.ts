@@ -11,4 +11,5 @@ export default new CommandActionBuilder('Reaction.Pizda')
     .ignoreChat(ChatId.LvivChat)
     .ignoreChat(ChatId.PauperChat)
     .ignoreChat(ChatId.FrankivskChat)
+    .ignoreChat(ChatId.CbgChat)
     .build();

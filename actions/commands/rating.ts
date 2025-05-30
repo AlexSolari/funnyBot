@@ -13,4 +13,5 @@ export default new CommandActionBuilder('Reaction.Rating')
     .ignoreChat(ChatId.LvivChat)
     .ignoreChat(ChatId.FrankivskChat)
     .ignoreChat(ChatId.FnmChat)
+    .ignoreChat(ChatId.CbgChat)
     .build();

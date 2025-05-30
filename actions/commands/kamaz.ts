@@ -12,4 +12,5 @@ export default new CommandActionBuilder('Reaction.Kamaz')
     .ignoreChat(ChatId.PauperChat)
     .ignoreChat(ChatId.FrankivskChat)
     .ignoreChat(ChatId.GenshinChat)
+    .ignoreChat(ChatId.CbgChat)
     .build();

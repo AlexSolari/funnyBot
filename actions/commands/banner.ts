@@ -5,6 +5,7 @@ import escapeMarkdown from '../../helpers/escapeMarkdown';
 
 export default new CommandActionBuilder('Reaction.Banner')
     .on('баннер')
+    .when((ctx) => ctx.chatInfo.id == ChatId.GenshinChat)
     .do(async (ctx) => {
         const domain = 'https://genshin-impact.fandom.com';
 
@@ -57,8 +58,4 @@ export default new CommandActionBuilder('Reaction.Banner')
         }
     })
     .cooldown(30 as Seconds)
-    .ignoreChat(ChatId.LvivChat)
-    .ignoreChat(ChatId.PauperChat)
-    .ignoreChat(ChatId.FrankivskChat)
-    .ignoreChat(ChatId.FnmChat)
     .build();
