@@ -15,6 +15,7 @@ function capitalizeFirstLetter(val: string) {
 }
 
 const SCRYFALL_RATELIMIT_DELAY = 75 as Milliseconds;
+const TELEGRAM_MAX_MESSAGE_LENGTH = 3000;
 
 const cardBack =
     'https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg';
@@ -159,7 +160,28 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
                 extraText += `\n\n${bansText}`;
             }
 
-            ctx.replyWithText(`[\\.](${images[0] ?? cardBack})${extraText}`);
+            let message = `[\\.](${images[0] ?? cardBack})${extraText}`;
+
+            const messageChunks: string[] = [];
+            while (message.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
+                const lastNewLineIndex = message.lastIndexOf(
+                    '\n\n',
+                    TELEGRAM_MAX_MESSAGE_LENGTH
+                );
+
+                if (
+                    lastNewLineIndex !== -1 &&
+                    lastNewLineIndex < TELEGRAM_MAX_MESSAGE_LENGTH
+                ) {
+                    const chunk = message.slice(0, lastNewLineIndex);
+                    messageChunks.push(chunk);
+                    message = message.slice(lastNewLineIndex + 2);
+                }
+            }
+
+            for (const chunk of messageChunks) {
+                ctx.replyWithText(chunk);
+            }
 
             if (waitCounter > 0) {
                 waitCounter -= 1;
