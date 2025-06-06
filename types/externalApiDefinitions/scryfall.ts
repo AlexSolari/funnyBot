@@ -1,5 +1,16 @@
 export type IScryfallFuzzyResponse = IScryfallCard | IScryfallError;
 export type IScryfallQueryResponse = IScryfallQuerySuccess | IScryfallError;
+export type IScryfallRulesResponse = IScryfallRules | IScryfallError;
+
+export interface IScryfallRules {
+    data: IScryfallRule[];
+}
+
+export interface IScryfallRule {
+    source: string;
+    published_at: string;
+    comment: string;
+}
 
 interface IScryfallQuerySuccess {
     data: IScryfallCard[];
@@ -21,6 +32,8 @@ export interface IScryfallCard extends IScryfallCardFace {
 }
 
 export interface IScryfallCardFace {
+    id: string;
+    legalities: Record<string, 'legal' | 'not_legal' | 'restricted' | 'banned'>;
     image_uris: {
         normal: string;
     };
