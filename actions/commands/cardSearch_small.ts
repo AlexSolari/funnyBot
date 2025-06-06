@@ -161,7 +161,6 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
             }
 
             let message = `[\\.](${images[0] ?? cardBack})${extraText}`;
-
             const messageChunks: string[] = [];
             while (message.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
                 const lastNewLineIndex = message.lastIndexOf(
@@ -179,8 +178,12 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
                 }
             }
 
-            for (const chunk of messageChunks) {
-                ctx.replyWithText(chunk);
+            if (messageChunks.length > 0) {
+                for (const chunk of messageChunks) {
+                    ctx.replyWithText(chunk);
+                }
+            } else {
+                ctx.replyWithText(message);
             }
 
             if (waitCounter > 0) {
