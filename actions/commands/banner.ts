@@ -20,7 +20,7 @@ export default new CommandActionBuilder('Reaction.Banner')
             .eq(2)
             .find('td')
             .eq(1)
-            .find('a:has(img)')
+            .find('a:first-of-type')
             .toArray()
             .map((x) => x.attribs.href);
 
