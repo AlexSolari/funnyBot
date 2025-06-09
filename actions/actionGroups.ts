@@ -23,6 +23,7 @@ import vitalii from './commands/vitalii';
 import becker from './scheduled/becker';
 import lowCount from './scheduled/lowCount';
 import meta from './scheduled/meta';
+import inline_cardSearch from './inline/inline_cardSearch';
 
 export const testCommands = {
     commands: [
@@ -31,7 +32,8 @@ export const testCommands = {
         pizda,
         banner
     ] as CommandAction<ActionStateBase>[],
-    scheduled: [] as ScheduledAction<ActionStateBase>[]
+    scheduled: [] as ScheduledAction<ActionStateBase>[],
+    inline: [inline_cardSearch]
 };
 
 export const mtgCommands = {
@@ -54,7 +56,8 @@ export const mtgCommands = {
         ternopil,
         vitalii
     ] as CommandAction<ActionStateBase>[],
-    scheduled: [meta, lowCount] as ScheduledAction<ActionStateBase>[]
+    scheduled: [meta, lowCount] as ScheduledAction<ActionStateBase>[],
+    inline: [inline_cardSearch]
 };
 
 export const genshinCommands = {

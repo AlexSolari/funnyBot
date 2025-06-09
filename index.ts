@@ -4,14 +4,17 @@ import {
     testCommands
 } from './actions/actionGroups.js';
 import { ChatId } from './types/chatIds.js';
-import { Seconds, startBot, stopBots } from 'chz-telegram-bot';
+import { Seconds, botOrchestrator } from 'chz-telegram-bot';
 
 if (process.env.NODE_ENV == 'production') {
-    startBot({
+    botOrchestrator.startBot({
         name: 'kekruga',
         tokenFilePath: 'token.prod',
-        commands: mtgCommands.commands,
-        scheduled: mtgCommands.scheduled,
+        actions: {
+            commands: mtgCommands.commands,
+            scheduled: mtgCommands.scheduled,
+            inlineQueries: mtgCommands.inline
+        },
         chats: {
             ModernChat: ChatId.ModernChat,
             PioneerChat: ChatId.PioneerChat,
@@ -21,33 +24,42 @@ if (process.env.NODE_ENV == 'production') {
         },
         scheduledPeriod: (60 * 5) as Seconds
     });
-    startBot({
+    botOrchestrator.startBot({
         name: 'botseiju',
         tokenFilePath: 'token.lviv',
-        commands: mtgCommands.commands,
-        scheduled: mtgCommands.scheduled,
+        actions: {
+            commands: mtgCommands.commands,
+            scheduled: mtgCommands.scheduled,
+            inlineQueries: mtgCommands.inline
+        },
         chats: {
             LvivChat: ChatId.LvivChat,
             FrankivskChat: ChatId.FrankivskChat
         },
         scheduledPeriod: (60 * 5) as Seconds
     });
-    startBot({
+    botOrchestrator.startBot({
         name: 'xiao',
         tokenFilePath: 'token.genshit',
-        commands: genshinCommands.commands,
-        scheduled: genshinCommands.scheduled,
+        actions: {
+            commands: genshinCommands.commands,
+            scheduled: genshinCommands.scheduled,
+            inlineQueries: []
+        },
         chats: {
             GenshinChat: ChatId.GenshinChat
         },
         scheduledPeriod: (60 * 5) as Seconds
     });
 } else {
-    startBot({
+    botOrchestrator.startBot({
         name: 'test',
         tokenFilePath: 'token.test',
-        commands: testCommands.commands,
-        scheduled: testCommands.scheduled,
+        actions: {
+            commands: testCommands.commands,
+            scheduled: testCommands.scheduled,
+            inlineQueries: testCommands.inline
+        },
         chats: {
             TestChat: ChatId.TestChat
         },
@@ -57,10 +69,10 @@ if (process.env.NODE_ENV == 'production') {
 }
 
 process.once('SIGINT', async () => {
-    await stopBots('SIGINT');
+    await botOrchestrator.stopBots('SIGINT');
     process.exit(0);
 });
 process.once('SIGTERM', async () => {
-    await stopBots('SIGTERM');
+    await botOrchestrator.stopBots('SIGTERM');
     process.exit(0);
 });

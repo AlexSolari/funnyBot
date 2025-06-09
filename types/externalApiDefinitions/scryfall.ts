@@ -32,9 +32,15 @@ export interface IScryfallCard extends IScryfallCardFace {
 }
 
 export interface IScryfallCardFace {
+    set_name: string;
     id: string;
+    name: string;
+    mana_cost: string;
+    type_line: string;
+    oracle_text: string;
     legalities: Record<string, 'legal' | 'not_legal' | 'restricted' | 'banned'>;
     image_uris: {
+        art_crop: string;
         normal: string;
     };
 }
