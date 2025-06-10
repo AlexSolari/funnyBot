@@ -1,77 +1,16 @@
-import { CommandActionBuilder, Milliseconds } from 'chz-telegram-bot';
-import {
-    IScryfallCard,
-    IScryfallCardFace,
-    IScryfallFuzzyResponse,
-    IScryfallQueryResponse,
-    IScryfallRulesResponse
-} from '../../types/externalApiDefinitions/scryfall';
-import { setTimeout } from 'timers/promises';
+import { CommandActionBuilder } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
-import escapeMarkdown from '../../helpers/escapeMarkdown';
+import { ScryfallService } from '../../services/scryfallService';
+import capitalizeFirstLetter from '../../helpers/capitalizeFirstLetter';
 
-function capitalizeFirstLetter(val: string) {
-    return String(val).charAt(0).toUpperCase() + String(val).slice(1);
-}
-
-const SCRYFALL_RATELIMIT_DELAY = 75 as Milliseconds;
 const TELEGRAM_MAX_MESSAGE_LENGTH = 3000;
-
-const cardBack =
-    'https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg';
-
-async function getRules(card: IScryfallCardFace) {
-    const rulesResponse = await fetch(
-        `https://api.scryfall.com/cards/${card.id}/rulings`
-    );
-    const rulesData = (await rulesResponse.json()) as IScryfallRulesResponse;
-    if ('status' in rulesData) throw new Error('Failed to fetch rules');
-
-    return rulesData.data
-        .map(
-            (rule) =>
-                `${capitalizeFirstLetter(
-                    rule.source == 'wotc' ? 'oracle' : rule.source
-                )} *${escapeMarkdown(rule.published_at)}*\n_${escapeMarkdown(
-                    rule.comment
-                )}_`
-        )
-        .join('\n\n');
-}
-
-async function findWithCompositeQuery(query: string, subquery: string) {
-    const response = await fetch(
-        `https://api.scryfall.com/cards/search?q=${query} ${subquery}`
-    );
-    const data = (await response.json()) as IScryfallQueryResponse;
-
-    if ('status' in data) return null;
-
-    const firstMatch = data.data[0] as IScryfallCard;
-    const fallbackImage =
-        'image_uris' in firstMatch ? firstMatch.image_uris.normal : cardBack;
-
-    const cards =
-        firstMatch.card_faces && 'image_uris' in firstMatch.card_faces[0]
-            ? firstMatch.card_faces
-            : [firstMatch];
-
-    return {
-        cards,
-        fallbackImage
-    };
-}
 
 export default new CommandActionBuilder('Reaction.CardSearch_Small')
     .on(/\[([^[]+)\]/gi)
     .do(async (ctx) => {
-        let waitCounter = ctx.matchResults.length - 1;
-
         for (const matchResult of ctx.matchResults) {
             const firstRegexMatch = matchResult[1];
             let rulesText = '';
-            let cards: IScryfallCardFace[];
-            let fallbackImage: string;
             let useBack = false;
             let fetchRules = false;
             let showBans = false;
@@ -83,56 +22,41 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
                     ? '|'
                     : '#'
                 : null;
-            const query = delimiter
-                ? firstRegexMatch.split(delimiter)[0]
-                : firstRegexMatch;
-            let subquery = delimiter ? firstRegexMatch.split(delimiter)[1] : '';
+            const [query, subquery] = hasSubquery
+                ? firstRegexMatch.split(delimiter!)
+                : [firstRegexMatch, ''];
 
             if (hasSubquery && subquery.includes('flip')) {
                 useBack = true;
-                subquery = subquery.replace('flip', '');
             }
             if (hasSubquery && subquery.includes('rules')) {
                 fetchRules = true;
-                subquery = subquery.replace('rules', '');
             }
             if (hasSubquery && subquery.includes('bans')) {
                 showBans = true;
-                subquery = subquery.replace('bans', '');
             }
 
-            if (subquery.trim().length == 0) {
-                const response = await fetch(
-                    `https://api.scryfall.com/cards/named?fuzzy=${query}`
-                );
-                const data = (await response.json()) as IScryfallFuzzyResponse;
+            const sanitizedSubquery = subquery
+                .replace('flip', '')
+                .replace('rules', '')
+                .replace('bans', '')
+                .trim();
 
-                if ('status' in data) continue;
-
-                cards =
-                    data.card_faces && 'image_uris' in data.card_faces[0]
-                        ? data.card_faces
-                        : [data];
-            } else {
-                const findResult = await findWithCompositeQuery(
-                    query,
-                    subquery
-                );
-
-                if (findResult === null) continue;
-
-                cards = findResult.cards;
-                fallbackImage = findResult.fallbackImage;
-            }
+            const cards =
+                sanitizedSubquery.length == 0
+                    ? await ScryfallService.findFuzzy(query)
+                    : await ScryfallService.findWithQuery(
+                          `${query} ${sanitizedSubquery}`
+                      );
 
             if (useBack) cards.shift();
-
+            console.log(cards);
             const resultCard = cards[0];
 
             if (!resultCard) continue;
 
             if (fetchRules) {
-                rulesText = await getRules(resultCard);
+                rulesText = await ScryfallService.getRules(resultCard);
             }
 
             let bansText = '';
@@ -149,7 +73,7 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
             }
 
             const images = cards.map(
-                (card) => card.image_uris.normal ?? fallbackImage
+                (card) => card.image_uris.normal ?? ScryfallService.cardBack
             );
 
             let extraText = '';
@@ -160,35 +84,29 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
                 extraText += `\n\n${bansText}`;
             }
 
-            let message = `[\\.](${images[0] ?? cardBack})${extraText}`;
-            const messageChunks: string[] = [];
-            while (message.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
-                const lastNewLineIndex = message.lastIndexOf(
-                    '\n\n',
-                    TELEGRAM_MAX_MESSAGE_LENGTH
-                );
+            let message = `[\\.](${
+                images[0] ?? ScryfallService.cardBack
+            })${extraText}`;
 
-                if (
-                    lastNewLineIndex !== -1 &&
-                    lastNewLineIndex < TELEGRAM_MAX_MESSAGE_LENGTH
-                ) {
-                    const chunk = message.slice(0, lastNewLineIndex);
-                    messageChunks.push(chunk);
-                    message = message.slice(lastNewLineIndex + 2);
-                }
-            }
+            if (message.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
+                while (message.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
+                    const lastNewLineIndex = message.lastIndexOf(
+                        '\n\n',
+                        TELEGRAM_MAX_MESSAGE_LENGTH
+                    );
 
-            if (messageChunks.length > 0) {
-                for (const chunk of messageChunks) {
-                    ctx.replyWithText(chunk);
+                    if (
+                        lastNewLineIndex !== -1 &&
+                        lastNewLineIndex < TELEGRAM_MAX_MESSAGE_LENGTH
+                    ) {
+                        const chunk = message.slice(0, lastNewLineIndex);
+                        message = message.slice(lastNewLineIndex + 2);
+
+                        ctx.replyWithText(chunk);
+                    }
                 }
             } else {
                 ctx.replyWithText(message);
-            }
-
-            if (waitCounter > 0) {
-                waitCounter -= 1;
-                await setTimeout(SCRYFALL_RATELIMIT_DELAY);
             }
         }
     })

@@ -32,6 +32,7 @@ export interface IScryfallCard extends IScryfallCardFace {
 }
 
 export interface IScryfallCardFace {
+    flavor_text: string;
     set_name: string;
     id: string;
     name: string;

@@ -1,6 +1,7 @@
 {
     "type": "module",
     "dependencies": {
+        "async-sema": "^3.1.1",
         "cheerio": "^1.0.0-rc.12",
         "chz-telegram-bot": "^0.1.8",
         "markdown-escape": "^2.0.0",
