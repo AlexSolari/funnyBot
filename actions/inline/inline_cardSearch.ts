@@ -84,7 +84,9 @@ export default new InlineQueryActionBuilder('Inline.CardSearch')
                 title: showSetCode
                     ? `${card.name} - ${card.set_name ?? 'Unknown'}`
                     : card.name,
-                description: `${card.type_line}\n${card.oracle_text}`,
+                description: escapeMarkdown(
+                    `${card.type_line ?? ''}\n${card.oracle_text ?? ''}`
+                ),
                 thumbnail_url:
                     card.image_uris?.art_crop ??
                     card.image_uris?.normal ??
