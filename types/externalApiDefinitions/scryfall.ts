@@ -1,3 +1,8 @@
+export type IScryfallApiResponse =
+    | IScryfallFuzzyResponse
+    | IScryfallQueryResponse
+    | IScryfallRulesResponse;
+
 export type IScryfallFuzzyResponse = IScryfallCard | IScryfallError;
 export type IScryfallQueryResponse = IScryfallQuerySuccess | IScryfallError;
 export type IScryfallRulesResponse = IScryfallRules | IScryfallError;
@@ -12,11 +17,11 @@ export interface IScryfallRule {
     comment: string;
 }
 
-interface IScryfallQuerySuccess {
+export interface IScryfallQuerySuccess {
     data: IScryfallCard[];
 }
 
-interface IScryfallError {
+export interface IScryfallError {
     status: number;
     details: string;
     code: string;

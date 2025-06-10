@@ -28,8 +28,6 @@ export default new InlineQueryActionBuilder('Inline.CardSearch')
         if (results.length > 50) results = results.slice(0, 49);
 
         for (const card of results) {
-            if (!card) continue;
-
             ctx.showInlineQueryResult({
                 type: 'article',
                 id: Math.random().toString(),

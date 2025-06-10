@@ -10,7 +10,6 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
     .do(async (ctx) => {
         for (const matchResult of ctx.matchResults) {
             const firstRegexMatch = matchResult[1];
-            let rulesText = '';
             let useBack = false;
             let fetchRules = false;
             let showBans = false;
@@ -26,16 +25,17 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
                 ? firstRegexMatch.split(delimiter!)
                 : [firstRegexMatch, ''];
 
-            if (hasSubquery && subquery.includes('flip')) {
-                useBack = true;
+            if (hasSubquery) {
+                if (subquery.includes('flip')) {
+                    useBack = true;
+                }
+                if (subquery.includes('rules')) {
+                    fetchRules = true;
+                }
+                if (subquery.includes('bans')) {
+                    showBans = true;
+                }
             }
-            if (hasSubquery && subquery.includes('rules')) {
-                fetchRules = true;
-            }
-            if (hasSubquery && subquery.includes('bans')) {
-                showBans = true;
-            }
-
             const sanitizedSubquery = subquery
                 .replace('flip', '')
                 .replace('rules', '')
@@ -50,39 +50,43 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
                       );
 
             if (useBack) cards.shift();
-            console.log(cards);
+
             const resultCard = cards[0];
 
             if (!resultCard) continue;
 
+            let extraText = '';
+
             if (fetchRules) {
-                rulesText = await ScryfallService.getRules(resultCard);
+                const rulesText = await ScryfallService.getRules(resultCard);
+                if (rulesText.length > 0) {
+                    extraText += `\n\n*Rules:*\n${rulesText}`;
+                }
             }
 
-            let bansText = '';
-            if (showBans) {
-                for (const [format, legality] of Object.entries(
-                    resultCard.legalities
-                )) {
-                    if (legality == 'not_legal') continue;
+            if (showBans && resultCard.legalities) {
+                const bansText = Object.entries(resultCard.legalities)
+                    .sort(([_1, legality1], [_2, legality2]) =>
+                        legality1.localeCompare(legality2)
+                    )
+                    .map(
+                        ([format, legality]) =>
+                            `*${capitalizeFirstLetter(
+                                format
+                            )}*: _${capitalizeFirstLetter(
+                                legality.replace('_', ' ')
+                            )}_`
+                    )
+                    .join('\n');
 
-                    bansText += `*${capitalizeFirstLetter(
-                        format
-                    )}*: _${capitalizeFirstLetter(legality)}_\n`;
+                if (bansText.length > 0) {
+                    extraText += `\n\n${bansText}`;
                 }
             }
 
             const images = cards.map(
                 (card) => card.image_uris.normal ?? ScryfallService.cardBack
             );
-
-            let extraText = '';
-            if (rulesText) {
-                extraText += `\n\n*Rules:*\n${rulesText}`;
-            }
-            if (bansText) {
-                extraText += `\n\n${bansText}`;
-            }
 
             let message = `[\\.](${
                 images[0] ?? ScryfallService.cardBack

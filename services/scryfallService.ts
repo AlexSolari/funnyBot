@@ -1,7 +1,9 @@
 import { Milliseconds } from 'chz-telegram-bot';
 import {
+    IScryfallApiResponse,
     IScryfallCard,
     IScryfallCardFace,
+    IScryfallError,
     IScryfallFuzzyResponse,
     IScryfallQueryResponse,
     IScryfallRulesResponse
@@ -39,6 +41,21 @@ class ScryfallSearchService {
         }
     }
 
+    private unwrapResponse<TResponse extends IScryfallApiResponse, TResult>(
+        response: TResponse,
+        transformer: (data: Exclude<TResponse, IScryfallError>) => TResult[]
+    ) {
+        if ('status' in response) {
+            if (response.status == 404) return [];
+
+            throw new Error(
+                `Scryfall API error: ${response.code} ${response.status}\n${response.details}`
+            );
+        }
+
+        return transformer(response as Exclude<TResponse, IScryfallError>);
+    }
+
     async findWithQuery(query: string) {
         return await this.withRatelimit(async () => {
             const response = await fetch(
@@ -46,15 +63,9 @@ class ScryfallSearchService {
             );
             const data = (await response.json()) as IScryfallQueryResponse;
 
-            if ('status' in data) {
-                if (data.status == 404) return [];
-
-                throw new Error(
-                    `Scryfall API error: ${data.code} ${data.status}\n${data.details}`
-                );
-            }
-
-            return this.mapCardsToCardFaces(data.data);
+            return this.unwrapResponse(data, (x) =>
+                this.mapCardsToCardFaces(x.data)
+            );
         });
     }
 
@@ -65,15 +76,7 @@ class ScryfallSearchService {
             );
             const data = (await response.json()) as IScryfallFuzzyResponse;
 
-            if ('status' in data) {
-                if (data.status == 404) return [];
-
-                throw new Error(
-                    `Scryfall API error: ${data.code} ${data.status}\n${data.details}`
-                );
-            }
-
-            return this.getCardFaces(data);
+            return this.unwrapResponse(data, (x) => this.getCardFaces(x));
         });
     }
 
@@ -84,15 +87,7 @@ class ScryfallSearchService {
             );
             const data = (await response.json()) as IScryfallFuzzyResponse;
 
-            if ('status' in data) {
-                if (data.status == 404) return [];
-
-                throw new Error(
-                    `Scryfall API error: ${data.code} ${data.status}\n${data.details}`
-                );
-            }
-
-            return this.getCardFaces(data);
+            return this.unwrapResponse(data, (x) => this.getCardFaces(x));
         });
     }
 
@@ -101,12 +96,10 @@ class ScryfallSearchService {
             const rulesResponse = await fetch(
                 `https://api.scryfall.com/cards/${card.id}/rulings`
             );
-            const rulesData =
-                (await rulesResponse.json()) as IScryfallRulesResponse;
-            if ('status' in rulesData) throw new Error('Failed to fetch rules');
+            const data = (await rulesResponse.json()) as IScryfallRulesResponse;
 
-            return rulesData.data
-                .map(
+            return this.unwrapResponse(data, (x) =>
+                x.data.map(
                     (rule) =>
                         `${capitalizeFirstLetter(
                             rule.source == 'wotc' ? 'oracle' : rule.source
@@ -114,7 +107,7 @@ class ScryfallSearchService {
                             rule.published_at
                         )}*\n_${escapeMarkdown(rule.comment)}_`
                 )
-                .join('\n\n');
+            ).join('\n\n');
         });
     }
 
