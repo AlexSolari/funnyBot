@@ -1,7 +1,7 @@
 import { CommandActionBuilder } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
-import { ScryfallService } from '../../services/scryfallService';
-import capitalizeFirstLetter from '../../helpers/capitalizeFirstLetter';
+import { MtgCardSearchService } from '../../services/cardSearchService';
+import escapeMarkdown from '../../helpers/escapeMarkdown';
 
 const TELEGRAM_MAX_MESSAGE_LENGTH = 3000;
 
@@ -10,87 +10,11 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
     .do(async (ctx) => {
         for (const matchResult of ctx.matchResults) {
             const firstRegexMatch = matchResult[1];
-            let useBack = false;
-            let fetchRules = false;
-            let showBans = false;
-
-            const hasSubquery =
-                firstRegexMatch.includes('|') || firstRegexMatch.includes('#');
-            const delimiter = hasSubquery
-                ? firstRegexMatch.includes('|')
-                    ? '|'
-                    : '#'
-                : null;
-            const [query, subquery] = hasSubquery
-                ? firstRegexMatch.split(delimiter!)
-                : [firstRegexMatch, ''];
-
-            if (hasSubquery) {
-                if (subquery.includes('flip')) {
-                    useBack = true;
-                }
-                if (subquery.includes('rules')) {
-                    fetchRules = true;
-                }
-                if (subquery.includes('bans')) {
-                    showBans = true;
-                }
-            }
-            const sanitizedSubquery = subquery
-                .replace('flip', '')
-                .replace('rules', '')
-                .replace('bans', '')
-                .trim();
-
-            const cards =
-                sanitizedSubquery.length == 0
-                    ? await ScryfallService.findFuzzy(query)
-                    : await ScryfallService.findWithQuery(
-                          `${query} ${sanitizedSubquery}`
-                      );
-
-            if (useBack) cards.shift();
-
-            const resultCard = cards[0];
-
-            if (!resultCard) continue;
-
-            let extraText = '';
-
-            if (fetchRules) {
-                const rulesText = await ScryfallService.getRules(resultCard);
-                if (rulesText.length > 0) {
-                    extraText += `\n\n*Rules:*\n${rulesText}`;
-                }
-            }
-
-            if (showBans && resultCard.legalities) {
-                const bansText = Object.entries(resultCard.legalities)
-                    .sort(([_1, legality1], [_2, legality2]) =>
-                        legality1.localeCompare(legality2)
-                    )
-                    .map(
-                        ([format, legality]) =>
-                            `*${capitalizeFirstLetter(
-                                format
-                            )}*: _${capitalizeFirstLetter(
-                                legality.replace('_', ' ')
-                            )}_`
-                    )
-                    .join('\n');
-
-                if (bansText.length > 0) {
-                    extraText += `\n\n${bansText}`;
-                }
-            }
-
-            const images = cards.map(
-                (card) => card.image_uris.normal ?? ScryfallService.cardBack
+            let message = await MtgCardSearchService.findForAction(
+                firstRegexMatch
             );
 
-            let message = `[\\.](${
-                images[0] ?? ScryfallService.cardBack
-            })${extraText}`;
+            if (!message) return;
 
             if (message.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
                 while (message.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
@@ -114,5 +38,19 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
             }
         }
     })
+    .withHelp(
+        (botUsername) =>
+            'Бот може здійснювати *пошук карток*\\.\n' +
+            'Для цього використовуйте наступний синтаксис: [_назва картки_]\\. Також після назви картки, через символ _\\#_ можна задати додаткові аргументи використовуючи синтаксис Scryfall\\. Наприклад: *\\[opt\\#set\\=dom\\]* знайде Opt із сету Dominaria\n\n' +
+            'Також доступні наступні флаги для отримання дотаткових даних:\n' +
+            ' \\- _price_ \\- покаже ціну по TCGPlayer\n' +
+            ' \\- _bans_ \\- покаже бани картки у форматах\n' +
+            ' \\- _rules_ \\- покаже рулінги картки\n' +
+            ' \\- _flip_ \\- покаже другу сторону, якщо картка двухстороння\n\n' +
+            'Приклад використання флагів: *\\[thoughtseize\\#price rules\\]* виведе картку з ціною та рулінгами\n\n' +
+            'Пошук карток також доступен через inline\\-query, для чього потрібно у повідомленні набрати тег бота через @, та через пробіл ввести назву картки\\.\n' +
+            'Флаги також працюють у цьому режимі, але синтаксис трохи інший: флаги потрібно вказати до назви картки, кожен флаг повинен починатися з \\#\\. Наприклад:\n' +
+            `@${escapeMarkdown(botUsername)} \\#rules \\#price consider`
+    )
     .ignoreChat(ChatId.GenshinChat)
     .build();

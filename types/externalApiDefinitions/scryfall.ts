@@ -37,6 +37,7 @@ export interface IScryfallCard extends IScryfallCardFace {
 }
 
 export interface IScryfallCardFace {
+    parentId: string;
     prices: {
         usd: string;
         tix: string;

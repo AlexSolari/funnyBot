@@ -1,11 +1,10 @@
+import { botOrchestrator, Seconds } from 'chz-telegram-bot';
 import {
     genshinCommands,
     mtgCommands,
     testCommands
 } from './actions/actionGroups.js';
 import { ChatId } from './types/chatIds.js';
-import { Seconds, botOrchestrator } from 'chz-telegram-bot';
-
 if (process.env.NODE_ENV == 'production') {
     botOrchestrator.startBot({
         name: 'kekruga',

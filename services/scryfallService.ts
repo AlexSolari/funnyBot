@@ -22,7 +22,12 @@ class ScryfallSearchService {
 
     private getCardFaces(card: IScryfallCard) {
         return card.card_faces && 'image_uris' in card.card_faces[0]
-            ? card.card_faces
+            ? card.card_faces.map((x) => {
+                  x.parentId = card.id;
+                  x.prices ??= card.prices;
+                  x.legalities ??= card.legalities;
+                  return x;
+              })
             : [card];
     }
 
@@ -94,7 +99,9 @@ class ScryfallSearchService {
     async getRules(card: IScryfallCardFace) {
         return await this.withRatelimit(async () => {
             const rulesResponse = await fetch(
-                `https://api.scryfall.com/cards/${card.id}/rulings`
+                `https://api.scryfall.com/cards/${
+                    card.parentId ?? card.id
+                }/rulings`
             );
             const data = (await rulesResponse.json()) as IScryfallRulesResponse;
 
