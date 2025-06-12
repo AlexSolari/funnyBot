@@ -112,7 +112,9 @@ class ScryfallSearchService {
     }
 
     async findAllArtworks(name: string) {
-        return await this.findWithQuery(`@@name="${name}"`);
+        return (await this.findWithQuery(`@@name="${name}"`)).filter(
+            (x) => x.name == name
+        );
     }
 }
 
