@@ -24,6 +24,7 @@ import becker from './scheduled/becker';
 import lowCount from './scheduled/lowCount';
 import meta from './scheduled/meta';
 import inline_cardSearch from './inline/inline_cardSearch';
+import dvach from './commands/dvach';
 
 export const testCommands = {
     commands: [
@@ -66,7 +67,8 @@ export const genshinCommands = {
         hello,
         pizda,
         potuzhno,
-        potuzhnoStats
+        potuzhnoStats,
+        dvach
     ] as CommandAction<ActionStateBase>[],
     scheduled: [becker] as unknown as ScheduledAction<ActionStateBase>[]
 };
