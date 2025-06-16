@@ -1,4 +1,4 @@
-import { CommandActionBuilder, MessageType } from 'chz-telegram-bot';
+import { CommandActionBuilder, MessageType, Seconds } from 'chz-telegram-bot';
 
 const DVACH_CHATID = -1001009232144;
 const DVACH2_CHATID = -1001166834860;
@@ -15,4 +15,5 @@ export default new CommandActionBuilder('Reaction.Dvach')
     .do(async (ctx) => {
         ctx.replyWithImage('dvach');
     })
+    .cooldown(1 as Seconds)
     .build();
