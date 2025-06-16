@@ -116,6 +116,20 @@ class CardSearchService {
         return extraText;
     }
 
+    async findBySetAndNumber(setCode: string, number: number) {
+        const matchedCards = await ScryfallService.findBySetAndNumber(
+            setCode,
+            number
+        );
+
+        const resultCard = matchedCards[0];
+        if (!resultCard) return null;
+
+        return `[\\${escapeMarkdown(resultCard.name)}](${
+            resultCard.image_uris.normal ?? ScryfallService.cardBack
+        })`;
+    }
+
     async findForAction(matchResult: string) {
         const { flags, query, subquery } =
             this.getFlagsFromActionMatchResult(matchResult);
@@ -131,7 +145,6 @@ class CardSearchService {
         if (!resultCard) return null;
 
         const extraText = await this.transfromFlags(flags, resultCard);
-        console.log(flags, extraText);
         return `[\\${escapeMarkdown(resultCard.name)}](${
             resultCard.image_uris.normal ?? ScryfallService.cardBack
         })${extraText}`;

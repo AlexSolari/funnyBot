@@ -4,12 +4,27 @@ import { MtgCardSearchService } from '../../services/cardSearchService';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 
 const TELEGRAM_MAX_MESSAGE_LENGTH = 3000;
+const SET_AND_NUMBER_REGEX = /(\w{3,5})\s(\d+)/gi;
 
 export default new CommandActionBuilder('Reaction.CardSearch_Small')
     .on(/\[([^[]+)\]/gi)
     .do(async (ctx) => {
         for (const matchResult of ctx.matchResults) {
             const firstRegexMatch = matchResult[1];
+
+            const setAndNumberMatch =
+                SET_AND_NUMBER_REGEX.exec(firstRegexMatch);
+            if (setAndNumberMatch) {
+                const message = await MtgCardSearchService.findBySetAndNumber(
+                    setAndNumberMatch[1],
+                    parseInt(setAndNumberMatch[2])
+                );
+
+                if (message) ctx.replyWithText(message);
+
+                continue;
+            }
+
             let message = await MtgCardSearchService.findForAction(
                 firstRegexMatch
             );
@@ -50,7 +65,8 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
             'Приклад використання флагів: *\\[thoughtseize\\#price rules\\]* виведе картку з ціною та рулінгами\n\n' +
             'Пошук карток також доступен через inline\\-query, для чього потрібно у повідомленні набрати тег бота через @, та через пробіл ввести назву картки\\.\n' +
             'Флаги також працюють у цьому режимі, але синтаксис трохи інший: флаги потрібно вказати до назви картки, кожен флаг повинен починатися з \\#\\. Наприклад:\n' +
-            `@${escapeMarkdown(botUsername)} \\#rules \\#price consider`
+            `@${escapeMarkdown(botUsername)} \\#rules \\#price consider\n\n` +
+            'Також бот може шукати картки за сетом та номером, для цього використовуйте синтаксис *\\[код\\_сету номер\\]*, наприклад: *\\[dom 101\\]* знайде картку з сету Dominaria під номером 101 \\(Rat Colony\\)\\.\n\n'
     )
     .ignoreChat(ChatId.GenshinChat)
     .build();

@@ -28,10 +28,6 @@ export interface IScryfallError {
 }
 
 export interface IScryfallCard extends IScryfallCardFace {
-    oracle_text: string;
-    name: string;
-    mana_cost: string;
-    type_line: string;
     oracle_id: string;
     card_faces?: IScryfallCardFace[];
 }

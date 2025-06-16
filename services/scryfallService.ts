@@ -61,8 +61,21 @@ class ScryfallSearchService {
         return transformer(response as Exclude<TResponse, IScryfallError>);
     }
 
+    async findBySetAndNumber(setCode: string, number: number) {
+        return this.withRatelimit(async () => {
+            const response = await fetch(
+                `https://api.scryfall.com/cards/${setCode}/${number}`
+            );
+            const data = (await response.json()) as IScryfallCard;
+
+            return this.unwrapResponse(data, (x) =>
+                this.mapCardsToCardFaces([x])
+            );
+        });
+    }
+
     async findWithQuery(query: string) {
-        return await this.withRatelimit(async () => {
+        return this.withRatelimit(async () => {
             const response = await fetch(
                 `https://api.scryfall.com/cards/search?q=${query}`
             );
@@ -75,7 +88,7 @@ class ScryfallSearchService {
     }
 
     async findExact(name: string) {
-        return await this.withRatelimit(async () => {
+        return this.withRatelimit(async () => {
             const response = await fetch(
                 `https://api.scryfall.com/cards/named?exact=${name}`
             );
@@ -86,7 +99,7 @@ class ScryfallSearchService {
     }
 
     async findFuzzy(query: string) {
-        return await this.withRatelimit(async () => {
+        return this.withRatelimit(async () => {
             const response = await fetch(
                 `https://api.scryfall.com/cards/named?fuzzy=${query}`
             );
@@ -97,7 +110,7 @@ class ScryfallSearchService {
     }
 
     async getRules(card: IScryfallCardFace) {
-        return await this.withRatelimit(async () => {
+        return this.withRatelimit(async () => {
             const rulesResponse = await fetch(
                 `https://api.scryfall.com/cards/${
                     card.parentId ?? card.id
