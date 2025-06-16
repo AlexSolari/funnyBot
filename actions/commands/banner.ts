@@ -3,9 +3,45 @@ import { ChatId } from '../../types/chatIds';
 import { load } from 'cheerio';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 
+function chuckBanners(input: string[]) {
+    const result: { version: string; links: string[] }[] = [];
+    let currentChunk: { version: string; links: string[] } | null = null;
+
+    input.forEach((item) => {
+        if (item.startsWith('Version ')) {
+            // Save previous chunk if exists
+            if (currentChunk) result.push(currentChunk);
+
+            // Start new version chunk
+            currentChunk = {
+                version: item,
+                links: []
+            };
+        } else {
+            // If no current version, start a default chunk
+            if (!currentChunk) {
+                currentChunk = {
+                    version: 'некст патче',
+                    links: []
+                };
+            }
+            currentChunk.links.push(item);
+        }
+    });
+
+    // Push the last chunk if exists
+    if (currentChunk) result.push(currentChunk);
+
+    return result;
+}
+
 export default new CommandActionBuilder('Reaction.Banner')
     .on('баннер')
-    .when((ctx) => ctx.chatInfo.id == ChatId.GenshinChat)
+    .when(
+        (ctx) =>
+            ctx.chatInfo.id == ChatId.GenshinChat ||
+            ctx.chatInfo.id == ChatId.TestChat
+    )
     .do(async (ctx) => {
         const domain = 'https://genshin-impact.fandom.com';
 
@@ -15,46 +51,63 @@ export default new CommandActionBuilder('Reaction.Banner')
         const bannerTable = findInUpcomingPageDOM(
             'h3:has(span#Upcoming)+table'
         );
-        const bannerUrls = bannerTable
-            .find('tr')
-            .eq(2)
-            .find('td')
-            .eq(1)
-            .find('a:first-of-type')
-            .toArray()
-            .map((x) => x.attribs.href);
-
-        for (const bannerUrl of bannerUrls) {
-            const bannerPage = await fetch(`${domain}${bannerUrl}`);
-            const bannerPageText = await bannerPage.text();
-            const findInBannerPageDOM = load(bannerPageText);
-
-            const image = findInBannerPageDOM('a.image-thumbnail').toArray()[0];
-            if (image) {
-                ctx.replyWithText(`[\\.](${image.attribs.href})`);
-                continue;
-            }
-
-            const characterCards = findInBannerPageDOM(
-                '.wish-pool-table:first-of-type'
+        const bannerUrls = [
+            ...new Set(
+                bannerTable
+                    .find(
+                        'tr:has(a[title="Character Event Wish"]) td:nth-of-type(2) a:first-of-type, th[colspan]'
+                    )
+                    .toArray()
+                    .map((x) =>
+                        x.name == 'a'
+                            ? x.attribs.href
+                            : findInUpcomingPageDOM(x).text().trim()
+                    )
             )
-                .find('td')
-                .find('.card-caption')
-                .find('a');
-            const characterInfos = characterCards.toArray().map((x) => ({
-                name: x.attribs.title,
-                link: domain + x.attribs.href
-            }));
+        ];
 
-            ctx.replyWithText(
-                'Персонажи в некст баннере:\n\n' +
-                    characterInfos
-                        .map((x) => `[${escapeMarkdown(x.name)}](${x.link})`)
-                        .join('\n'),
-                {
-                    disableWebPreview: true
+        const bannerChunks = chuckBanners(bannerUrls);
+
+        for (const bannerChunk of bannerChunks) {
+            for (const link of bannerChunk.links) {
+                const bannerPage = await fetch(`${domain}${link}`);
+                const bannerPageText = await bannerPage.text();
+                const findInBannerPageDOM = load(bannerPageText);
+
+                const image =
+                    findInBannerPageDOM('a.image-thumbnail').toArray()[0];
+                if (image) {
+                    ctx.replyWithText(
+                        `[\\${escapeMarkdown(bannerChunk.version)}](${
+                            image.attribs.href
+                        })`
+                    );
+                    continue;
                 }
-            );
+
+                const characterCards = findInBannerPageDOM(
+                    '.wish-pool-table:first-of-type'
+                )
+                    .find('td')
+                    .find('.card-caption')
+                    .find('a');
+                const characterInfos = characterCards.toArray().map((x) => ({
+                    name: x.attribs.title,
+                    link: domain + x.attribs.href
+                }));
+
+                ctx.replyWithText(
+                    `Персонажи в ${escapeMarkdown(bannerChunk.version)}:\n\n` +
+                        characterInfos
+                            .map(
+                                (x) => `[${escapeMarkdown(x.name)}](${x.link})`
+                            )
+                            .join('\n'),
+                    {
+                        disableWebPreview: true
+                    }
+                );
+            }
         }
     })
     .cooldown(30 as Seconds)
