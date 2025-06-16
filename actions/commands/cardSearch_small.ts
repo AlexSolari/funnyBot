@@ -12,6 +12,7 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
         for (const matchResult of ctx.matchResults) {
             const firstRegexMatch = matchResult[1];
 
+            SET_AND_NUMBER_REGEX.lastIndex = 0;
             const setAndNumberMatch =
                 SET_AND_NUMBER_REGEX.exec(firstRegexMatch);
             if (setAndNumberMatch) {
