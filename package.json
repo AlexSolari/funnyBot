@@ -17,7 +17,6 @@
         "typescript-eslint": "^8.5.0"
     },
     "scripts": {
-        "build": "tsc",
         "lint": "npx eslint && tsc --noEmit"
     },
     "overrides": {
