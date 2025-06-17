@@ -35,7 +35,10 @@ export interface IScryfallCard extends IScryfallCardFace {
 export interface IScryfallCardFace {
     parentId: string;
     prices: {
+        eur: string;
+        eur_foil: string;
         usd: string;
+        usd_foil: string;
         tix: string;
     };
     flavor_text: string;

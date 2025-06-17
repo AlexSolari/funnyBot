@@ -60,9 +60,23 @@ class CardSearchService {
             return '';
         },
         price: async (card) => {
-            if (card.prices?.usd) {
-                return escapeMarkdown(`\n\nTCGPlayer: ${card.prices.usd}$`);
-            }
+            const usdPrice = card.prices?.usd
+                ? `TCGPlayer: ${card.prices.usd}$` +
+                  (card.prices?.usd_foil
+                      ? ` (foil: ${card.prices.usd_foil}$)\n`
+                      : '\n')
+                : '';
+            const euroPrice = card.prices?.eur
+                ? `CardMarket: ${card.prices.eur}€` +
+                  (card.prices?.eur_foil
+                      ? ` (foil: ${card.prices.eur_foil}€)\n`
+                      : '\n')
+                : '';
+
+            if (usdPrice || euroPrice)
+                return `\n\n${escapeMarkdown(usdPrice)}${escapeMarkdown(
+                    euroPrice
+                )}`;
 
             return '';
         },
@@ -179,13 +193,15 @@ class CardSearchService {
                 card.image_uris.normal ?? ScryfallService.cardBack
             })${await this.transfromFlags(flags, card)}`;
 
+            const usdPrice = card.prices?.usd ? `${card.prices.usd}$` : '';
+            const eurPrice = card.prices?.eur ? ` ${card.prices.eur}€` : '';
+
             cardsWithText.push({
                 card,
                 responseText,
-                description:
-                    flags.includes(CardSearchFlags.price) && card.prices?.usd
-                        ? `${card.prices.usd}$`
-                        : `${card.type_line ?? ''}\n${card.flavor_text ?? ''}`
+                description: flags.includes(CardSearchFlags.price)
+                    ? `${usdPrice} ${eurPrice}`
+                    : `${card.type_line ?? ''}\n${card.flavor_text ?? ''}`
             });
         }
         return { cardsWithText, showSetCode: wasOneCardFound };
