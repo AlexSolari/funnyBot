@@ -25,13 +25,15 @@ import lowCount from './scheduled/lowCount';
 import meta from './scheduled/meta';
 import inline_cardSearch from './inline/inline_cardSearch';
 import dvach from './commands/dvach';
+import ru from './commands/ru';
 
 export const testCommands = {
     commands: [
         test,
         cardSearch_small,
         pizda,
-        banner
+        banner,
+        ru
     ] as CommandAction<ActionStateBase>[],
     scheduled: [] as ScheduledAction<ActionStateBase>[],
     inline: [inline_cardSearch]
@@ -68,7 +70,8 @@ export const genshinCommands = {
         pizda,
         potuzhno,
         potuzhnoStats,
-        dvach
+        dvach,
+        ru
     ] as CommandAction<ActionStateBase>[],
     scheduled: [becker] as unknown as ScheduledAction<ActionStateBase>[]
 };
