@@ -38,7 +38,7 @@ async function sendRecentTournaments<TActionState extends IActionState>(
     const tournaments = await getCached<string>(format);
 
     if (tournaments.length > 0) {
-        ctx.sendTextToChat(`⚔️ Свіжі турніри ⚔️\n\n${tournaments}`);
+        ctx.send.text(`⚔️ Свіжі турніри ⚔️\n\n${tournaments}`);
     }
 }
 
@@ -117,7 +117,7 @@ export default new ScheduledActionBuilder('Scheduled.Meta')
                     pauperString.length > 0 ||
                     commander1v1String.length > 0
                 ) {
-                    ctx.sendTextToChat(
+                    ctx.send.text(
                         `⚔️ Свіжі турніри ⚔️\n\n ${pauperString} ${modernString} ${pioneerString} ${standardString} ${commander1v1String}`
                     );
                 }
@@ -142,7 +142,7 @@ export default new ScheduledActionBuilder('Scheduled.Meta')
                 }
 
                 if (pioneerString.length > 0 || standardString.length > 0) {
-                    ctx.sendTextToChat(
+                    ctx.send.text(
                         `⚔️ Свіжі турніри ⚔️\n\n ${pioneerString} ${standardString}`
                     );
                 }

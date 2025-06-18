@@ -5,7 +5,7 @@ import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
 export default new CommandActionBuilder('Reaction.Black')
     .on(/моноб/i)
     .do(async (ctx) => {
-        ctx.replyWithImage('monoB');
+        ctx.reply.withImage('monoB');
     })
     .ignoreChat(ChatId.LvivChat)
     .ignoreChat(ChatId.FrankivskChat)

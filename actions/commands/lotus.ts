@@ -14,7 +14,7 @@ export default new CommandActionBuilder('Reaction.Lotus')
             imageName += randomInt(1, 4);
         }
 
-        ctx.replyWithImage(imageName);
+        ctx.reply.withImage(imageName);
     })
     .ignoreChat(ChatId.LvivChat)
     .ignoreChat(ChatId.PauperChat)

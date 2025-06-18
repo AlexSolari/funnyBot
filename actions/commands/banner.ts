@@ -77,7 +77,7 @@ export default new CommandActionBuilder('Reaction.Banner')
                 const image =
                     findInBannerPageDOM('a.image-thumbnail').toArray()[0];
                 if (image) {
-                    ctx.replyWithText(
+                    ctx.reply.withText(
                         `[\\${escapeMarkdown(bannerChunk.version)}](${
                             image.attribs.href
                         })`
@@ -96,7 +96,7 @@ export default new CommandActionBuilder('Reaction.Banner')
                     link: domain + x.attribs.href
                 }));
 
-                ctx.replyWithText(
+                ctx.reply.withText(
                     `Персонажи в ${escapeMarkdown(bannerChunk.version)}:\n\n` +
                         characterInfos
                             .map(

@@ -26,17 +26,17 @@ export default new CommandActionBuilderWithState(
 
         const remainder69 = state.count % 69;
         if (remainder69 == 0) {
-            ctx.replyWithText(
+            ctx.reply.withText(
                 `Бот заходив вже ${state.count} \\(69 \\* ${
                     state.count / 69
                 }\\) раз${suffix}`
             );
-            ctx.replyWithVideo('nice');
+            ctx.reply.withVideo('nice');
             return;
         } else if (randomInt(0, 3) == 0) {
-            ctx.replyWithText(`Бот заходив вже ${state.count} раз${suffix}`);
+            ctx.reply.withText(`Бот заходив вже ${state.count} раз${suffix}`);
         } else {
-            ctx.react('🥴');
+            ctx.reply.withReaction('🥴');
         }
     })
     .cooldown(0 as Seconds)

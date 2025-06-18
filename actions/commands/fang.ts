@@ -10,13 +10,13 @@ export default new CommandActionBuilder('Reaction.Fang')
 
         switch (i) {
             case 0:
-                ctx.replyWithImage('fangAbzan');
+                ctx.reply.withImage('fangAbzan');
                 break;
             case 1:
-                ctx.replyWithImage('fangEsper');
+                ctx.reply.withImage('fangEsper');
                 break;
             case 2:
-                ctx.replyWithImage('fangLove');
+                ctx.reply.withImage('fangLove');
                 break;
             default:
                 break;

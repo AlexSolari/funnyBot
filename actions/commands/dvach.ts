@@ -13,7 +13,7 @@ export default new CommandActionBuilder('Reaction.Dvach')
                 ctx.messageUpdateObject.forward_origin.chat.id == DVACH2_CHATID)
     )
     .do(async (ctx) => {
-        ctx.replyWithImage('dvach');
+        ctx.reply.withImage('dvach');
     })
     .cooldown(1 as Seconds)
     .build();

@@ -15,7 +15,7 @@ export default new CommandActionBuilder('Reaction.Schedule')
         const posts = findInDOM('.js-widget_message').toArray();
         const link = posts.at(-1)!.attribs['data-post'];
 
-        ctx.replyWithText(`[Розклад на цей тиждень](https://t.me/${link})`);
+        ctx.reply.withText(`[Розклад на цей тиждень](https://t.me/${link})`);
     })
     .cooldown(30 as Seconds)
     .build();

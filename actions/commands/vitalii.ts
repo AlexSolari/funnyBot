@@ -8,7 +8,7 @@ export default new CommandActionBuilder('Reaction.Vitalii')
     .from(SpecificUsers.vitalii)
     .when((ctx) => ctx.chatInfo.id == ChatId.LvivChat)
     .do(async (ctx) => {
-        ctx.replyWithImage('malifo');
+        ctx.reply.withImage('malifo');
     })
     .cooldown(hoursToSeconds(24 as Hours))
     .build();

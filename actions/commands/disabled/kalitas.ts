@@ -5,7 +5,7 @@ import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
 export default new CommandActionBuilder('Reaction.Kalitas')
     .on(/калитас/i)
     .do(async (ctx) => {
-        ctx.replyWithImage('kalitas');
+        ctx.reply.withImage('kalitas');
     })
     .cooldown(hoursToSeconds(2 as Hours))
     .ignoreChat(ChatId.LvivChat)

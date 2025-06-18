@@ -21,7 +21,7 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
                     parseInt(setAndNumberMatch[2])
                 );
 
-                if (message) ctx.replyWithText(message);
+                if (message) ctx.reply.withText(message);
 
                 continue;
             }
@@ -46,11 +46,11 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
                         const chunk = message.slice(0, lastNewLineIndex);
                         message = message.slice(lastNewLineIndex + 2);
 
-                        ctx.replyWithText(chunk);
+                        ctx.reply.andQuote.withText(chunk);
                     }
                 }
             } else {
-                ctx.replyWithText(message);
+                ctx.reply.andQuote.withText(message);
             }
         }
     })

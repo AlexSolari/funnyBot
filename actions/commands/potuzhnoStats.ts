@@ -22,7 +22,7 @@ export default new CommandActionBuilder('Reaction.PotuzhnoStats')
             .map((x) => `${x.key} - ${x.value} Ватт`)
             .join('\n');
 
-        ctx.replyWithText(
+        ctx.reply.withText(
             escapeMarkdown(
                 `💪 TOП-10 потужності: 💪 \n\n${topTen}\n\nНаступна суперпотужність зарядженна на ${
                     superChargeCount * PotuzhnoState.superChargeMultiplier

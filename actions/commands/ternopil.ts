@@ -15,57 +15,57 @@ export default new CommandActionBuilder('Reaction.Ternopil')
     .do(async (ctx) => {
         const rnd = randomInt(0, 4);
         if (rnd == 0) {
-            ctx.replyWithImage('ternopil');
+            ctx.reply.withImage('ternopil');
         } else if (rnd == 1) {
             const rnd2 = randomInt(0, 5);
             if (rnd2 == 0) {
                 ctx.wait(secondsToMilliseconds(5 as Seconds));
-                ctx.replyWithText('Добре, цього разу без кібербулінгу');
+                ctx.reply.withText('Добре, цього разу без кібербулінгу');
                 ctx.wait(secondsToMilliseconds(5 as Seconds));
-                ctx.replyWithText('SIKE');
-                ctx.replyWithImage('lolcat');
+                ctx.reply.withText('SIKE');
+                ctx.reply.withImage('lolcat');
             } else {
                 const rnd3 = randomInt(0, 2);
                 switch (rnd3) {
                     case 0:
-                        ctx.replyWithText('В респонс');
-                        ctx.replyWithImage('silence');
+                        ctx.reply.withText('В респонс');
+                        ctx.reply.withImage('silence');
                         break;
                     case 1:
-                        ctx.replyWithText(
+                        ctx.reply.withText(
                             escapeMarkdown('краще б в церкву сходив...')
                         );
                         break;
                     default:
-                        ctx.replyWithVideo('nowords');
+                        ctx.reply.withVideo('nowords');
                         break;
                 }
             }
         } else {
             switch (randomInt(0, 10)) {
                 case 0:
-                    ctx.replyWithText('🫵🤣');
+                    ctx.reply.withText('🫵🤣');
                     break;
                 case 1:
-                    ctx.replyWithText('👀');
+                    ctx.reply.withText('👀');
                     break;
                 case 2:
-                    ctx.replyWithText('🙃');
+                    ctx.reply.withText('🙃');
                     break;
                 case 3:
-                    ctx.replyWithText('😃👉🚪');
+                    ctx.reply.withText('😃👉🚪');
                     break;
                 case 4:
-                    ctx.replyWithText('🤫🧏‍♂️🤫');
+                    ctx.reply.withText('🤫🧏‍♂️🤫');
                     break;
                 case 5:
-                    ctx.react('🤯');
+                    ctx.reply.withReaction('🤯');
                     break;
                 case 6:
-                    ctx.react('👍');
+                    ctx.reply.withReaction('👍');
                     break;
                 case 7:
-                    ctx.react('💅');
+                    ctx.reply.withReaction('💅');
                     break;
                 default:
                     ctx.startCooldown = false;

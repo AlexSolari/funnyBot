@@ -58,9 +58,9 @@ export default new ScheduledActionBuilder('Scheduled.LowCount')
                 return;
 
             if (target.gt.used_space == 7 || target.gt.used_space == 9) {
-                ctx.sendImageToChat(`${prefix}${target.gt.used_space}people`);
+                ctx.send.image(`${prefix}${target.gt.used_space}people`);
             } else if (target.gt.used_space <= 6) {
-                ctx.sendImageToChat(`${prefix}nopeople`);
+                ctx.send.image(`${prefix}nopeople`);
             }
         }
     })

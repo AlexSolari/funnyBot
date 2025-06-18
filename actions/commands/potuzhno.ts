@@ -22,17 +22,17 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
         state.scoreBoard[ctx.fromUserName] =
             (state.scoreBoard[ctx.fromUserName] ?? 0) + scoredPoints;
 
-        ctx.react('🎉');
+        ctx.reply.withReaction('🎉');
         if (superPotuzhno) {
-            ctx.replyWithText(
+            ctx.reply.withText(
                 `🎉😳😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО \\+${scoredPoints} 💪\n🎉😳😳😳😳😳😳😳🎉`
             );
             state.superCharge += 1;
         } else {
             if (Math.random() < 0.2) {
-                ctx.replyWithVideo('potuzhno');
+                ctx.reply.withVideo('potuzhno');
             } else {
-                ctx.replyWithText('Потужно 💪');
+                ctx.reply.withText('Потужно 💪');
             }
         }
     })

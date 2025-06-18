@@ -8,7 +8,7 @@ export default new CommandActionBuilder('Reaction.Ihor')
     .from(SpecificUsers.ihor)
     .when((ctx) => ctx.chatInfo.id == ChatId.LvivChat)
     .do(async (ctx) => {
-        ctx.replyWithImage('ihor');
+        ctx.reply.withImage('ihor');
     })
     .cooldown(hoursToSeconds(2 as Hours))
     .disabled()

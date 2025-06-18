@@ -5,7 +5,7 @@ import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
 export default new CommandActionBuilder('Reaction.Pizda')
     .on('да')
     .do(async (ctx) => {
-        ctx.replyWithText('пизда');
+        ctx.reply.withText('пизда');
     })
     .cooldown(hoursToSeconds(2 as Hours))
     .ignoreChat(ChatId.LvivChat)

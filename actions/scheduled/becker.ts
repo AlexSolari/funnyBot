@@ -22,7 +22,7 @@ export default new ScheduledActionBuilderWithState<BeckerState>(
         if (imageContainer.id != state.id) {
             state.id = imageContainer.id;
 
-            ctx.sendTextToChat(
+            ctx.send.text(
                 `[${escapeMarkdown(
                     imageContainer.title
                 )}](https://img.coomer.su/thumbnail/data/${

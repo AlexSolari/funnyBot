@@ -27,15 +27,15 @@ export default new CommandActionBuilder('Reaction.Dispute')
             cards.indexOf('Forest') == -1;
 
         if (isRakdos) {
-            ctx.replyWithText('ми досі про ракдос дрочню?');
+            ctx.reply.withText('ми досі про ракдос дрочню?');
         } else if (hasOffering) {
-            ctx.replyWithImage(`offering`);
+            ctx.reply.withImage(`offering`);
         } else if (hasEnforcer) {
-            ctx.replyWithText(
+            ctx.reply.withText(
                 'ВААААУ! вперше бачу такий набір карт. автор геній!'
             );
         } else if (randomInt(0, 1) == 0) {
-            ctx.react('🍌');
+            ctx.reply.withReaction('🍌');
         }
     })
     .cooldown(hoursToSeconds(2 as Hours))

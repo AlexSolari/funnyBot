@@ -80,7 +80,7 @@ export default new CommandActionBuilder('Reaction.Registration')
             .filter((x) => x.gt.service.name.includes(serviceName));
 
         if (!resources || resources.length == 0) {
-            ctx.replyWithText(`поки нема`);
+            ctx.reply.withText(`поки нема`);
             return;
         }
 
@@ -107,7 +107,7 @@ export default new CommandActionBuilder('Reaction.Registration')
             if (i + 1 < eventInfos.length) text += '\n';
         });
 
-        ctx.replyWithText(text);
+        ctx.reply.withText(text);
     })
     .cooldown(30 as Seconds)
     .ignoreChat(ChatId.LvivChat)
