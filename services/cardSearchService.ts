@@ -15,13 +15,13 @@ class CardSearchService {
 
     private flagTransformers: Record<
         keyof typeof CardSearchFlags,
-        (card: IScryfallCardFace) => Promise<string>
+        (card: IScryfallCardFace, signal?: AbortSignal) => Promise<string>
     > = {
-        rules: async (card) => {
+        rules: async (card, signal) => {
             if (!this.rulesCache.has(card.name)) {
                 this.rulesCache.set(
                     card.name,
-                    await ScryfallService.getRules(card)
+                    await ScryfallService.getRules(card, signal)
                 );
 
                 setTimeout(() => {
@@ -117,23 +117,32 @@ class CardSearchService {
         return { flags, query, subquery: sanitizedSubquery };
     }
 
-    private async transfromFlags(flags: string[], card: IScryfallCardFace) {
+    private async transfromFlags(
+        flags: string[],
+        card: IScryfallCardFace,
+        signal?: AbortSignal
+    ) {
         let extraText = '';
         for (const flag of flags) {
             if (!Object.keys(CardSearchFlags).includes(flag)) continue;
 
             extraText += await this.flagTransformers[
                 flag as keyof typeof CardSearchFlags
-            ](card);
+            ](card, signal);
         }
 
         return extraText;
     }
 
-    async findBySetAndNumber(setCode: string, number: number) {
+    async findBySetAndNumber(
+        setCode: string,
+        number: number,
+        signal?: AbortSignal
+    ) {
         const matchedCards = await ScryfallService.findBySetAndNumber(
             setCode,
-            number
+            number,
+            signal
         );
 
         const resultCard = matchedCards[0];
@@ -144,43 +153,49 @@ class CardSearchService {
         })`;
     }
 
-    async findForAction(matchResult: string) {
+    async findForAction(matchResult: string, signal?: AbortSignal) {
         const { flags, query, subquery } =
             this.getFlagsFromActionMatchResult(matchResult);
 
         const matchedCards =
             subquery.length == 0
-                ? await ScryfallService.findFuzzy(query)
-                : await ScryfallService.findWithQuery(`${query} ${subquery}`);
+                ? await ScryfallService.findFuzzy(query, signal)
+                : await ScryfallService.findWithQuery(
+                      `${query} ${subquery}`,
+                      signal
+                  );
 
         if (flags.includes(CardSearchFlags.flip)) matchedCards.shift();
 
         const resultCard = matchedCards[0];
         if (!resultCard) return null;
 
-        const extraText = await this.transfromFlags(flags, resultCard);
+        const extraText = await this.transfromFlags(flags, resultCard, signal);
         return `[\\${escapeMarkdown(resultCard.name)}](${
             resultCard.image_uris.normal ?? ScryfallService.cardBack
         })${extraText}`;
     }
 
-    async findForInlineQuery(inlineQuery: string) {
+    async findForInlineQuery(inlineQuery: string, signal?: AbortSignal) {
         const { flags, query } = this.getFlagsFromInlineQuery(inlineQuery);
         let wasOneCardFound = false;
 
         if (query.length == 0)
             return { cardsWithText: [], showSetCode: wasOneCardFound };
 
-        let cards = await ScryfallService.findExact(query);
+        let cards = await ScryfallService.findExact(query, signal);
 
         if (cards.length == 0) {
-            cards = await ScryfallService.findWithQuery(query);
+            cards = await ScryfallService.findWithQuery(query, signal);
         }
 
         let results: IScryfallCardFace[] = [];
         if (cards.length == 1) {
             wasOneCardFound = true;
-            results = await ScryfallService.findAllArtworks(cards[0].name);
+            results = await ScryfallService.findAllArtworks(
+                cards[0].name,
+                signal
+            );
         } else {
             results = cards;
         }
@@ -191,7 +206,7 @@ class CardSearchService {
         for (const card of results) {
             const responseText = `[\\${escapeMarkdown(card.name)}](${
                 card.image_uris.normal ?? ScryfallService.cardBack
-            })${await this.transfromFlags(flags, card)}`;
+            })${await this.transfromFlags(flags, card, signal)}`;
 
             const usdPrice = card.prices?.usd ? `${card.prices.usd}$` : '';
             const eurPrice = card.prices?.eur ? ` ${card.prices.eur}€` : '';

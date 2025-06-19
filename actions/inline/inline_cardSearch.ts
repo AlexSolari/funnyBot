@@ -5,7 +5,10 @@ import { MtgCardSearchService } from '../../services/cardSearchService';
 export default new InlineQueryActionBuilder('Inline.CardSearch')
     .do(async (ctx) => {
         const { cardsWithText, showSetCode } =
-            await MtgCardSearchService.findForInlineQuery(ctx.queryText);
+            await MtgCardSearchService.findForInlineQuery(
+                ctx.queryText,
+                ctx.abortSignal
+            );
 
         for (const cardData of cardsWithText) {
             ctx.showInlineQueryResult({

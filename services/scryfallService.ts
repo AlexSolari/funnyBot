@@ -61,10 +61,17 @@ class ScryfallSearchService {
         return transformer(response as Exclude<TResponse, IScryfallError>);
     }
 
-    async findBySetAndNumber(setCode: string, number: number) {
+    async findBySetAndNumber(
+        setCode: string,
+        number: number,
+        signal?: AbortSignal
+    ) {
         return this.withRatelimit(async () => {
             const response = await fetch(
-                `https://api.scryfall.com/cards/${setCode}/${number}`
+                `https://api.scryfall.com/cards/${setCode}/${number}`,
+                {
+                    signal
+                }
             );
             const data = (await response.json()) as IScryfallCard;
 
@@ -74,10 +81,13 @@ class ScryfallSearchService {
         });
     }
 
-    async findWithQuery(query: string) {
+    async findWithQuery(query: string, signal?: AbortSignal) {
         return this.withRatelimit(async () => {
             const response = await fetch(
-                `https://api.scryfall.com/cards/search?q=${query}`
+                `https://api.scryfall.com/cards/search?q=${query}`,
+                {
+                    signal
+                }
             );
             const data = (await response.json()) as IScryfallQueryResponse;
 
@@ -87,10 +97,13 @@ class ScryfallSearchService {
         });
     }
 
-    async findExact(name: string) {
+    async findExact(name: string, signal?: AbortSignal) {
         return this.withRatelimit(async () => {
             const response = await fetch(
-                `https://api.scryfall.com/cards/named?exact=${name}`
+                `https://api.scryfall.com/cards/named?exact=${name}`,
+                {
+                    signal
+                }
             );
             const data = (await response.json()) as IScryfallFuzzyResponse;
 
@@ -98,7 +111,7 @@ class ScryfallSearchService {
         });
     }
 
-    async findFuzzy(query: string) {
+    async findFuzzy(query: string, signal?: AbortSignal) {
         return this.withRatelimit(async () => {
             const response = await fetch(
                 `https://api.scryfall.com/cards/named?fuzzy=${query}`
@@ -109,12 +122,15 @@ class ScryfallSearchService {
         });
     }
 
-    async getRules(card: IScryfallCardFace) {
+    async getRules(card: IScryfallCardFace, signal?: AbortSignal) {
         return this.withRatelimit(async () => {
             const rulesResponse = await fetch(
                 `https://api.scryfall.com/cards/${
                     card.parentId ?? card.id
-                }/rulings`
+                }/rulings`,
+                {
+                    signal
+                }
             );
             const data = (await rulesResponse.json()) as IScryfallRulesResponse;
 
@@ -131,8 +147,8 @@ class ScryfallSearchService {
         });
     }
 
-    async findAllArtworks(name: string) {
-        return (await this.findWithQuery(`@@name="${name}"`)).filter(
+    async findAllArtworks(name: string, signal?: AbortSignal) {
+        return (await this.findWithQuery(`@@name="${name}"`, signal)).filter(
             (x) => x.name == name
         );
     }
