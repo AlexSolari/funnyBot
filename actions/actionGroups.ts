@@ -26,6 +26,7 @@ import meta from './scheduled/meta';
 import inline_cardSearch from './inline/inline_cardSearch';
 import dvach from './commands/dvach';
 import ru from './commands/ru';
+import nameSave from './commands/nameSave';
 
 export const testCommands = {
     commands: [
@@ -33,7 +34,10 @@ export const testCommands = {
         cardSearch_small,
         pizda,
         banner,
-        ru
+        ru,
+        potuzhno,
+        potuzhnoStats,
+        nameSave
     ] as CommandAction<ActionStateBase>[],
     scheduled: [] as ScheduledAction<ActionStateBase>[],
     inline: [inline_cardSearch]
@@ -57,7 +61,8 @@ export const mtgCommands = {
         slon,
         spamlol,
         ternopil,
-        vitalii
+        vitalii,
+        nameSave
     ] as CommandAction<ActionStateBase>[],
     scheduled: [meta, lowCount] as ScheduledAction<ActionStateBase>[],
     inline: [inline_cardSearch]
@@ -71,7 +76,8 @@ export const genshinCommands = {
         potuzhno,
         potuzhnoStats,
         dvach,
-        ru
+        ru,
+        nameSave
     ] as CommandAction<ActionStateBase>[],
     scheduled: [becker] as unknown as ScheduledAction<ActionStateBase>[]
 };

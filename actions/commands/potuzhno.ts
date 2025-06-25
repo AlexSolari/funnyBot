@@ -19,8 +19,11 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
             ? PotuzhnoState.superChargeMultiplier * state.superCharge
             : 1;
 
-        state.scoreBoard[ctx.fromUserName] =
-            (state.scoreBoard[ctx.fromUserName] ?? 0) + scoredPoints;
+        const scoreFromLegacyBoard = state.scoreBoard[ctx.fromUserName];
+        const scoreFromIdBoard = state.idScoreBoard[ctx.fromUserId!];
+
+        state.idScoreBoard[ctx.fromUserId!] =
+            (scoreFromIdBoard ?? scoreFromLegacyBoard ?? 0) + scoredPoints;
 
         ctx.reply.withReaction('🎉');
         if (superPotuzhno) {

@@ -2,19 +2,37 @@ import { CommandActionBuilder } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import PotuzhnoState from '../../entities/potuzhnoState';
+import NameState from '../../entities/nameState';
+import nameSave from './nameSave';
+import potuzhno from './potuzhno';
 
 export default new CommandActionBuilder('Reaction.PotuzhnoStats')
     .on('топ потужності')
     .do(async (ctx) => {
-        const loadedState = await ctx.loadStateOf<PotuzhnoState>(
-            'Reaction.Potuzhno'
+        const potuzhnoState = await ctx.loadStateOf<PotuzhnoState>(
+            potuzhno.name
         );
-        const scoreBoard = loadedState.scoreBoard ?? {};
-        const superChargeCount = loadedState.superCharge ?? 1;
-        const allEntries = [];
-        for (const [key, value] of Object.entries(scoreBoard)) {
-            allEntries.push({ key, value });
+        const namesState = await ctx.loadStateOf<NameState>(nameSave.name);
+
+        const legacyScoreBoard = potuzhnoState.scoreBoard;
+        const idScoreBoard = potuzhnoState.idScoreBoard;
+        const superChargeCount = potuzhnoState.superCharge ?? 1;
+
+        const mergedScore: Record<string, number> = {};
+
+        for (const [key, value] of Object.entries(legacyScoreBoard)) {
+            mergedScore[key] = value;
         }
+
+        for (const [strId, score] of Object.entries(idScoreBoard)) {
+            const name = namesState.lastUsername[parseInt(strId)];
+
+            mergedScore[name] = score;
+        }
+
+        const allEntries = Object.entries(mergedScore).map(([key, value]) => {
+            return { key, value };
+        });
 
         const topTen = allEntries
             .sort((a, b) => b.value - a.value)
