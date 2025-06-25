@@ -9,10 +9,8 @@ import potuzhno from './potuzhno';
 export default new CommandActionBuilder('Reaction.PotuzhnoStats')
     .on('топ потужності')
     .do(async (ctx) => {
-        const potuzhnoState = await ctx.loadStateOf<PotuzhnoState>(
-            potuzhno.name
-        );
-        const namesState = await ctx.loadStateOf<NameState>(nameSave.name);
+        const potuzhnoState = await ctx.loadStateOf<PotuzhnoState>(potuzhno);
+        const namesState = await ctx.loadStateOf<NameState>(nameSave);
 
         const legacyScoreBoard = potuzhnoState.scoreBoard;
         const idScoreBoard = potuzhnoState.idScoreBoard;
