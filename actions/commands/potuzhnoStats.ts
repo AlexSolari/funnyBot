@@ -12,8 +12,8 @@ export default new CommandActionBuilder('Reaction.PotuzhnoStats')
         const potuzhnoState = await ctx.loadStateOf<PotuzhnoState>(potuzhno);
         const namesState = await ctx.loadStateOf<NameState>(nameSave);
 
-        const legacyScoreBoard = potuzhnoState.scoreBoard;
-        const idScoreBoard = potuzhnoState.idScoreBoard;
+        const legacyScoreBoard = potuzhnoState.scoreBoard ?? {};
+        const idScoreBoard = potuzhnoState.idScoreBoard ?? {};
         const superChargeCount = potuzhnoState.superCharge ?? 1;
 
         const mergedScore: Record<string, number> = {};
