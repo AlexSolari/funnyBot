@@ -27,6 +27,7 @@ import inline_cardSearch from './inline/inline_cardSearch';
 import dvach from './commands/dvach';
 import ru from './commands/ru';
 import nameSave from './commands/nameSave';
+import long from './commands/long';
 
 export const testCommands = {
     commands: [
@@ -37,7 +38,8 @@ export const testCommands = {
         ru,
         potuzhno,
         potuzhnoStats,
-        nameSave
+        nameSave,
+        long
     ] as CommandAction<ActionStateBase>[],
     scheduled: [] as ScheduledAction<ActionStateBase>[],
     inline: [inline_cardSearch]
@@ -62,7 +64,8 @@ export const mtgCommands = {
         spamlol,
         ternopil,
         vitalii,
-        nameSave
+        nameSave,
+        long
     ] as CommandAction<ActionStateBase>[],
     scheduled: [meta, lowCount] as ScheduledAction<ActionStateBase>[],
     inline: [inline_cardSearch]
@@ -77,7 +80,8 @@ export const genshinCommands = {
         potuzhnoStats,
         dvach,
         ru,
-        nameSave
+        nameSave,
+        long
     ] as CommandAction<ActionStateBase>[],
     scheduled: [becker] as unknown as ScheduledAction<ActionStateBase>[]
 };
