@@ -28,6 +28,7 @@ import dvach from './commands/dvach';
 import ru from './commands/ru';
 import nameSave from './commands/nameSave';
 import long from './commands/long';
+import dvach_silentForward from './commands/dvach_silentForward';
 
 export const testCommands = {
     commands: [
@@ -39,7 +40,8 @@ export const testCommands = {
         potuzhno,
         potuzhnoStats,
         nameSave,
-        long
+        long,
+        dvach_silentForward
     ] as CommandAction<ActionStateBase>[],
     scheduled: [] as ScheduledAction<ActionStateBase>[],
     inline: [inline_cardSearch]
@@ -81,7 +83,8 @@ export const genshinCommands = {
         dvach,
         ru,
         nameSave,
-        long
+        long,
+        dvach_silentForward
     ] as CommandAction<ActionStateBase>[],
     scheduled: [becker] as unknown as ScheduledAction<ActionStateBase>[]
 };
