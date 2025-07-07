@@ -2,15 +2,14 @@ import { CommandActionBuilder } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import PotuzhnoState from '../../entities/potuzhnoState';
-import NameState from '../../entities/nameState';
 import nameSave from './nameSave';
 import potuzhno from './potuzhno';
 
 export default new CommandActionBuilder('Reaction.PotuzhnoStats')
     .on('топ потужності')
     .do(async (ctx) => {
-        const potuzhnoState = await ctx.loadStateOf<PotuzhnoState>(potuzhno);
-        const namesState = await ctx.loadStateOf<NameState>(nameSave);
+        const potuzhnoState = await ctx.loadStateOf(potuzhno);
+        const namesState = await ctx.loadStateOf(nameSave);
 
         const legacyScoreBoard = potuzhnoState.scoreBoard ?? {};
         const idScoreBoard = potuzhnoState.idScoreBoard ?? {};

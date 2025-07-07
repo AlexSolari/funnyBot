@@ -11,7 +11,7 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
     'Reaction.Potuzhno',
     () => new PotuzhnoState()
 )
-    .on(MessageType.Text)
+    .on(MessageType.Any)
     .when((ctx) => Math.random() < 0.01 && ctx.messageText != 'топ потужності')
     .do(async (ctx, state) => {
         const superPotuzhno = Math.random() < 0.01;
@@ -24,6 +24,10 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
 
         state.idScoreBoard[ctx.fromUserId!] =
             (scoreFromIdBoard ?? scoreFromLegacyBoard ?? 0) + scoredPoints;
+
+        if (state.scoreBoard[ctx.fromUserName]) {
+            delete state.scoreBoard[ctx.fromUserName];
+        }
 
         ctx.reply.withReaction('🎉');
         if (superPotuzhno) {

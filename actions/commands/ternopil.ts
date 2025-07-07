@@ -13,20 +13,37 @@ export default new CommandActionBuilder('Reaction.Ternopil')
     .from([SpecificUsers.pontiff, SpecificUsers.trigan, SpecificUsers.zohan])
     .when((ctx) => ctx.chatInfo.id == ChatId.LvivChat)
     .do(async (ctx) => {
-        const rnd = randomInt(0, 4);
-        if (rnd == 0) {
-            ctx.reply.withImage('ternopil');
-        } else if (rnd == 1) {
-            const rnd2 = randomInt(0, 5);
-            if (rnd2 == 0) {
-                ctx.wait(secondsToMilliseconds(5 as Seconds));
-                ctx.reply.withText('Добре, цього разу без кібербулінгу');
-                ctx.wait(secondsToMilliseconds(5 as Seconds));
-                ctx.reply.withText('SIKE');
-                ctx.reply.withImage('lolcat');
-            } else {
-                const rnd3 = randomInt(0, 2);
-                switch (rnd3) {
+        switch (randomInt(0, 4)) {
+            case 0:
+                switch (randomInt(0, 4)) {
+                    case 0:
+                        ctx.reply.withVideo('ternopil');
+                        break;
+                    case 1:
+                        ctx.reply.withVideo('ternopil');
+                        ctx.wait(secondsToMilliseconds(10 as Seconds));
+                        ctx.reply.withVideo('noternopil');
+                        break;
+                    default:
+                        ctx.reply.withImage('ternopil');
+                        break;
+                }
+                break;
+            case 1:
+                if (randomInt(0, 5) == 0) {
+                    ctx.wait(secondsToMilliseconds(5 as Seconds));
+                    ctx.reply.withText('Добре, цього разу без кібербулінгу');
+
+                    if (randomInt(0, 1) == 1) {
+                        ctx.wait(secondsToMilliseconds(5 as Seconds));
+                        ctx.reply.withText('SIKE');
+                        ctx.reply.withImage('lolcat');
+                    }
+
+                    return;
+                }
+
+                switch (randomInt(0, 2)) {
                     case 0:
                         ctx.reply.withText('В респонс');
                         ctx.reply.withImage('silence');
@@ -40,37 +57,38 @@ export default new CommandActionBuilder('Reaction.Ternopil')
                         ctx.reply.withVideo('nowords');
                         break;
                 }
-            }
-        } else {
-            switch (randomInt(0, 10)) {
-                case 0:
-                    ctx.reply.withText('🫵🤣');
-                    break;
-                case 1:
-                    ctx.reply.withText('👀');
-                    break;
-                case 2:
-                    ctx.reply.withText('🙃');
-                    break;
-                case 3:
-                    ctx.reply.withText('😃👉🚪');
-                    break;
-                case 4:
-                    ctx.reply.withText('🤫🧏‍♂️🤫');
-                    break;
-                case 5:
-                    ctx.reply.withReaction('🤯');
-                    break;
-                case 6:
-                    ctx.reply.withReaction('👍');
-                    break;
-                case 7:
-                    ctx.reply.withReaction('💅');
-                    break;
-                default:
-                    ctx.startCooldown = false;
-                    break;
-            }
+                break;
+            default:
+                switch (randomInt(0, 10)) {
+                    case 0:
+                        ctx.reply.withText('🫵🤣');
+                        break;
+                    case 1:
+                        ctx.reply.withText('👀');
+                        break;
+                    case 2:
+                        ctx.reply.withText('🙃');
+                        break;
+                    case 3:
+                        ctx.reply.withText('😃👉🚪');
+                        break;
+                    case 4:
+                        ctx.reply.withText('🤫🧏‍♂️🤫');
+                        break;
+                    case 5:
+                        ctx.reply.withReaction('🤯');
+                        break;
+                    case 6:
+                        ctx.reply.withReaction('👍');
+                        break;
+                    case 7:
+                        ctx.reply.withReaction('💅');
+                        break;
+                    default:
+                        ctx.startCooldown = false;
+                        break;
+                }
+                break;
         }
     })
     .cooldown(hoursToSeconds(8 as Hours))

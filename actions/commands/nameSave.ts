@@ -5,7 +5,7 @@ export default new CommandActionBuilderWithState(
     'Reaction.NameSave',
     () => new NameState()
 )
-    .on(MessageType.Text)
+    .on(MessageType.Any)
     .when(
         (ctx, state) => state.lastUsername[ctx.fromUserId!] != ctx.fromUserName
     )
