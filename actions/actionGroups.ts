@@ -30,6 +30,7 @@ import nameSave from './commands/nameSave';
 import long from './commands/long';
 import dvach_silentForward from './commands/dvach_silentForward';
 import voice from './commands/voice';
+import gpt from './commands/gpt';
 
 export const testCommands = {
     commands: [
@@ -39,7 +40,8 @@ export const testCommands = {
         banner,
         potuzhno,
         potuzhnoStats,
-        nameSave
+        nameSave,
+        gpt
     ] as CommandAction<ActionStateBase>[],
     scheduled: [] as ScheduledAction<ActionStateBase>[],
     inline: [inline_cardSearch]
@@ -66,7 +68,8 @@ export const mtgCommands = {
         vitalii,
         nameSave,
         long,
-        voice
+        voice,
+        gpt
     ] as CommandAction<ActionStateBase>[],
     scheduled: [meta, lowCount] as ScheduledAction<ActionStateBase>[],
     inline: [inline_cardSearch]

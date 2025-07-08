@@ -9,3 +9,4 @@ start.ps1
 build/
 types/chatIds.ts
 types/userIds.ts
+openAiToken.json
