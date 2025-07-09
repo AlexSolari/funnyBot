@@ -31,6 +31,7 @@ import long from './commands/long';
 import dvach_silentForward from './commands/dvach_silentForward';
 import voice from './commands/voice';
 import gpt from './commands/gpt';
+import gpt_isTrue from './commands/gpt_isTrue';
 
 export const testCommands = {
     commands: [
@@ -41,7 +42,7 @@ export const testCommands = {
         potuzhno,
         potuzhnoStats,
         nameSave,
-        gpt
+        gpt_isTrue
     ] as CommandAction<ActionStateBase>[],
     scheduled: [] as ScheduledAction<ActionStateBase>[],
     inline: [inline_cardSearch]
@@ -69,7 +70,8 @@ export const mtgCommands = {
         nameSave,
         long,
         voice,
-        gpt
+        gpt,
+        gpt_isTrue
     ] as CommandAction<ActionStateBase>[],
     scheduled: [meta, lowCount] as ScheduledAction<ActionStateBase>[],
     inline: [inline_cardSearch]
@@ -86,7 +88,8 @@ export const genshinCommands = {
         ru,
         nameSave,
         long,
-        dvach_silentForward
+        dvach_silentForward,
+        gpt_isTrue
     ] as CommandAction<ActionStateBase>[],
     scheduled: [becker] as unknown as ScheduledAction<ActionStateBase>[]
 };
