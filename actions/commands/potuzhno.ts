@@ -12,21 +12,24 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
     () => new PotuzhnoState()
 )
     .on(MessageType.Any)
-    .when((ctx) => Math.random() < 0.01 && ctx.messageText != 'топ потужності')
+    .when(
+        (ctx) =>
+            Math.random() < 0.01 && ctx.messageInfo.text != 'топ потужності'
+    )
     .do(async (ctx, state) => {
         const superPotuzhno = Math.random() < 0.01;
         const scoredPoints = superPotuzhno
             ? PotuzhnoState.superChargeMultiplier * state.superCharge
             : 1;
 
-        const scoreFromLegacyBoard = state.scoreBoard[ctx.fromUserName];
-        const scoreFromIdBoard = state.idScoreBoard[ctx.fromUserId!];
+        const scoreFromLegacyBoard = state.scoreBoard[ctx.userInfo.name];
+        const scoreFromIdBoard = state.idScoreBoard[ctx.userInfo.id!];
 
-        state.idScoreBoard[ctx.fromUserId!] =
+        state.idScoreBoard[ctx.userInfo.id!] =
             (scoreFromIdBoard ?? scoreFromLegacyBoard ?? 0) + scoredPoints;
 
-        if (state.scoreBoard[ctx.fromUserName]) {
-            delete state.scoreBoard[ctx.fromUserName];
+        if (state.scoreBoard[ctx.userInfo.name]) {
+            delete state.scoreBoard[ctx.userInfo.name];
         }
 
         ctx.reply.withReaction('🎉');
@@ -44,5 +47,6 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
         }
     })
     .ignoreChat(ChatId.PauperChat)
+    .ratelimit(1)
     .cooldown(hoursToSeconds(4 as Hours))
     .build();

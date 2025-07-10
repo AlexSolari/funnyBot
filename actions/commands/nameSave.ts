@@ -7,9 +7,9 @@ export default new CommandActionBuilderWithState(
 )
     .on(MessageType.Any)
     .when(
-        (ctx, state) => state.lastUsername[ctx.fromUserId!] != ctx.fromUserName
+        (ctx, state) => state.lastUsername[ctx.userInfo.id] != ctx.userInfo.name
     )
     .do(async (ctx, state) => {
-        state.lastUsername[ctx.fromUserId!] = ctx.fromUserName;
+        state.lastUsername[ctx.userInfo.id] = ctx.userInfo.name;
     })
     .build();

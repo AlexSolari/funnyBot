@@ -9,8 +9,8 @@ export default new CommandActionBuilder('Reaction.Long')
     .on(MessageType.Text)
     .when(
         (ctx) =>
-            ctx.messageText.length >= 400 &&
-            !whitelist.includes(ctx.fromUserId!)
+            ctx.messageInfo.text.length >= 400 &&
+            !whitelist.includes(ctx.userInfo.id)
     )
     .do(async (ctx) => {
         ctx.reply.withImage('long');

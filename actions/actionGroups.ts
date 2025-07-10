@@ -42,7 +42,7 @@ export const testCommands = {
         potuzhno,
         potuzhnoStats,
         nameSave,
-        gpt_isTrue
+        gpt
     ] as CommandAction<ActionStateBase>[],
     scheduled: [] as ScheduledAction<ActionStateBase>[],
     inline: [inline_cardSearch]

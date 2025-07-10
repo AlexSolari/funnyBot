@@ -35,7 +35,7 @@ export default new CommandActionBuilder('Reaction.Registration')
                 serviceName = 'Стандарт';
                 break;
             default:
-                ctx.startCooldown = false;
+                ctx.skipCooldown();
                 return;
         }
 

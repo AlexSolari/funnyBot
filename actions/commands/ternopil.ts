@@ -85,7 +85,7 @@ export default new CommandActionBuilder('Reaction.Ternopil')
                         ctx.reply.withReaction('💅');
                         break;
                     default:
-                        ctx.startCooldown = false;
+                        ctx.skipCooldown();
                         break;
                 }
                 break;
