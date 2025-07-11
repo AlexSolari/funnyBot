@@ -1,6 +1,10 @@
-import { CommandActionBuilder, Hours, MessageType } from 'chz-telegram-bot';
+import {
+    CommandActionBuilder,
+    Hours,
+    hoursToSeconds,
+    MessageType
+} from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
-import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
 
 export default new CommandActionBuilder('Reaction.Voice')
     .on(MessageType.Voice)

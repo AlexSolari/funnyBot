@@ -1,6 +1,7 @@
 import {
     CommandActionBuilderWithState,
     Hours,
+    hoursToSeconds,
     MessageType
 } from 'chz-telegram-bot';
 import OpenAI from 'openai';
@@ -8,7 +9,6 @@ import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { ChatId } from '../../types/chatIds';
 import openAiToken from '../../openAiToken.json';
 import { SpecificUsers } from '../../types/userIds';
-import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
 import GptState from '../../entities/gptState';
 
 const whitelist = [SpecificUsers.nerdik, SpecificUsers.otabapa];

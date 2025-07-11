@@ -1,6 +1,5 @@
-import { CommandActionBuilder, Hours } from 'chz-telegram-bot';
+import { CommandActionBuilder, Hours, hoursToSeconds } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
-import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
 import { randomInt } from '../../helpers/randomInt';
 
 export default new CommandActionBuilder('Reaction.Lotus')

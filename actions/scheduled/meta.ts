@@ -3,9 +3,11 @@ import escapeMarkdown from '../../helpers/escapeMarkdown';
 import moment from 'moment';
 import { ChatId } from '../../types/chatIds';
 import { Format } from '../../types/mtgFormats';
-import { CachedValueAccessor } from 'chz-telegram-bot/dist/types/cachedValueAccessor';
-import { IActionState, ScheduledActionBuilder } from 'chz-telegram-bot';
-import { ChatContext } from 'chz-telegram-bot/dist/entities/context/chatContext';
+import {
+    ChatContext,
+    IActionState,
+    ScheduledActionBuilder
+} from 'chz-telegram-bot';
 
 async function loadTournaments(formatName: Format): Promise<string> {
     const today = moment().format('MM/DD/YYYY');
@@ -33,7 +35,7 @@ async function loadTournaments(formatName: Format): Promise<string> {
 async function sendRecentTournaments<TActionState extends IActionState>(
     format: Format,
     ctx: ChatContext<TActionState>,
-    getCached: CachedValueAccessor
+    getCached: <TResult>(key: string) => Promise<TResult>
 ) {
     const tournaments = await getCached<string>(format);
 

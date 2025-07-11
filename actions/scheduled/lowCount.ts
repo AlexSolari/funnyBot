@@ -6,8 +6,11 @@ import {
 } from '../../types/externalApiDefinitions/mw';
 import { ChatId } from '../../types/chatIds';
 import { Day } from '../../types/daysOfTheWeek';
-import { Hours, ScheduledActionBuilder } from 'chz-telegram-bot';
-import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
+import {
+    Hours,
+    hoursToSeconds,
+    ScheduledActionBuilder
+} from 'chz-telegram-bot';
 
 export default new ScheduledActionBuilder('Scheduled.LowCount')
     .runAt(8)

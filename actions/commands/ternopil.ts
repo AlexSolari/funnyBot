@@ -1,9 +1,11 @@
-import { CommandActionBuilder, Hours, Seconds } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
 import {
+    CommandActionBuilder,
+    Hours,
     hoursToSeconds,
+    Seconds,
     secondsToMilliseconds
-} from 'chz-telegram-bot/dist/helpers/timeConvertions';
+} from 'chz-telegram-bot';
+import { ChatId } from '../../types/chatIds';
 import { SpecificUsers } from '../../types/userIds';
 import { randomInt } from '../../helpers/randomInt';
 import escapeMarkdown from '../../helpers/escapeMarkdown';

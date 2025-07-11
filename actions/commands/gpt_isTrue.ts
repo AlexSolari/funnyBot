@@ -1,10 +1,14 @@
-import { CommandActionBuilder, Hours, Seconds } from 'chz-telegram-bot';
+import {
+    CommandActionBuilder,
+    Hours,
+    hoursToSeconds,
+    Seconds,
+    TelegrafContextMessage
+} from 'chz-telegram-bot';
 import OpenAI from 'openai';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { ChatId } from '../../types/chatIds';
 import openAiToken from '../../openAiToken.json';
-import { TelegrafContextMessage } from 'chz-telegram-bot/dist/types/messageTypes';
-import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
 
 const client = new OpenAI({
     apiKey: openAiToken.token

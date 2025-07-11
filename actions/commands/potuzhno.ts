@@ -2,10 +2,10 @@ import PotuzhnoState from '../../entities/potuzhnoState';
 import {
     CommandActionBuilderWithState,
     Hours,
+    hoursToSeconds,
     MessageType
 } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
-import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
 
 export default new CommandActionBuilderWithState<PotuzhnoState>(
     'Reaction.Potuzhno',

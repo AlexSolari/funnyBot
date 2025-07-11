@@ -5,8 +5,11 @@ import {
     IMwApiResponseDateSlot
 } from '../../types/externalApiDefinitions/mw';
 import { ChatId } from '../../types/chatIds';
-import { CommandActionBuilder, Seconds } from 'chz-telegram-bot';
-import { secondsToMilliseconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
+import {
+    CommandActionBuilder,
+    Seconds,
+    secondsToMilliseconds
+} from 'chz-telegram-bot';
 import moment from 'moment';
 
 const daysMap = {

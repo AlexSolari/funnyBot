@@ -1,6 +1,8 @@
-import { ActionStateBase } from 'chz-telegram-bot';
-import { CommandAction } from 'chz-telegram-bot/dist/entities/actions/commandAction';
-import { ScheduledAction } from 'chz-telegram-bot/dist/entities/actions/scheduledAction';
+import {
+    ActionStateBase,
+    CommandAction,
+    ScheduledAction
+} from 'chz-telegram-bot';
 import banner from './commands/banner';
 import cardSearch_small from './commands/cardSearch_small';
 import dispute from './commands/dispute';

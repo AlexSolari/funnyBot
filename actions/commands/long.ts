@@ -1,6 +1,10 @@
-import { CommandActionBuilder, Hours, MessageType } from 'chz-telegram-bot';
+import {
+    CommandActionBuilder,
+    Hours,
+    MessageType,
+    hoursToSeconds
+} from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
-import { hoursToSeconds } from 'chz-telegram-bot/dist/helpers/timeConvertions';
 import { SpecificUsers } from '../../types/userIds';
 
 const whitelist = [SpecificUsers.nerdik, SpecificUsers.otabapa];
