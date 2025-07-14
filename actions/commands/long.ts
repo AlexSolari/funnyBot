@@ -13,6 +13,7 @@ export default new CommandActionBuilder('Reaction.Long')
     .on(MessageType.Text)
     .when(
         (ctx) =>
+            !ctx.messageInfo.text.includes('send.monobank') &&
             ctx.messageInfo.text.length >= 400 &&
             !whitelist.includes(ctx.userInfo.id)
     )
@@ -20,5 +21,5 @@ export default new CommandActionBuilder('Reaction.Long')
         ctx.reply.withImage('long');
     })
     .ignoreChat(ChatId.PauperChat)
-    .cooldown(hoursToSeconds(8 as Hours))
+    .cooldown(hoursToSeconds(20 as Hours))
     .build();

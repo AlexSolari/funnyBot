@@ -88,7 +88,7 @@ export default new CommandActionBuilder('Reaction.Registration')
         }
 
         const eventInfos = resources.map((x) => ({
-            date: x.date as string,
+            date: x.date,
             name: x.gt.name ?? x.gt.service?.name ?? serviceName,
             id: x.id,
             spaces: x.gt.space,

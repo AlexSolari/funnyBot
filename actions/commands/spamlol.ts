@@ -32,7 +32,6 @@ export default new CommandActionBuilderWithState(
                 }\\) раз${suffix}`
             );
             ctx.reply.withVideo('nice');
-            return;
         } else if (randomInt(0, 3) == 0) {
             ctx.reply.withText(`Бот заходив вже ${state.count} раз${suffix}`);
         } else {

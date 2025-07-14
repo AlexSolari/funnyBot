@@ -23,9 +23,9 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
             : 1;
 
         const scoreFromLegacyBoard = state.scoreBoard[ctx.userInfo.name];
-        const scoreFromIdBoard = state.idScoreBoard[ctx.userInfo.id!];
+        const scoreFromIdBoard = state.idScoreBoard[ctx.userInfo.id];
 
-        state.idScoreBoard[ctx.userInfo.id!] =
+        state.idScoreBoard[ctx.userInfo.id] =
             (scoreFromIdBoard ?? scoreFromLegacyBoard ?? 0) + scoredPoints;
 
         if (state.scoreBoard[ctx.userInfo.name]) {
@@ -38,12 +38,10 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
                 `🎉😳😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО \\+${scoredPoints} 💪\n🎉😳😳😳😳😳😳😳🎉`
             );
             state.superCharge += 1;
+        } else if (Math.random() < 0.2) {
+            ctx.reply.withVideo('potuzhno');
         } else {
-            if (Math.random() < 0.2) {
-                ctx.reply.withVideo('potuzhno');
-            } else {
-                ctx.reply.withText('Потужно 💪');
-            }
+            ctx.reply.withText('Потужно 💪');
         }
     })
     .ignoreChat(ChatId.PauperChat)

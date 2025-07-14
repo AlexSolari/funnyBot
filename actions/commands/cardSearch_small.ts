@@ -31,7 +31,7 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
                 firstRegexMatch
             );
 
-            if (!message) return;
+            if (!message) continue;
 
             if (message.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
                 while (message.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
@@ -50,9 +50,11 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
                         ctx.reply.andQuote.withText(chunk, firstRegexMatch);
                     }
                 }
-            } else {
-                ctx.reply.andQuote.withText(message, firstRegexMatch);
+
+                continue;
             }
+
+            ctx.reply.andQuote.withText(message, firstRegexMatch);
         }
     })
     .withHelp(

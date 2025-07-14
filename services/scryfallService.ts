@@ -17,7 +17,7 @@ const SCRYFALL_RATELIMIT_DELAY = 50 as Milliseconds;
 
 class ScryfallSearchService {
     private readonly semaphore = new Sema(1);
-    cardBack =
+    readonly cardBack =
         'https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg';
 
     private getCardFaces(card: IScryfallCard) {
@@ -114,7 +114,8 @@ class ScryfallSearchService {
     async findFuzzy(query: string, signal?: AbortSignal) {
         return this.withRatelimit(async () => {
             const response = await fetch(
-                `https://api.scryfall.com/cards/named?fuzzy=${query}`
+                `https://api.scryfall.com/cards/named?fuzzy=${query}`,
+                { signal }
             );
             const data = (await response.json()) as IScryfallFuzzyResponse;
 

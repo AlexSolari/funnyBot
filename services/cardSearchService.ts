@@ -11,9 +11,9 @@ type InlineQueryCardSearchResult = {
 };
 
 class CardSearchService {
-    private rulesCache: Map<string, string> = new Map();
+    private readonly rulesCache: Map<string, string> = new Map();
 
-    private flagTransformers: Record<
+    private readonly flagTransformers: Record<
         keyof typeof CardSearchFlags,
         (card: IScryfallCardFace, signal?: AbortSignal) => Promise<string>
     > = {
@@ -60,17 +60,18 @@ class CardSearchService {
             return '';
         },
         price: async (card) => {
+            const usdFoilPrice = card.prices?.usd_foil
+                ? ` (foil: ${card.prices.usd_foil}$)\n`
+                : '\n';
             const usdPrice = card.prices?.usd
-                ? `TCGPlayer: ${card.prices.usd}$` +
-                  (card.prices?.usd_foil
-                      ? ` (foil: ${card.prices.usd_foil}$)\n`
-                      : '\n')
+                ? `TCGPlayer: ${card.prices.usd}$` + usdFoilPrice
                 : '';
+
+            const euroFoilPrice = card.prices?.eur_foil
+                ? ` (foil: ${card.prices.eur_foil}€)\n`
+                : '\n';
             const euroPrice = card.prices?.eur
-                ? `CardMarket: ${card.prices.eur}€` +
-                  (card.prices?.eur_foil
-                      ? ` (foil: ${card.prices.eur_foil}€)\n`
-                      : '\n')
+                ? `CardMarket: ${card.prices.eur}€` + euroFoilPrice
                 : '';
 
             if (usdPrice || euroPrice)
@@ -86,7 +87,7 @@ class CardSearchService {
     private getFlagsFromInlineQuery(query: string) {
         const flags: string[] = [];
 
-        while (query[0] == '#') {
+        while (query.startsWith('#')) {
             const [hash, ...rest] = query.split(' ');
             query = rest.join(' ');
             flags.push(hash.slice(1));

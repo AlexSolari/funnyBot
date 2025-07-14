@@ -9,22 +9,17 @@ function chuckBanners(input: string[]) {
 
     input.forEach((item) => {
         if (item.startsWith('Version ')) {
-            // Save previous chunk if exists
             if (currentChunk) result.push(currentChunk);
 
-            // Start new version chunk
             currentChunk = {
                 version: item,
                 links: []
             };
         } else {
-            // If no current version, start a default chunk
-            if (!currentChunk) {
-                currentChunk = {
-                    version: 'некст патче',
-                    links: []
-                };
-            }
+            currentChunk ??= {
+                version: 'некст патче',
+                links: []
+            };
             currentChunk.links.push(item);
         }
     });

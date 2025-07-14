@@ -32,7 +32,7 @@ export default new CommandActionBuilder('Reaction.PotuzhnoStats')
         });
 
         const topTen = allEntries
-            .sort((a, b) => b.value - a.value)
+            .toSorted((a, b) => b.value - a.value)
             .slice(0, 10)
             .map((x) => `${x.key} - ${x.value} Ватт`)
             .join('\n');
