@@ -3,9 +3,13 @@ import {
     CommandActionBuilderWithState,
     Hours,
     hoursToSeconds,
-    MessageType
+    ICaptureController,
+    MessageType,
+    Seconds,
+    secondsToMilliseconds
 } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
+import { randomInt } from '../../helpers/randomInt';
 
 export default new CommandActionBuilderWithState<PotuzhnoState>(
     'Reaction.Potuzhno',
@@ -33,16 +37,49 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
         }
 
         ctx.reply.withReaction('🎉');
+
+        let captureController: ICaptureController;
         if (superPotuzhno) {
-            ctx.reply.withText(
+            captureController = ctx.reply.withText(
                 `🎉😳😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО \\+${scoredPoints} 💪\n🎉😳😳😳😳😳😳😳🎉`
             );
             state.superCharge += 1;
         } else if (Math.random() < 0.2) {
-            ctx.reply.withVideo('potuzhno');
+            captureController = ctx.reply.withVideo('potuzhno');
         } else {
-            ctx.reply.withText('Потужно 💪');
+            captureController = ctx.reply.withText('Потужно 💪');
         }
+
+        const abortController = new AbortController();
+        captureController.captureReplies(
+            [/дякую/gi],
+            async (replyCtx) => {
+                switch (randomInt(0, 4)) {
+                    case 0:
+                        replyCtx.reply.withText(
+                            'Завжди радий бачити вас щасливими\\!'
+                        );
+                        break;
+                    case 1:
+                        replyCtx.reply.withText('Не варто подяки, це дрібниця');
+                        break;
+                    case 2:
+                        replyCtx.reply.withText('Завжди до ваших послуг');
+                        break;
+                    case 3:
+                        replyCtx.reply.withText('Нема за що');
+                        break;
+                    case 4:
+                        replyCtx.reply.withReaction('😘');
+                        break;
+                }
+                replyCtx.stopCapture();
+            },
+            abortController
+        );
+        setTimeout(() => {
+            abortController.abort();
+        }, secondsToMilliseconds(30 as Seconds));
     })
     .ignoreChat(ChatId.PauperChat)
     .ratelimit(1)
