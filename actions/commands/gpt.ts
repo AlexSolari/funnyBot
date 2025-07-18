@@ -41,6 +41,7 @@ export default new CommandActionBuilderWithState(
             model: 'gpt-4.1',
             input: `Write a response to following message, be edgy and funny. 
             If possible make a MTG reference relevant to the message contents, but be sure to not overdo it.
+            MTG reference should make sence in context of reply itself and chat history.
             Reply language should be Ukraininan. Make sure that reply is short, 50 words max. 
             Here's chat history before the message so you now have a context of a discussion:\n\n[${messagesBeforeTarget}]
             Here's the message you need to reply:\n\n${ctx.messageInfo.text}`
