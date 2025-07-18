@@ -8,8 +8,10 @@ const testActionBuilder = new CommandActionBuilderWithState<TestState>(
     () => new TestState()
 )
     .on('test')
-    .when((ctx) => ctx.chatInfo.id == ChatId.TestChat)
-    .do(async (ctx, state) => {});
+    .in([ChatId.TestChat])
+    .do(async (ctx, state) => {
+        ctx.reply.withText('test response');
+    });
 
 if (process.env.NODE_ENV == 'production') {
     testActionBuilder.disabled();

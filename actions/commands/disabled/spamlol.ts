@@ -1,12 +1,8 @@
-import {
-    CommandActionBuilderWithState,
-    MessageType,
-    Seconds
-} from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
-import { SpecificUsers } from '../../types/userIds';
-import SpamState from '../../entities/spamState';
-import { randomInt } from '../../helpers/randomInt';
+import { CommandActionBuilderWithState, MessageType } from 'chz-telegram-bot';
+import { ChatId } from '../../../types/chatIds';
+import { SpecificUsers } from '../../../types/userIds';
+import SpamState from '../../../entities/spamState';
+import { randomInt } from '../../../helpers/randomInt';
 
 export default new CommandActionBuilderWithState(
     'Reaction.Spamlol',
@@ -14,7 +10,7 @@ export default new CommandActionBuilderWithState(
 )
     .on(MessageType.NewChatMember)
     .from(SpecificUsers.m_1kyyqq)
-    .when((ctx) => ctx.chatInfo.id == ChatId.LvivChat)
+    .in([ChatId.LvivChat])
     .do(async (ctx, state) => {
         state.count += 1;
 
@@ -38,5 +34,5 @@ export default new CommandActionBuilderWithState(
             ctx.reply.withReaction('🥴');
         }
     })
-    .cooldown(0 as Seconds)
+    .disabled()
     .build();

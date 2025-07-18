@@ -1,8 +1,4 @@
-import {
-    ActionStateBase,
-    CommandAction,
-    ScheduledAction
-} from 'chz-telegram-bot';
+import { CommandAction, IActionState, ScheduledAction } from 'chz-telegram-bot';
 import banner from './commands/banner';
 import cardSearch_small from './commands/cardSearch_small';
 import dispute from './commands/dispute';
@@ -18,7 +14,6 @@ import rating from './commands/rating';
 import registration from './commands/registration';
 import rozklad from './commands/rozklad';
 import slon from './commands/slon';
-import spamlol from './commands/spamlol';
 import ternopil from './commands/ternopil';
 import test from './commands/test';
 import vitalii from './commands/vitalii';
@@ -45,8 +40,8 @@ export const testCommands = {
         potuzhnoStats,
         nameSave,
         gpt
-    ] as CommandAction<ActionStateBase>[],
-    scheduled: [] as ScheduledAction<ActionStateBase>[],
+    ] as CommandAction<IActionState>[],
+    scheduled: [] as ScheduledAction<IActionState>[],
     inline: [inline_cardSearch]
 };
 
@@ -66,7 +61,6 @@ export const mtgCommands = {
         registration,
         rozklad,
         slon,
-        spamlol,
         ternopil,
         vitalii,
         nameSave,
@@ -74,8 +68,8 @@ export const mtgCommands = {
         voice,
         gpt,
         gpt_isTrue
-    ] as CommandAction<ActionStateBase>[],
-    scheduled: [meta, lowCount] as ScheduledAction<ActionStateBase>[],
+    ] as CommandAction<IActionState>[],
+    scheduled: [meta, lowCount] as ScheduledAction<IActionState>[],
     inline: [inline_cardSearch]
 };
 
@@ -92,6 +86,6 @@ export const genshinCommands = {
         long,
         dvach_silentForward,
         gpt_isTrue
-    ] as CommandAction<ActionStateBase>[],
-    scheduled: [becker] as unknown as ScheduledAction<ActionStateBase>[]
+    ] as CommandAction<IActionState>[],
+    scheduled: [becker] as unknown as ScheduledAction<IActionState>[]
 };

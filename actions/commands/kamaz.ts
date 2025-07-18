@@ -3,13 +3,15 @@ import { ChatId } from '../../types/chatIds';
 
 export default new CommandActionBuilder('Reaction.Kamaz')
     .on(/камаз/i)
+    .notIn([
+        ChatId.LvivChat,
+        ChatId.PauperChat,
+        ChatId.FrankivskChat,
+        ChatId.GenshinChat,
+        ChatId.CbgChat
+    ])
     .do(async (ctx) => {
         ctx.reply.withImage('kamazGun');
     })
-    .cooldown(hoursToSeconds(2 as Hours))
-    .ignoreChat(ChatId.LvivChat)
-    .ignoreChat(ChatId.PauperChat)
-    .ignoreChat(ChatId.FrankivskChat)
-    .ignoreChat(ChatId.GenshinChat)
-    .ignoreChat(ChatId.CbgChat)
+    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
     .build();

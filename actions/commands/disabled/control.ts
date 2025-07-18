@@ -3,14 +3,16 @@ import { ChatId } from '../../../types/chatIds';
 
 export default new CommandActionBuilder('Reaction.Control')
     .on(/контроль/i)
+    .notIn([
+        ChatId.LvivChat,
+        ChatId.PauperChat,
+        ChatId.FrankivskChat,
+        ChatId.FnmChat,
+        ChatId.GenshinChat
+    ])
     .do(async (ctx) => {
         ctx.reply.withImage('control');
     })
-    .cooldown(hoursToSeconds(2 as Hours))
-    .ignoreChat(ChatId.LvivChat)
-    .ignoreChat(ChatId.PauperChat)
-    .ignoreChat(ChatId.FrankivskChat)
-    .ignoreChat(ChatId.FnmChat)
-    .ignoreChat(ChatId.GenshinChat)
+    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
     .disabled()
     .build();

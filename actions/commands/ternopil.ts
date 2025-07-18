@@ -13,7 +13,7 @@ import escapeMarkdown from '../../helpers/escapeMarkdown';
 export default new CommandActionBuilder('Reaction.Ternopil')
     .on(/.+/i)
     .from([SpecificUsers.pontiff, SpecificUsers.trigan, SpecificUsers.zohan])
-    .when((ctx) => ctx.chatInfo.id == ChatId.LvivChat)
+    .in([ChatId.LvivChat])
     .do(async (ctx) => {
         switch (randomInt(0, 4)) {
             case 0:
@@ -93,5 +93,5 @@ export default new CommandActionBuilder('Reaction.Ternopil')
                 break;
         }
     })
-    .cooldown(hoursToSeconds(8 as Hours))
+    .withCooldown({ seconds: hoursToSeconds(8 as Hours) })
     .build();

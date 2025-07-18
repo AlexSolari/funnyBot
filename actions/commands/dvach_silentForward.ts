@@ -20,5 +20,5 @@ export default new CommandActionBuilder('Reaction.Dvach_SilentVideoForward')
     .do(async (ctx) => {
         ctx.reply.withImage('dvach');
     })
-    .cooldown(1 as Seconds)
+    .withCooldown({ seconds: 1 as Seconds })
     .build();

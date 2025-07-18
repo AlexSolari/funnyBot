@@ -10,7 +10,7 @@ export default new ScheduledActionBuilderWithState<BeckerState>(
     () => new BeckerState()
 )
     .runAt(11)
-    .allowIn(ChatId.GenshinChat)
+    .in([ChatId.GenshinChat])
     .do(async (ctx, _, state) => {
         const offset = randomInt(0, 21) * 50;
         const contentPage = await fetch(

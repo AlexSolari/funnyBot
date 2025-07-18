@@ -14,8 +14,7 @@ import {
 
 export default new ScheduledActionBuilder('Scheduled.LowCount')
     .runAt(8)
-    .allowIn(ChatId.PioneerChat)
-    .allowIn(ChatId.ModernChat)
+    .in([ChatId.PioneerChat, ChatId.ModernChat])
     .do(async (ctx) => {
         const currentWeek = getCurrentWeek();
         const today = moment().day();

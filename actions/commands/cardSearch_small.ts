@@ -1,10 +1,37 @@
-import { CommandActionBuilder } from 'chz-telegram-bot';
+import {
+    ActionStateBase,
+    CommandActionBuilder,
+    MessageContext
+} from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import { MtgCardSearchService } from '../../services/cardSearchService';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 
 const TELEGRAM_MAX_MESSAGE_LENGTH = 3000;
 const SET_AND_NUMBER_REGEX = /(\w{3,5})\s(\d+)/gi;
+
+function sendInChunks(
+    message: string,
+    ctx: MessageContext<ActionStateBase>,
+    firstRegexMatch: string
+) {
+    while (message.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
+        const lastNewLineIndex = message.lastIndexOf(
+            '\n\n',
+            TELEGRAM_MAX_MESSAGE_LENGTH
+        );
+
+        if (
+            lastNewLineIndex !== -1 &&
+            lastNewLineIndex < TELEGRAM_MAX_MESSAGE_LENGTH
+        ) {
+            const chunk = message.slice(0, lastNewLineIndex);
+            message = message.slice(lastNewLineIndex + 2);
+
+            ctx.reply.andQuote.withText(chunk, firstRegexMatch);
+        }
+    }
+}
 
 export default new CommandActionBuilder('Reaction.CardSearch_Small')
     .on(/\[([^[]+)\]/gi)
@@ -27,29 +54,14 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
                 continue;
             }
 
-            let message = await MtgCardSearchService.findForAction(
+            const message = await MtgCardSearchService.findForAction(
                 firstRegexMatch
             );
 
             if (!message) continue;
 
             if (message.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
-                while (message.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
-                    const lastNewLineIndex = message.lastIndexOf(
-                        '\n\n',
-                        TELEGRAM_MAX_MESSAGE_LENGTH
-                    );
-
-                    if (
-                        lastNewLineIndex !== -1 &&
-                        lastNewLineIndex < TELEGRAM_MAX_MESSAGE_LENGTH
-                    ) {
-                        const chunk = message.slice(0, lastNewLineIndex);
-                        message = message.slice(lastNewLineIndex + 2);
-
-                        ctx.reply.andQuote.withText(chunk, firstRegexMatch);
-                    }
-                }
+                sendInChunks(message, ctx, firstRegexMatch);
 
                 continue;
             }
@@ -72,5 +84,5 @@ export default new CommandActionBuilder('Reaction.CardSearch_Small')
             `@${escapeMarkdown(botUsername)} \\#rules \\#price consider\n\n` +
             'Також бот може шукати картки за сетом та номером, для цього використовуйте синтаксис *\\[код\\_сету номер\\]*, наприклад: *\\[dom 101\\]* знайде картку з сету Dominaria під номером 101 \\(Rat Colony\\)\\.\n\n'
     )
-    .ignoreChat(ChatId.GenshinChat)
+    .notIn([ChatId.GenshinChat])
     .build();

@@ -3,13 +3,15 @@ import { ChatId } from '../../../types/chatIds';
 
 export default new CommandActionBuilder('Reaction.Black')
     .on(/моноб/i)
+    .notIn([
+        ChatId.LvivChat,
+        ChatId.FrankivskChat,
+        ChatId.FnmChat,
+        ChatId.GenshinChat
+    ])
     .do(async (ctx) => {
         ctx.reply.withImage('monoB');
     })
-    .ignoreChat(ChatId.LvivChat)
-    .ignoreChat(ChatId.FrankivskChat)
-    .ignoreChat(ChatId.FnmChat)
-    .ignoreChat(ChatId.GenshinChat)
-    .cooldown(hoursToSeconds(2 as Hours))
+    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
     .disabled()
     .build();

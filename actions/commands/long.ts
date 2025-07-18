@@ -11,6 +11,7 @@ const whitelist = [SpecificUsers.nerdik, SpecificUsers.otabapa];
 
 export default new CommandActionBuilder('Reaction.Long')
     .on(MessageType.Text)
+    .notIn([ChatId.PauperChat])
     .when(
         (ctx) =>
             !ctx.messageInfo.text.includes('send.monobank') &&
@@ -20,6 +21,5 @@ export default new CommandActionBuilder('Reaction.Long')
     .do(async (ctx) => {
         ctx.reply.withImage('long');
     })
-    .ignoreChat(ChatId.PauperChat)
-    .cooldown(hoursToSeconds(20 as Hours))
+    .withCooldown({ seconds: hoursToSeconds(20 as Hours) })
     .build();

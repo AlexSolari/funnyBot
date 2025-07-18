@@ -16,6 +16,7 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
     () => new PotuzhnoState()
 )
     .on(MessageType.Any)
+    .notIn([ChatId.PauperChat])
     .when(
         (ctx) =>
             Math.random() < 0.01 && ctx.messageInfo.text != 'топ потужності'
@@ -81,7 +82,6 @@ export default new CommandActionBuilderWithState<PotuzhnoState>(
             abortController.abort();
         }, secondsToMilliseconds(30 as Seconds));
     })
-    .ignoreChat(ChatId.PauperChat)
-    .ratelimit(1)
-    .cooldown(hoursToSeconds(4 as Hours))
+    .withRatelimit(1)
+    .withCooldown({ seconds: hoursToSeconds(4 as Hours) })
     .build();

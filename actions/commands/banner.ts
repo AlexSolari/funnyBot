@@ -32,11 +32,7 @@ function chuckBanners(input: string[]) {
 
 export default new CommandActionBuilder('Reaction.Banner')
     .on('баннер')
-    .when(
-        (ctx) =>
-            ctx.chatInfo.id == ChatId.GenshinChat ||
-            ctx.chatInfo.id == ChatId.TestChat
-    )
+    .in([ChatId.GenshinChat, ChatId.TestChat])
     .do(async (ctx) => {
         const domain = 'https://genshin-impact.fandom.com';
 
@@ -105,5 +101,5 @@ export default new CommandActionBuilder('Reaction.Banner')
             }
         }
     })
-    .cooldown(30 as Seconds)
+    .withCooldown({ seconds: 30 as Seconds })
     .build();

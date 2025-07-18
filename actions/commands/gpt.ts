@@ -21,6 +21,7 @@ export default new CommandActionBuilderWithState(
     () => new GptState()
 )
     .on(MessageType.Text)
+    .notIn([ChatId.PauperChat])
     .when(
         (ctx, state) =>
             Math.random() < 0.05 &&
@@ -46,7 +47,6 @@ export default new CommandActionBuilderWithState(
         });
         ctx.reply.withText(escapeMarkdown(response.output_text));
     })
-    .ratelimit(1)
-    .cooldown(hoursToSeconds(20 as Hours))
-    .ignoreChat(ChatId.PauperChat)
+    .withRatelimit(1)
+    .withCooldown({ seconds: hoursToSeconds(20 as Hours) })
     .build();

@@ -3,10 +3,9 @@ import { ChatId } from '../../types/chatIds';
 
 export default new CommandActionBuilder('Reaction.Hello')
     .on('ні')
+    .notIn([ChatId.LvivChat, ChatId.FrankivskChat])
     .do(async (ctx) => {
         ctx.reply.withText('hello');
     })
-    .cooldown(hoursToSeconds(2 as Hours))
-    .ignoreChat(ChatId.LvivChat)
-    .ignoreChat(ChatId.FrankivskChat)
+    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
     .build();

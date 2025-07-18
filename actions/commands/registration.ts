@@ -23,6 +23,14 @@ const daysMap = {
 } as Record<string, string>;
 
 export default new CommandActionBuilder('Reaction.Registration')
+    .notIn([
+        ChatId.LvivChat,
+        ChatId.PauperChat,
+        ChatId.FrankivskChat,
+        ChatId.FnmChat,
+        ChatId.GenshinChat,
+        ChatId.CbgChat
+    ])
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
     .do(async (ctx) => {
         let serviceName = '';
@@ -112,11 +120,5 @@ export default new CommandActionBuilder('Reaction.Registration')
 
         ctx.reply.withText(text);
     })
-    .cooldown(30 as Seconds)
-    .ignoreChat(ChatId.LvivChat)
-    .ignoreChat(ChatId.PauperChat)
-    .ignoreChat(ChatId.FrankivskChat)
-    .ignoreChat(ChatId.FnmChat)
-    .ignoreChat(ChatId.GenshinChat)
-    .ignoreChat(ChatId.CbgChat)
+    .withCooldown({ seconds: 30 as Seconds })
     .build();

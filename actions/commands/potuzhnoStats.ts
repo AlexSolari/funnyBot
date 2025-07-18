@@ -7,6 +7,7 @@ import potuzhno from './potuzhno';
 
 export default new CommandActionBuilder('Reaction.PotuzhnoStats')
     .on('топ потужності')
+    .notIn([ChatId.PauperChat])
     .do(async (ctx) => {
         const potuzhnoState = await ctx.loadStateOf(potuzhno);
         const namesState = await ctx.loadStateOf(nameSave);
@@ -45,5 +46,4 @@ export default new CommandActionBuilder('Reaction.PotuzhnoStats')
             )
         );
     })
-    .ignoreChat(ChatId.PauperChat)
     .build();

@@ -4,6 +4,13 @@ import { randomInt } from '../../helpers/randomInt';
 
 export default new CommandActionBuilder('Reaction.Fang')
     .on(/(фанг|мотом[иы]ш)/i)
+    .notIn([
+        ChatId.LvivChat,
+        ChatId.PauperChat,
+        ChatId.FrankivskChat,
+        ChatId.GenshinChat,
+        ChatId.CbgChat
+    ])
     .do(async (ctx) => {
         const i = randomInt(0, 2);
 
@@ -21,10 +28,5 @@ export default new CommandActionBuilder('Reaction.Fang')
                 break;
         }
     })
-    .cooldown(hoursToSeconds(2 as Hours))
-    .ignoreChat(ChatId.LvivChat)
-    .ignoreChat(ChatId.PauperChat)
-    .ignoreChat(ChatId.FrankivskChat)
-    .ignoreChat(ChatId.GenshinChat)
-    .ignoreChat(ChatId.CbgChat)
+    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
     .build();

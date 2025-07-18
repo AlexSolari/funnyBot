@@ -3,12 +3,14 @@ import { ChatId } from '../../types/chatIds';
 
 export default new CommandActionBuilder('Reaction.Pizda')
     .on('да')
+    .notIn([
+        ChatId.LvivChat,
+        ChatId.PauperChat,
+        ChatId.FrankivskChat,
+        ChatId.CbgChat
+    ])
     .do(async (ctx) => {
         ctx.reply.withText('пизда');
     })
-    .cooldown(hoursToSeconds(2 as Hours))
-    .ignoreChat(ChatId.LvivChat)
-    .ignoreChat(ChatId.PauperChat)
-    .ignoreChat(ChatId.FrankivskChat)
-    .ignoreChat(ChatId.CbgChat)
+    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
     .build();

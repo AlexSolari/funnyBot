@@ -63,10 +63,10 @@ export default new CommandActionBuilder('Reaction.Gpt_IsTrue')
         if (ctx.chatInfo.id == ChatId.LvivChat)
             ctx.startCustomCooldown(hoursToSeconds(4 as Hours));
     })
-    .ratelimit(1)
-    .withCooldownMessage(
-        escapeMarkdown(`Наразі не можу перевірити, спробуйте пізніше.`)
-    )
-    .cooldown(60 as Seconds)
-    .ignoreChat(ChatId.PauperChat)
+    .withRatelimit(1)
+    .withCooldown({
+        seconds: 60 as Seconds,
+        message: escapeMarkdown(`Наразі не можу перевірити, спробуйте пізніше.`)
+    })
+    .notIn([ChatId.PauperChat])
     .build();

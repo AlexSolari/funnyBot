@@ -3,13 +3,16 @@ import { ChatId } from '../../../types/chatIds';
 
 export default new CommandActionBuilder('Reaction.Kalitas')
     .on(/калитас/i)
+    .notIn([
+        ChatId.LvivChat,
+        ChatId.PauperChat,
+        ChatId.FrankivskChat,
+        ChatId.FnmChat,
+        ChatId.GenshinChat
+    ])
     .do(async (ctx) => {
         ctx.reply.withImage('kalitas');
     })
-    .cooldown(hoursToSeconds(2 as Hours))
-    .ignoreChat(ChatId.LvivChat)
-    .ignoreChat(ChatId.FrankivskChat)
-    .ignoreChat(ChatId.FnmChat)
-    .ignoreChat(ChatId.GenshinChat)
+    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
     .disabled()
     .build();

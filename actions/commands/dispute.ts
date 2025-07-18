@@ -5,7 +5,6 @@ import { randomInt } from '../../helpers/randomInt';
 
 export default new CommandActionBuilder('Reaction.Dispute')
     .on(/mtggoldfish\.com\/deck\/(\d+)/i)
-    .when((ctx) => ctx.chatInfo.id == ChatId.PauperChat)
     .do(async (ctx) => {
         const deckId = ctx.matchResults[0][1];
         const response = await fetch(
@@ -37,5 +36,6 @@ export default new CommandActionBuilder('Reaction.Dispute')
             ctx.reply.withReaction('🍌');
         }
     })
-    .cooldown(hoursToSeconds(2 as Hours))
+    .in([ChatId.PauperChat])
+    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
     .build();
