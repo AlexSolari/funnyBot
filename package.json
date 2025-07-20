@@ -3,7 +3,7 @@
     "dependencies": {
         "async-sema": "^3.1.1",
         "cheerio": "^1.0.0-rc.12",
-        "chz-telegram-bot": "^0.3.21",
+        "chz-telegram-bot": "^0.3.23",
         "markdown-escape": "^2.0.0",
         "moment": "^2.30.1",
         "openai": "^5.8.3"
