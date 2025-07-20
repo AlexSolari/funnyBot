@@ -22,7 +22,7 @@ const daysMap = {
     субота: 'суботу'
 } as Record<string, string>;
 
-export default new CommandActionBuilder('Reaction.Registration')
+export const registration = new CommandActionBuilder('Reaction.Registration')
     .notIn([
         ChatId.LvivChat,
         ChatId.PauperChat,

@@ -17,4 +17,4 @@ if (process.env.NODE_ENV == 'production') {
     testActionBuilder.disabled();
 }
 
-export default testActionBuilder.build();
+export const test = testActionBuilder.build();

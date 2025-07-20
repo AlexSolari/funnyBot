@@ -115,7 +115,7 @@ async function showFrankivskTournaments<TActionState extends IActionState>(
     }
 }
 
-export default new ScheduledActionBuilder('Scheduled.Meta')
+export const meta = new ScheduledActionBuilder('Scheduled.Meta')
     .runAt(18)
     .in([
         ChatId.ModernChat,

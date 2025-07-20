@@ -1,6 +1,8 @@
 import { CommandActionBuilder, MessageType, Seconds } from 'chz-telegram-bot';
 
-export default new CommandActionBuilder('Reaction.Dvach_SilentVideoForward')
+export const dvachSilentForward = new CommandActionBuilder(
+    'Reaction.Dvach_SilentVideoForward'
+)
     .on(MessageType.Any)
     .when(
         (ctx) =>

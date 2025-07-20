@@ -9,7 +9,7 @@ import { SpecificUsers } from '../../types/userIds';
 
 const whitelist = [SpecificUsers.nerdik, SpecificUsers.otabapa];
 
-export default new CommandActionBuilder('Reaction.Long')
+export const long = new CommandActionBuilder('Reaction.Long')
     .on(MessageType.Text)
     .notIn([ChatId.PauperChat])
     .when(

@@ -5,7 +5,7 @@ import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { randomInt } from '../../helpers/randomInt';
 import { ICmerApiResponse } from '../../types/externalApiDefinitions/cmer';
 
-export default new ScheduledActionBuilderWithState<BeckerState>(
+export const becker = new ScheduledActionBuilderWithState<BeckerState>(
     'Scheduled.Becker',
     () => new BeckerState()
 )

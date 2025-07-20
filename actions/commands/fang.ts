@@ -2,7 +2,7 @@ import { CommandActionBuilder, Hours, hoursToSeconds } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import { randomInt } from '../../helpers/randomInt';
 
-export default new CommandActionBuilder('Reaction.Fang')
+export const fang = new CommandActionBuilder('Reaction.Fang')
     .on(/(фанг|мотом[иы]ш)/i)
     .notIn([
         ChatId.LvivChat,

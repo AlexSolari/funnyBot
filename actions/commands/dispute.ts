@@ -3,7 +3,7 @@ import { CommandActionBuilder, Hours, hoursToSeconds } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import { randomInt } from '../../helpers/randomInt';
 
-export default new CommandActionBuilder('Reaction.Dispute')
+export const dispute = new CommandActionBuilder('Reaction.Dispute')
     .on(/mtggoldfish\.com\/deck\/(\d+)/i)
     .do(async (ctx) => {
         const deckId = ctx.matchResults[0][1];

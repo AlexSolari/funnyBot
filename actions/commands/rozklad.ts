@@ -2,7 +2,7 @@ import { load } from 'cheerio';
 import { CommandActionBuilder, Seconds } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 
-export default new CommandActionBuilder('Reaction.Schedule')
+export const rozklad = new CommandActionBuilder('Reaction.Schedule')
     .on(['розклад'])
     .in([ChatId.LvivChat])
     .do(async (ctx) => {

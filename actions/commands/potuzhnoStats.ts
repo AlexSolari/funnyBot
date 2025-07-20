@@ -2,10 +2,10 @@ import { CommandActionBuilder } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import PotuzhnoState from '../../entities/potuzhnoState';
-import nameSave from './nameSave';
-import potuzhno from './potuzhno';
+import { nameSave } from './nameSave';
+import { potuzhno } from './potuzhno';
 
-export default new CommandActionBuilder('Reaction.PotuzhnoStats')
+export const potuzhnoStats = new CommandActionBuilder('Reaction.PotuzhnoStats')
     .on('топ потужності')
     .notIn([ChatId.PauperChat])
     .do(async (ctx) => {

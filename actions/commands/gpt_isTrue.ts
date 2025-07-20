@@ -32,7 +32,7 @@ function getTextContentsFromReply(messageUpdateObject: TelegrafContextMessage) {
     return '';
 }
 
-export default new CommandActionBuilder('Reaction.Gpt_IsTrue')
+export const gptIsTrue = new CommandActionBuilder('Reaction.Gpt_IsTrue')
     .on(/is (this|it|that) true\??/gi)
     .when(
         (ctx) =>

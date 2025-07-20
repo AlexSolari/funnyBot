@@ -10,7 +10,7 @@ import { SpecificUsers } from '../../types/userIds';
 import { randomInt } from '../../helpers/randomInt';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 
-export default new CommandActionBuilder('Reaction.Ternopil')
+export const ternopil = new CommandActionBuilder('Reaction.Ternopil')
     .on(/.+/i)
     .from([SpecificUsers.pontiff, SpecificUsers.trigan, SpecificUsers.zohan])
     .in([ChatId.LvivChat])

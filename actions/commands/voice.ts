@@ -6,7 +6,7 @@ import {
 } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 
-export default new CommandActionBuilder('Reaction.Voice')
+export const voice = new CommandActionBuilder('Reaction.Voice')
     .on(MessageType.Voice)
     .in([ChatId.FrankivskChat])
     .do(async (ctx) => {

@@ -1,7 +1,7 @@
 import { CommandActionBuilder, Hours, hoursToSeconds } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 
-export default new CommandActionBuilder('Reaction.Ponyav')
+export const ponyav = new CommandActionBuilder('Reaction.Ponyav')
     .on('поняв')
     .notIn([
         ChatId.PauperChat,

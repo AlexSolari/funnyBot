@@ -2,7 +2,7 @@ import { InlineQueryActionBuilder } from 'chz-telegram-bot';
 import { ScryfallService } from '../../services/scryfallService';
 import { MtgCardSearchService } from '../../services/cardSearchService';
 
-export default new InlineQueryActionBuilder('Inline.CardSearch')
+export const inlineCardSearch = new InlineQueryActionBuilder('Inline.CardSearch')
     .do(async (ctx) => {
         const { cardsWithText, showSetCode } =
             await MtgCardSearchService.findForInlineQuery(

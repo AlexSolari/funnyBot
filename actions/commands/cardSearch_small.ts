@@ -33,7 +33,7 @@ function sendInChunks(
     }
 }
 
-export default new CommandActionBuilder('Reaction.CardSearch_Small')
+export const cardSearch = new CommandActionBuilder('Reaction.CardSearch_Small')
     .on(/\[([^[]+)\]/gi)
     .do(async (ctx) => {
         for (const matchResult of ctx.matchResults) {

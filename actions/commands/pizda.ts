@@ -1,7 +1,7 @@
 import { CommandActionBuilder, Hours, hoursToSeconds } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 
-export default new CommandActionBuilder('Reaction.Pizda')
+export const pizda = new CommandActionBuilder('Reaction.Pizda')
     .on('да')
     .notIn([
         ChatId.LvivChat,

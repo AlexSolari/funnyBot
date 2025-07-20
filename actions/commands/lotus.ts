@@ -2,7 +2,7 @@ import { CommandActionBuilder, Hours, hoursToSeconds } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import { randomInt } from '../../helpers/randomInt';
 
-export default new CommandActionBuilder('Reaction.Lotus')
+export const lotus = new CommandActionBuilder('Reaction.Lotus')
     .on(/лотус/i)
     .notIn([
         ChatId.LvivChat,

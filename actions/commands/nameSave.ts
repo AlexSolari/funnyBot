@@ -1,7 +1,7 @@
 import { CommandActionBuilderWithState, MessageType } from 'chz-telegram-bot';
 import NameState from '../../entities/nameState';
 
-export default new CommandActionBuilderWithState(
+export const nameSave = new CommandActionBuilderWithState(
     'Reaction.NameSave',
     () => new NameState()
 )

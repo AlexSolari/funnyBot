@@ -2,7 +2,7 @@ import { CommandActionBuilder, Hours, hoursToSeconds } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import { randomInt } from '../../helpers/randomInt';
 
-export default new CommandActionBuilder('Reaction.Rating')
+export const rating = new CommandActionBuilder('Reaction.Rating')
     .on(/youtube\.com\/watch\?/i)
     .notIn([
         ChatId.LvivChat,

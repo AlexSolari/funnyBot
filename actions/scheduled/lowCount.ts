@@ -12,7 +12,7 @@ import {
     ScheduledActionBuilder
 } from 'chz-telegram-bot';
 
-export default new ScheduledActionBuilder('Scheduled.LowCount')
+export const lowCount = new ScheduledActionBuilder('Scheduled.LowCount')
     .runAt(8)
     .in([ChatId.PioneerChat, ChatId.ModernChat])
     .do(async (ctx) => {

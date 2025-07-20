@@ -30,7 +30,7 @@ function chuckBanners(input: string[]) {
     return result;
 }
 
-export default new CommandActionBuilder('Reaction.Banner')
+export const banner = new CommandActionBuilder('Reaction.Banner')
     .on('баннер')
     .in([ChatId.GenshinChat, ChatId.TestChat])
     .do(async (ctx) => {

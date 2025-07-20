@@ -11,7 +11,7 @@ import {
 import { ChatId } from '../../types/chatIds';
 import { randomInt } from '../../helpers/randomInt';
 
-export default new CommandActionBuilderWithState<PotuzhnoState>(
+export const potuzhno = new CommandActionBuilderWithState<PotuzhnoState>(
     'Reaction.Potuzhno',
     () => new PotuzhnoState()
 )
