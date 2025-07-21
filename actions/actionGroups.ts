@@ -21,11 +21,14 @@ import { becker } from './scheduled/becker';
 import { lowCount } from './scheduled/lowCount';
 import { meta } from './scheduled/meta';
 import { inlineCardSearch } from './inline/inline_cardSearch';
-import { dvach } from './commands/dvach';
+import {
+    dvachForward,
+    dvachLightning,
+    dvachSilentForward
+} from './commands/dvach';
 import { ru } from './commands/ru';
 import { nameSave } from './commands/nameSave';
 import { long } from './commands/long';
-import { dvachSilentForward } from './commands/dvach_silentForward';
 import { voice } from './commands/voice';
 import { gpt } from './commands/gpt';
 import { gptIsTrue } from './commands/gpt_isTrue';
@@ -40,7 +43,8 @@ export const testCommands = {
         potuzhno,
         potuzhnoStats,
         nameSave,
-        gpt
+        gpt,
+        dvachLightning
     ] as CommandAction<IActionState>[],
     scheduled: [] as ScheduledAction<IActionState>[],
     inline: [inlineCardSearch]
@@ -82,7 +86,8 @@ export const genshinCommands = {
         pizda,
         potuzhno,
         potuzhnoStats,
-        dvach,
+        dvachForward,
+        dvachLightning,
         ru,
         nameSave,
         long,
