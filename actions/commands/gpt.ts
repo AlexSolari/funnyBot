@@ -15,6 +15,7 @@ import { ChatId } from '../../types/chatIds';
 import openAiToken from '../../openAiToken.json';
 import { SpecificUsers } from '../../types/userIds';
 import GptState from '../../entities/gptState';
+import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
 
 const whitelist = [SpecificUsers.nerdik, SpecificUsers.otabapa];
 const client = new OpenAI({
@@ -58,18 +59,18 @@ export const gpt = new CommandActionBuilderWithState(
             ctx.userInfo.id != state.lastUserId
     )
     .do(async (ctx, state) => {
-        const conversation = [`${ctx.userInfo.name}: ${ctx.messageInfo.text}`];
         state.lastUserId = ctx.userInfo.id!;
+
+        const conversation = [`${ctx.userInfo.name}: ${ctx.messageInfo.text}`];
         const response = await getReplyText(ctx.messageInfo.text, ctx.chatInfo);
 
         conversation.push(`You: ${response.output_text}`);
+
         const captureController = ctx.reply.withText(
             escapeMarkdown(response.output_text)
         );
 
-        const abortController = new AbortController();
-        const timer = setTimeout(
-            () => abortController.abort(),
+        const { controller, timer } = getAbortControllerWithTimeout(
             secondsToMilliseconds(300 as Seconds)
         );
         const replyHandler = async (replyCtx: ReplyContext<IActionState>) => {
@@ -89,14 +90,14 @@ export const gpt = new CommandActionBuilderWithState(
             captureController.captureReplies(
                 [MessageType.Text],
                 replyHandler,
-                abortController
+                controller
             );
             timer.refresh();
         };
         captureController.captureReplies(
             [MessageType.Text],
             replyHandler,
-            abortController
+            controller
         );
     })
     .withRatelimit(1)

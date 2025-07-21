@@ -10,6 +10,7 @@ import {
 } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import { randomInt } from '../../helpers/randomInt';
+import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
 
 export const potuzhno = new CommandActionBuilderWithState<PotuzhnoState>(
     'Reaction.Potuzhno',
@@ -51,7 +52,6 @@ export const potuzhno = new CommandActionBuilderWithState<PotuzhnoState>(
             captureController = ctx.reply.withText('Потужно 💪');
         }
 
-        const abortController = new AbortController();
         captureController.captureReplies(
             [/дякую/gi],
             async (replyCtx) => {
@@ -76,11 +76,9 @@ export const potuzhno = new CommandActionBuilderWithState<PotuzhnoState>(
                 }
                 replyCtx.stopCapture();
             },
-            abortController
+            getAbortControllerWithTimeout(secondsToMilliseconds(30 as Seconds))
+                .controller
         );
-        setTimeout(() => {
-            abortController.abort();
-        }, secondsToMilliseconds(30 as Seconds));
     })
     .withRatelimit(1)
     .withCooldown({ seconds: hoursToSeconds(4 as Hours) })
