@@ -5,6 +5,7 @@ import {
     testCommands
 } from './actions/actionGroups.js';
 import { ChatId } from './types/chatIds.js';
+
 if (process.env.NODE_ENV == 'production') {
     botOrchestrator.startBot({
         name: 'kekruga',
