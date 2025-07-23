@@ -1,64 +1,69 @@
-import { CommandActionBuilder, MessageType, Seconds } from 'chz-telegram-bot';
+import {
+    CommandActionBuilder,
+    MessageInfo,
+    MessageType,
+    Seconds
+} from 'chz-telegram-bot';
 
-const DVACH_CHATID = -1001009232144;
-const DVACH2_CHATID = -1001166834860;
+const DVACH_CHATIDS = [-1001009232144, -1001166834860];
 const DVACH_LIGHTNING_ID = '5359617799515823946';
 
-export const dvachForward = new CommandActionBuilder('Reaction.Dvach')
-    .on(MessageType.Forward)
-    .when(
-        (ctx) =>
-            'forward_origin' in ctx.messageInfo.telegramUpdateObject &&
-            ctx.messageInfo.telegramUpdateObject.forward_origin?.type ==
-                'channel' &&
-            (ctx.messageInfo.telegramUpdateObject.forward_origin.chat.id ==
-                DVACH_CHATID ||
-                ctx.messageInfo.telegramUpdateObject.forward_origin.chat.id ==
-                    DVACH2_CHATID)
-    )
-    .do(async (ctx) => {
-        ctx.reply.withImage('dvach');
-    })
-    .withCooldown({ seconds: 1 as Seconds })
-    .build();
+function isForwarded(messageInfo: MessageInfo) {
+    const update = messageInfo.telegramUpdateObject;
+    const isForward = 'forward_origin' in update;
 
-export const dvachLightning = new CommandActionBuilder(
-    'Reaction.DvachLightning'
-)
-    .on(/⚡️/gi)
-    .when(
-        (ctx) =>
-            'entities' in ctx.messageInfo.telegramUpdateObject &&
-            ctx.messageInfo.telegramUpdateObject.entities?.find(
+    if (isForward) {
+        const origin = update.forward_origin;
+
+        if (origin?.type == 'channel') {
+            return DVACH_CHATIDS.includes(origin.chat.id);
+        }
+    }
+
+    return false;
+}
+
+function hasEmoji(messageInfo: MessageInfo) {
+    const update = messageInfo.telegramUpdateObject;
+
+    if ('entities' in update) {
+        return (
+            update.entities?.find(
                 (x) =>
                     x.type == 'custom_emoji' &&
                     x.custom_emoji_id == DVACH_LIGHTNING_ID
             ) != undefined
-    )
-    .do(async (ctx) => {
-        ctx.reply.withImage('dvach');
-    })
-    .withCooldown({ seconds: 1 as Seconds })
-    .build();
+        );
+    }
 
-export const dvachSilentForward = new CommandActionBuilder(
-    'Reaction.Dvach_SilentVideoForward'
-)
+    return false;
+}
+
+function hasVideo(messageInfo: MessageInfo) {
+    const update = messageInfo.telegramUpdateObject;
+
+    const hasVideo = 'video' in update && update.video.file_name != undefined;
+
+    if (hasVideo) {
+        const videoName = update.video.file_name!;
+
+        return (
+            videoName.includes('dvach') ||
+            videoName.includes('Двач') ||
+            videoName.includes('2ch')
+        );
+    }
+
+    return false;
+}
+
+export const dvach = new CommandActionBuilder('Reaction.Dvach')
     .on(MessageType.Any)
     .when(
         (ctx) =>
-            ctx.messageInfo.type != MessageType.Forward &&
-            'video' in ctx.messageInfo.telegramUpdateObject &&
-            ctx.messageInfo.telegramUpdateObject.video.file_name != undefined &&
-            (ctx.messageInfo.telegramUpdateObject.video.file_name.includes(
-                'dvach'
-            ) ||
-                ctx.messageInfo.telegramUpdateObject.video.file_name.includes(
-                    'Двач'
-                ) ||
-                ctx.messageInfo.telegramUpdateObject.video.file_name.includes(
-                    '2ch'
-                ))
+            isForwarded(ctx.messageInfo) ||
+            hasVideo(ctx.messageInfo) ||
+            hasEmoji(ctx.messageInfo)
     )
     .do(async (ctx) => {
         ctx.reply.withImage('dvach');
