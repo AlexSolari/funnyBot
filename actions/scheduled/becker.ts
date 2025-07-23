@@ -1,6 +1,6 @@
 import { ChatId } from '../../types/chatIds';
 import { ScheduledActionBuilderWithState } from 'chz-telegram-bot';
-import BeckerState from '../../entities/beckerState';
+import BeckerState from '../../state/beckerState';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { randomInt } from '../../helpers/randomInt';
 import { ICmerApiResponse } from '../../types/externalApiDefinitions/cmer';

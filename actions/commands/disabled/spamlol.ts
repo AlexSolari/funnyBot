@@ -1,7 +1,7 @@
 import { CommandActionBuilderWithState, MessageType } from 'chz-telegram-bot';
 import { ChatId } from '../../../types/chatIds';
 import { SpecificUsers } from '../../../types/userIds';
-import SpamState from '../../../entities/spamState';
+import SpamState from '../../../state/spamState';
 import { randomInt } from '../../../helpers/randomInt';
 
 export default new CommandActionBuilderWithState(

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { CommandActionBuilderWithState } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
-import TestState from '../../entities/testState';
+import TestState from '../../state/testState';
 
 const testActionBuilder = new CommandActionBuilderWithState<TestState>(
     'Reaction.Test',

@@ -1,4 +1,4 @@
-import PotuzhnoState from '../../entities/potuzhnoState';
+import PotuzhnoState from '../../state/potuzhnoState';
 import {
     CommandActionBuilderWithState,
     Hours,

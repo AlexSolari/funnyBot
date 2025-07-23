@@ -14,7 +14,7 @@ import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { ChatId } from '../../types/chatIds';
 import openAiToken from '../../openAiToken.json';
 import { SpecificUsers } from '../../types/userIds';
-import GptState from '../../entities/gptState';
+import GptState from '../../state/gptState';
 import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
 
 const whitelist = [SpecificUsers.nerdik, SpecificUsers.otabapa];

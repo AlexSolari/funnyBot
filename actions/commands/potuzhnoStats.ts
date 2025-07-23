@@ -1,7 +1,7 @@
 import { CommandActionBuilder } from 'chz-telegram-bot';
 import { ChatId } from '../../types/chatIds';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
-import PotuzhnoState from '../../entities/potuzhnoState';
+import PotuzhnoState from '../../state/potuzhnoState';
 import { nameSave } from './nameSave';
 import { potuzhno } from './potuzhno';
 
