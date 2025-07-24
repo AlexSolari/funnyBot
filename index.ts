@@ -5,6 +5,9 @@ import {
     testCommands
 } from './actions/actionGroups.js';
 import { ChatId } from './types/chatIds.js';
+import { cardSearch } from './actions/commands/cardSearch_small.js';
+import { inlineCardSearch } from './actions/inline/inline_cardSearch.js';
+
 if (process.env.NODE_ENV == 'production') {
     botOrchestrator.startBot({
         name: 'kekruga',
@@ -48,6 +51,17 @@ if (process.env.NODE_ENV == 'production') {
         chats: {
             GenshinChat: ChatId.GenshinChat
         },
+        scheduledPeriod: (60 * 5) as Seconds
+    });
+    botOrchestrator.startBot({
+        name: 'zirda',
+        tokenFilePath: 'token.zirda',
+        actions: {
+            commands: [cardSearch],
+            scheduled: [],
+            inlineQueries: [inlineCardSearch]
+        },
+        chats: {},
         scheduledPeriod: (60 * 5) as Seconds
     });
 } else {
