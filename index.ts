@@ -3,11 +3,10 @@ import {
     genshinCommands,
     mtgCommands,
     testCommands
-} from './actions/actionGroups.js';
-import { ChatId } from './types/chatIds.js';
-import { featureProvider } from './services/featureProvider.js';
-
-await featureProvider.load();
+} from './actions/actionGroups';
+import { ChatId } from './types/chatIds';
+import { cardSearch } from './actions/commands/cardSearch';
+import { inlineCardSearch } from './actions/inline/inline_cardSearch';
 
 if (process.env.NODE_ENV == 'production') {
     botOrchestrator.startBot({
@@ -52,6 +51,17 @@ if (process.env.NODE_ENV == 'production') {
         chats: {
             GenshinChat: ChatId.GenshinChat
         },
+        scheduledPeriod: (60 * 5) as Seconds
+    });
+    botOrchestrator.startBot({
+        name: 'zirda',
+        tokenFilePath: 'token.zirda',
+        actions: {
+            commands: [cardSearch],
+            scheduled: [],
+            inlineQueries: [inlineCardSearch]
+        },
+        chats: {},
         scheduledPeriod: (60 * 5) as Seconds
     });
 } else {

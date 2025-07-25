@@ -1,4 +1,3 @@
-import getCurrentWeek from '../../helpers/getWeek';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import {
     IMWApiResponse,
@@ -34,15 +33,22 @@ export const registration = new CommandBuilder('Reaction.Registration')
             case ChatId.StandardChat:
                 serviceName = 'Стандарт';
                 break;
+            case ChatId.PauperChat:
+                serviceName = 'Pauper';
+                break;
             default:
                 ctx.skipCooldown();
                 return;
         }
 
-        const currentWeek = getCurrentWeek();
+        const today = moment().startOf('day').format('YYYY-MM-DD');
+        const month = moment()
+            .add(1, 'months')
+            .startOf('day')
+            .format('YYYY-MM-DD');
 
         const response = await fetch(
-            `https://api.wlaunch.net/v1/company/7ea091e0-359a-11eb-86df-9f45a44f29bd/branch/7ea10724-359a-11eb-86df-9f45a44f29bd/slot/gt/resource?start=${currentWeek.firstDay}&end=${currentWeek.lastDay}&source=WIDGET&withDiscounts=true&preventBookingEnabled=true`
+            `https://api.wlaunch.net/v1/company/7ea091e0-359a-11eb-86df-9f45a44f29bd/branch/7ea10724-359a-11eb-86df-9f45a44f29bd/slot/gt/resource?start=${today}&end=${month}&source=WIDGET&withDiscounts=true&preventBookingEnabled=true`
         );
         const data = (await response.json()) as IMWApiResponse;
         const slots = data.slots
@@ -92,8 +98,7 @@ export const registration = new CommandBuilder('Reaction.Registration')
             usedSpaces: x.gt.used_space
         }));
 
-        let text =
-            eventInfos.length > 1 ? 'Реєстрації на цей тиждень:\n\n' : '';
+        let text = eventInfos.length > 1 ? 'Реєстрації:\n\n' : '';
 
         eventInfos.forEach((x, i) => {
             text += `[${escapeMarkdown(
