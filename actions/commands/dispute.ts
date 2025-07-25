@@ -1,7 +1,7 @@
 import { load } from 'cheerio';
 import { CommandActionBuilder } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
-import { featureSetConfiguration } from '../../helpers/getFeatures';
+import { configuration } from '../../helpers/getFeatures';
 
 export const dispute = new CommandActionBuilder('Reaction.Dispute')
     .on(/mtggoldfish\.com\/deck\/(\d+)/i)
@@ -36,5 +36,5 @@ export const dispute = new CommandActionBuilder('Reaction.Dispute')
             ctx.reply.withReaction('🍌');
         }
     })
-    .withConfiguration(() => featureSetConfiguration)
+    .withConfiguration(configuration)
     .build();

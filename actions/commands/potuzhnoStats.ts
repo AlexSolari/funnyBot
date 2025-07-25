@@ -3,7 +3,7 @@ import escapeMarkdown from '../../helpers/escapeMarkdown';
 import PotuzhnoState from '../../state/potuzhnoState';
 import { nameSave } from './nameSave';
 import { potuzhno } from './potuzhno';
-import { featureSetConfiguration } from '../../helpers/getFeatures';
+import { configuration } from '../../helpers/getFeatures';
 
 export const potuzhnoStats = new CommandActionBuilder('Reaction.PotuzhnoStats')
     .on('топ потужності')
@@ -45,5 +45,5 @@ export const potuzhnoStats = new CommandActionBuilder('Reaction.PotuzhnoStats')
             )
         );
     })
-    .withConfiguration(() => featureSetConfiguration)
+    .withConfiguration(configuration)
     .build();

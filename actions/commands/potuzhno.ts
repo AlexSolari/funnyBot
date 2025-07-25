@@ -8,7 +8,7 @@ import {
 } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
 import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
-import { featureSetConfiguration } from '../../helpers/getFeatures';
+import { configuration } from '../../helpers/getFeatures';
 
 export const potuzhno = new CommandActionBuilderWithState<PotuzhnoState>(
     'Reaction.Potuzhno',
@@ -78,5 +78,5 @@ export const potuzhno = new CommandActionBuilderWithState<PotuzhnoState>(
         );
     })
     .withRatelimit(1)
-    .withConfiguration(() => featureSetConfiguration)
+    .withConfiguration(configuration)
     .build();

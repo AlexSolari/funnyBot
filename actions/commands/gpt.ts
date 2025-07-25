@@ -14,7 +14,7 @@ import openAiToken from '../../openAiToken.json';
 import { SpecificUsers } from '../../types/userIds';
 import GptState from '../../state/gptState';
 import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
-import { featureSetConfiguration } from '../../helpers/getFeatures';
+import { configuration } from '../../helpers/getFeatures';
 
 const whitelist = [SpecificUsers.nerdik, SpecificUsers.otabapa];
 const client = new OpenAI({
@@ -114,5 +114,5 @@ export const gpt = new CommandActionBuilderWithState(
         );
     })
     .withRatelimit(1)
-    .withConfiguration(() => featureSetConfiguration)
+    .withConfiguration(configuration)
     .build();

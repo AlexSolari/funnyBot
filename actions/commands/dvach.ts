@@ -3,7 +3,7 @@ import {
     MessageInfo,
     MessageType
 } from 'chz-telegram-bot';
-import { featureSetConfiguration } from '../../helpers/getFeatures';
+import { configuration } from '../../helpers/getFeatures';
 
 const DVACH_CHATIDS = [-1001009232144, -1001166834860];
 const DVACH_LIGHTNING_ID = '5359617799515823946';
@@ -68,5 +68,5 @@ export const dvach = new CommandActionBuilder('Reaction.Dvach')
     .do(async (ctx) => {
         ctx.reply.withImage('dvach');
     })
-    .withConfiguration(() => featureSetConfiguration)
+    .withConfiguration(configuration)
     .build();

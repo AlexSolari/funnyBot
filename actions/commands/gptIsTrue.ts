@@ -8,7 +8,7 @@ import OpenAI from 'openai';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { ChatId } from '../../types/chatIds';
 import openAiToken from '../../openAiToken.json';
-import { featureSetConfiguration } from '../../helpers/getFeatures';
+import { configuration } from '../../helpers/getFeatures';
 
 const client = new OpenAI({
     apiKey: openAiToken.token
@@ -64,5 +64,5 @@ export const gptIsTrue = new CommandActionBuilder('Reaction.Gpt_IsTrue')
             ctx.startCustomCooldown(hoursToSeconds(4 as Hours));
     })
     .withRatelimit(1)
-    .withConfiguration(() => featureSetConfiguration)
+    .withConfiguration(configuration)
     .build();

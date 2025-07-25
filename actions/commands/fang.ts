@@ -1,6 +1,6 @@
 import { CommandActionBuilder } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
-import { featureSetConfiguration } from '../../helpers/getFeatures';
+import { configuration } from '../../helpers/getFeatures';
 
 export const fang = new CommandActionBuilder('Reaction.Fang')
     .on(/(фанг|мотом[иы]ш)/i)
@@ -21,5 +21,5 @@ export const fang = new CommandActionBuilder('Reaction.Fang')
                 break;
         }
     })
-    .withConfiguration(() => featureSetConfiguration)
+    .withConfiguration(configuration)
     .build();

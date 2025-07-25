@@ -1,6 +1,6 @@
 import { CommandAction, IActionState, ScheduledAction } from 'chz-telegram-bot';
 import { banner } from './commands/banner';
-import { cardSearch } from './commands/cardSearch_small';
+import { cardSearch } from './commands/cardSearch';
 import { dispute } from './commands/dispute';
 import { fang } from './commands/fang';
 import { hello } from './commands/hello';
@@ -27,7 +27,7 @@ import { nameSave } from './commands/nameSave';
 import { long } from './commands/long';
 import { voice } from './commands/voice';
 import { gpt } from './commands/gpt';
-import { gptIsTrue } from './commands/gpt_isTrue';
+import { gptIsTrue } from './commands/gptIsTrue';
 import { sadwhy } from './commands/sadwhy';
 
 export const testCommands = {

@@ -1,7 +1,7 @@
 import { CommandActionBuilder } from 'chz-telegram-bot';
 import { load } from 'cheerio';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
-import { featureSetConfiguration } from '../../helpers/getFeatures';
+import { configuration } from '../../helpers/getFeatures';
 
 function chuckBanners(input: string[]) {
     const result: { version: string; links: string[] }[] = [];
@@ -100,5 +100,5 @@ export const banner = new CommandActionBuilder('Reaction.Banner')
             }
         }
     })
-    .withConfiguration(() => featureSetConfiguration)
+    .withConfiguration(configuration)
     .build();

@@ -6,7 +6,7 @@ import {
 } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
-import { featureSetConfiguration } from '../../helpers/getFeatures';
+import { configuration } from '../../helpers/getFeatures';
 
 export const ternopil = new CommandActionBuilder('Reaction.Ternopil')
     .on(MessageType.Any)
@@ -89,5 +89,5 @@ export const ternopil = new CommandActionBuilder('Reaction.Ternopil')
                 break;
         }
     })
-    .withConfiguration(() => featureSetConfiguration)
+    .withConfiguration(configuration)
     .build();

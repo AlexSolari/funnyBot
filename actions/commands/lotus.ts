@@ -1,6 +1,6 @@
 import { CommandActionBuilder } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
-import { featureSetConfiguration } from '../../helpers/getFeatures';
+import { configuration } from '../../helpers/getFeatures';
 
 export const lotus = new CommandActionBuilder('Reaction.Lotus')
     .on(/лотус/i)
@@ -15,5 +15,5 @@ export const lotus = new CommandActionBuilder('Reaction.Lotus')
 
         ctx.reply.withImage(imageName);
     })
-    .withConfiguration(() => featureSetConfiguration)
+    .withConfiguration(configuration)
     .build();

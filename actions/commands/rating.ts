@@ -1,6 +1,6 @@
 import { CommandActionBuilder } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
-import { featureSetConfiguration } from '../../helpers/getFeatures';
+import { configuration } from '../../helpers/getFeatures';
 
 export const rating = new CommandActionBuilder('Reaction.Rating')
     .on(/youtube\.com\/watch\?/i)
@@ -8,5 +8,5 @@ export const rating = new CommandActionBuilder('Reaction.Rating')
     .do(async (ctx) => {
         ctx.reply.withImage('bad');
     })
-    .withConfiguration(() => featureSetConfiguration)
+    .withConfiguration(configuration)
     .build();

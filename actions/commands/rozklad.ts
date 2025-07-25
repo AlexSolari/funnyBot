@@ -1,6 +1,6 @@
 import { load } from 'cheerio';
 import { CommandActionBuilder } from 'chz-telegram-bot';
-import { featureSetConfiguration } from '../../helpers/getFeatures';
+import { configuration } from '../../helpers/getFeatures';
 
 export const rozklad = new CommandActionBuilder('Reaction.Schedule')
     .on(['розклад'])
@@ -16,5 +16,5 @@ export const rozklad = new CommandActionBuilder('Reaction.Schedule')
 
         ctx.reply.withText(`[Розклад на цей тиждень](https://t.me/${link})`);
     })
-    .withConfiguration(() => featureSetConfiguration)
+    .withConfiguration(configuration)
     .build();

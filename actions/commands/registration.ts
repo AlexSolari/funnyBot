@@ -7,7 +7,7 @@ import {
 import { ChatId } from '../../types/chatIds';
 import { CommandActionBuilder, secondsToMilliseconds } from 'chz-telegram-bot';
 import moment from 'moment';
-import { featureSetConfiguration } from '../../helpers/getFeatures';
+import { configuration } from '../../helpers/getFeatures';
 
 const daysMap = {
     неділя: 'неділю',
@@ -109,5 +109,5 @@ export const registration = new CommandActionBuilder('Reaction.Registration')
 
         ctx.reply.withText(text);
     })
-    .withConfiguration(() => featureSetConfiguration)
+    .withConfiguration(configuration)
     .build();

@@ -6,7 +6,6 @@ import {
 } from './features/genericActionFeatureSet';
 import { replacer, reviver } from '../helpers/mapJsonUtils';
 import { ActionKey } from 'chz-telegram-bot/dist/types/action';
-import { Seconds } from 'chz-telegram-bot';
 
 class FeatureProvider {
     config!: BotFeatureSetsConfiguration;
@@ -16,14 +15,14 @@ class FeatureProvider {
         this.storagePath = path ?? 'storage';
     }
 
-    load() {
-        const botConfigs = createDefaultBotConfig();
+    async load() {
         const fileContent = readFileSync(`${this.storagePath}/features.json`, {
             encoding: 'utf-8',
             flag: 'a+'
         });
 
         if (!fileContent) {
+            const botConfigs = await createDefaultBotConfig();
             writeFileSync(
                 `${this.storagePath}/features.json`,
                 JSON.stringify(botConfigs, replacer),
@@ -32,11 +31,10 @@ class FeatureProvider {
                     flag: 'a+'
                 }
             );
+            this.config = botConfigs;
+        } else {
+            this.config = JSON.parse(fileContent, reviver);
         }
-
-        this.config = fileContent
-            ? JSON.parse(fileContent, reviver)
-            : botConfigs;
 
         watch(`${this.storagePath}/features.json`, (eventType, _) => {
             if (eventType === 'change') {
@@ -57,16 +55,7 @@ class FeatureProvider {
 
     getFeaturesForAction(botName: string, key: ActionKey) {
         if (this.config == null) {
-            return {
-                description: '',
-                active: false,
-                cooldownSeconds: 0 as Seconds,
-                cooldownMessage: undefined,
-                chatWhitelist: [],
-                chatBlacklist: [],
-                userWhitelist: [],
-                extraFeatures: new Map<string, boolean>()
-            };
+            throw new Error(`Config is not loaded yet.`);
         }
 
         const defaultFeatures = this.config.default;
