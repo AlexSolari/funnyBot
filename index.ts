@@ -7,6 +7,8 @@ import {
 import { ChatId } from './types/chatIds.js';
 import { featureProvider } from './services/featureProvider.js';
 
+await featureProvider.load();
+
 if (process.env.NODE_ENV == 'production') {
     botOrchestrator.startBot({
         name: 'kekruga',
@@ -77,5 +79,3 @@ process.once('SIGTERM', async () => {
     await botOrchestrator.stopBots('SIGTERM');
     process.exit(0);
 });
-
-await featureProvider.load();
