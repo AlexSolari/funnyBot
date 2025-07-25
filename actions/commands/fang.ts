@@ -1,8 +1,7 @@
-import { CommandActionBuilder } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
-import { configuration } from '../../helpers/getFeatures';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
-export const fang = new CommandActionBuilder('Reaction.Fang')
+export const fang = new CommandBuilder('Reaction.Fang')
     .on(/(фанг|мотом[иы]ш)/i)
     .do(async (ctx) => {
         const i = randomInt(0, 2);
@@ -21,5 +20,4 @@ export const fang = new CommandActionBuilder('Reaction.Fang')
                 break;
         }
     })
-    .withConfiguration(configuration)
     .build();

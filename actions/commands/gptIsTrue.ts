@@ -1,5 +1,4 @@
 import {
-    CommandActionBuilder,
     Hours,
     hoursToSeconds,
     TelegrafContextMessage
@@ -8,7 +7,7 @@ import OpenAI from 'openai';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { ChatId } from '../../types/chatIds';
 import openAiToken from '../../openAiToken.json';
-import { configuration } from '../../helpers/getFeatures';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
 const client = new OpenAI({
     apiKey: openAiToken.token
@@ -32,7 +31,7 @@ function getTextContentsFromReply(messageUpdateObject: TelegrafContextMessage) {
     return '';
 }
 
-export const gptIsTrue = new CommandActionBuilder('Reaction.Gpt_IsTrue')
+export const gptIsTrue = new CommandBuilder('Reaction.Gpt_IsTrue')
     .on(/is (this|it|that) true\??/gi)
     .when(
         (ctx) =>
@@ -64,5 +63,4 @@ export const gptIsTrue = new CommandActionBuilder('Reaction.Gpt_IsTrue')
             ctx.startCustomCooldown(hoursToSeconds(4 as Hours));
     })
     .withRatelimit(1)
-    .withConfiguration(configuration)
     .build();

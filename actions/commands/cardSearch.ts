@@ -1,10 +1,7 @@
-import {
-    ActionStateBase,
-    CommandActionBuilder,
-    MessageContext
-} from 'chz-telegram-bot';
+import { ActionStateBase, MessageContext } from 'chz-telegram-bot';
 import { MtgCardSearchService } from '../../services/cardSearchService';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
 const TELEGRAM_MAX_MESSAGE_LENGTH = 3000;
 const SET_AND_NUMBER_REGEX = /(\w{3,5})\s(\d+)/gi;
@@ -32,7 +29,7 @@ function sendInChunks(
     }
 }
 
-export const cardSearch = new CommandActionBuilder('Reaction.CardSearch_Small')
+export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
     .on(/\[([^[]+)\]/gi)
     .do(async (ctx) => {
         for (const matchResult of ctx.matchResults) {

@@ -1,10 +1,8 @@
-import { CommandActionBuilder } from 'chz-telegram-bot';
-import { configuration } from '../../helpers/getFeatures';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
-export const pizda = new CommandActionBuilder('Reaction.Pizda')
+export const pizda = new CommandBuilder('Reaction.Pizda')
     .on('да')
     .do(async (ctx) => {
         ctx.reply.withText('пизда');
     })
-    .withConfiguration(configuration)
     .build();

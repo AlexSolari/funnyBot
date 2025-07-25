@@ -1,6 +1,5 @@
 import {
     ChatInfo,
-    CommandActionBuilderWithState,
     IActionState,
     MessageType,
     ReplyContext,
@@ -14,7 +13,7 @@ import openAiToken from '../../openAiToken.json';
 import { SpecificUsers } from '../../types/userIds';
 import GptState from '../../state/gptState';
 import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
-import { configuration } from '../../helpers/getFeatures';
+import { CommandBuilderWithState } from '../../helpers/commandBuilder';
 
 const whitelist = [SpecificUsers.nerdik, SpecificUsers.otabapa];
 const client = new OpenAI({
@@ -43,10 +42,7 @@ async function getReplyText(
     return response;
 }
 
-export const gpt = new CommandActionBuilderWithState(
-    'Reaction.Gpt',
-    () => new GptState()
-)
+export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
     .on(MessageType.Text)
     .when(
         (ctx, state) =>
@@ -114,5 +110,4 @@ export const gpt = new CommandActionBuilderWithState(
         );
     })
     .withRatelimit(1)
-    .withConfiguration(configuration)
     .build();

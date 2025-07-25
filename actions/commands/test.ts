@@ -1,15 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { CommandActionBuilderWithState } from 'chz-telegram-bot';
 import TestState from '../../state/testState';
 import { featureProvider } from '../../services/featureProvider';
-import { configuration } from '../../helpers/getFeatures';
+import { CommandBuilderWithState } from '../../helpers/commandBuilder';
 
-const testActionBuilder = new CommandActionBuilderWithState<TestState>(
+const testActionBuilder = new CommandBuilderWithState<TestState>(
     'Reaction.Test',
-    () => new TestState()
+    TestState
 )
     .on('test')
-    .withConfiguration(configuration)
     .do(async (ctx, state) => {
         const features = featureProvider.getFeaturesForAction(
             ctx.botName,

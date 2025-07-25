@@ -1,14 +1,9 @@
-import {
-    CommandActionBuilder,
-    MessageType,
-    Seconds,
-    secondsToMilliseconds
-} from 'chz-telegram-bot';
+import { MessageType, Seconds, secondsToMilliseconds } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
-import { configuration } from '../../helpers/getFeatures';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
-export const ternopil = new CommandActionBuilder('Reaction.Ternopil')
+export const ternopil = new CommandBuilder('Reaction.Ternopil')
     .on(MessageType.Any)
     .do(async (ctx) => {
         switch (randomInt(0, 4)) {
@@ -89,5 +84,4 @@ export const ternopil = new CommandActionBuilder('Reaction.Ternopil')
                 break;
         }
     })
-    .withConfiguration(configuration)
     .build();

@@ -1,8 +1,7 @@
-import { CommandActionBuilder } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
-import { configuration } from '../../helpers/getFeatures';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
-export const lotus = new CommandActionBuilder('Reaction.Lotus')
+export const lotus = new CommandBuilder('Reaction.Lotus')
     .on(/лотус/i)
     .do(async (ctx) => {
         let imageName = randomInt(0, 1)
@@ -15,5 +14,4 @@ export const lotus = new CommandActionBuilder('Reaction.Lotus')
 
         ctx.reply.withImage(imageName);
     })
-    .withConfiguration(configuration)
     .build();

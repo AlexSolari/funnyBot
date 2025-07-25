@@ -1,6 +1,5 @@
 import PotuzhnoState from '../../state/potuzhnoState';
 import {
-    CommandActionBuilderWithState,
     ICaptureController,
     MessageType,
     Seconds,
@@ -8,11 +7,11 @@ import {
 } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
 import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
-import { configuration } from '../../helpers/getFeatures';
+import { CommandBuilderWithState } from '../../helpers/commandBuilder';
 
-export const potuzhno = new CommandActionBuilderWithState<PotuzhnoState>(
+export const potuzhno = new CommandBuilderWithState<PotuzhnoState>(
     'Reaction.Potuzhno',
-    () => new PotuzhnoState()
+    PotuzhnoState
 )
     .on(MessageType.Any)
     .when(
@@ -78,5 +77,4 @@ export const potuzhno = new CommandActionBuilderWithState<PotuzhnoState>(
         );
     })
     .withRatelimit(1)
-    .withConfiguration(configuration)
     .build();

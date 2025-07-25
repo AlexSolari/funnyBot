@@ -1,8 +1,7 @@
 import { load } from 'cheerio';
-import { CommandActionBuilder } from 'chz-telegram-bot';
-import { configuration } from '../../helpers/getFeatures';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
-export const rozklad = new CommandActionBuilder('Reaction.Schedule')
+export const rozklad = new CommandBuilder('Reaction.Schedule')
     .on(['розклад'])
     .do(async (ctx) => {
         const response = await fetch(
@@ -16,5 +15,4 @@ export const rozklad = new CommandActionBuilder('Reaction.Schedule')
 
         ctx.reply.withText(`[Розклад на цей тиждень](https://t.me/${link})`);
     })
-    .withConfiguration(configuration)
     .build();

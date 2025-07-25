@@ -1,10 +1,8 @@
-import { CommandActionBuilder } from 'chz-telegram-bot';
-import { configuration } from '../../helpers/getFeatures';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
-export const ru = new CommandActionBuilder('Reaction.IdiNahui')
+export const ru = new CommandBuilder('Reaction.IdiNahui')
     .on(/р+у+с+к+и+й+/gi)
     .do(async (ctx) => {
         ctx.reply.andQuote.withText('военный корабль іді нахуй');
     })
-    .withConfiguration(configuration)
     .build();

@@ -1,9 +1,9 @@
-import { CommandActionBuilder, Milliseconds } from 'chz-telegram-bot';
+import { Milliseconds } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
-import { configuration } from '../../helpers/getFeatures';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
-export const sadwhy = new CommandActionBuilder('Reaction.SadWhy')
+export const sadwhy = new CommandBuilder('Reaction.SadWhy')
     .on(/железяка/i)
     .do(async (ctx) => {
         const isDerogatory =
@@ -34,5 +34,4 @@ export const sadwhy = new CommandActionBuilder('Reaction.SadWhy')
             }
         }
     })
-    .withConfiguration(configuration)
     .build();

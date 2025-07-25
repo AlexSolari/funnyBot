@@ -1,10 +1,8 @@
-import { CommandActionBuilder } from 'chz-telegram-bot';
-import { configuration } from '../../helpers/getFeatures';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
-export const slon = new CommandActionBuilder('Reaction.Slon')
+export const slon = new CommandBuilder('Reaction.Slon')
     .on(/слон/i)
     .do(async (ctx) => {
         ctx.reply.andQuote.withVideo('slon');
     })
-    .withConfiguration(configuration)
     .build();

@@ -1,9 +1,5 @@
-import {
-    CommandActionBuilder,
-    MessageInfo,
-    MessageType
-} from 'chz-telegram-bot';
-import { configuration } from '../../helpers/getFeatures';
+import { MessageInfo, MessageType } from 'chz-telegram-bot';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
 const DVACH_CHATIDS = [-1001009232144, -1001166834860];
 const DVACH_LIGHTNING_ID = '5359617799515823946';
@@ -57,7 +53,7 @@ function hasVideo(messageInfo: MessageInfo) {
     return false;
 }
 
-export const dvach = new CommandActionBuilder('Reaction.Dvach')
+export const dvach = new CommandBuilder('Reaction.Dvach')
     .on(MessageType.Any)
     .when(
         (ctx) =>
@@ -68,5 +64,4 @@ export const dvach = new CommandActionBuilder('Reaction.Dvach')
     .do(async (ctx) => {
         ctx.reply.withImage('dvach');
     })
-    .withConfiguration(configuration)
     .build();

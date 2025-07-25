@@ -1,10 +1,10 @@
-import { CommandActionBuilder, MessageType } from 'chz-telegram-bot';
+import { MessageType } from 'chz-telegram-bot';
 import { SpecificUsers } from '../../types/userIds';
-import { configuration } from '../../helpers/getFeatures';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
 const whitelist = [SpecificUsers.nerdik, SpecificUsers.otabapa];
 
-export const long = new CommandActionBuilder('Reaction.Long')
+export const long = new CommandBuilder('Reaction.Long')
     .on(MessageType.Text)
     .when(
         (ctx) =>
@@ -15,5 +15,4 @@ export const long = new CommandActionBuilder('Reaction.Long')
     .do(async (ctx) => {
         ctx.reply.withImage('long');
     })
-    .withConfiguration(configuration)
     .build();
