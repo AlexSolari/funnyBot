@@ -3,7 +3,7 @@ import {
     ActionFeatureSet,
     BotFeatureSetsConfiguration,
     createDefaultBotConfig
-} from './features/defaultFeaturesConfiguration';
+} from '../helpers/defaultFeaturesConfiguration';
 import { replacer, reviver } from '../helpers/mapJsonUtils';
 import { ActionKey } from 'chz-telegram-bot/dist/types/action';
 

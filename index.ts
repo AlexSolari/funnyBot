@@ -7,6 +7,9 @@ import {
 import { ChatId } from './types/chatIds';
 import { cardSearch } from './actions/commands/cardSearch';
 import { inlineCardSearch } from './actions/inline/inline_cardSearch';
+import { featureProvider } from './services/featureProvider';
+
+await featureProvider.load();
 
 if (process.env.NODE_ENV == 'production') {
     botOrchestrator.startBot({

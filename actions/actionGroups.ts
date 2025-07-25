@@ -30,63 +30,48 @@ import { gpt } from './commands/gpt';
 import { gptIsTrue } from './commands/gptIsTrue';
 import { sadwhy } from './commands/sadwhy';
 
+const allCommands = [
+    cardSearch,
+    dispute,
+    fang,
+    hello,
+    kamaz,
+    lotus,
+    pizda,
+    ponyav,
+    potuzhno,
+    potuzhnoStats,
+    rating,
+    registration,
+    rozklad,
+    slon,
+    ternopil,
+    vitalii,
+    nameSave,
+    long,
+    voice,
+    gpt,
+    gptIsTrue,
+    sadwhy,
+    banner,
+    test,
+    dvach,
+    ru
+] as CommandAction<IActionState>[];
+
 export const testCommands = {
-    commands: [
-        test,
-        cardSearch,
-        pizda,
-        banner,
-        potuzhno,
-        potuzhnoStats,
-        nameSave,
-        gpt,
-        dvach
-    ] as CommandAction<IActionState>[],
+    commands: allCommands,
     scheduled: [] as ScheduledAction<IActionState>[],
     inline: [inlineCardSearch]
 };
 
 export const mtgCommands = {
-    commands: [
-        cardSearch,
-        dispute,
-        fang,
-        hello,
-        kamaz,
-        lotus,
-        pizda,
-        ponyav,
-        potuzhno,
-        potuzhnoStats,
-        rating,
-        registration,
-        rozklad,
-        slon,
-        ternopil,
-        vitalii,
-        nameSave,
-        long,
-        voice,
-        gpt,
-        gptIsTrue,
-        sadwhy
-    ] as CommandAction<IActionState>[],
+    commands: allCommands,
     scheduled: [meta, lowCount] as ScheduledAction<IActionState>[],
     inline: [inlineCardSearch]
 };
 
 export const genshinCommands = {
-    commands: [
-        banner,
-        hello,
-        pizda,
-        potuzhno,
-        potuzhnoStats,
-        dvach,
-        ru,
-        nameSave,
-        long,
-        gptIsTrue
-    ] as CommandAction<IActionState>[],
+    commands: allCommands,
     scheduled: [becker] as unknown as ScheduledAction<IActionState>[]
 };

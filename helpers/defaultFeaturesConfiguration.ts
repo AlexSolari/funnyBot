@@ -1,8 +1,8 @@
 import { ActionKey, IAction } from 'chz-telegram-bot/dist/types/action';
-import { ChatId } from '../../types/chatIds';
+import { ChatId } from '../types/chatIds';
 import { Hours, hoursToSeconds, Seconds } from 'chz-telegram-bot';
-import escapeMarkdown from '../../helpers/escapeMarkdown';
-import { SpecificUsers } from '../../types/userIds';
+import escapeMarkdown from './escapeMarkdown';
+import { SpecificUsers } from '../types/userIds';
 
 const ActionNames = {
     banner: 'banner',
