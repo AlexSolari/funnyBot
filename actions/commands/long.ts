@@ -21,5 +21,5 @@ export const long = new CommandActionBuilder('Reaction.Long')
     .do(async (ctx) => {
         ctx.reply.withImage('long');
     })
-    .withCooldown({ seconds: hoursToSeconds(20 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(20 as Hours) })
     .build();

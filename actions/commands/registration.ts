@@ -23,13 +23,11 @@ const daysMap = {
 } as Record<string, string>;
 
 export const registration = new CommandActionBuilder('Reaction.Registration')
-    .notIn([
-        ChatId.LvivChat,
+    .in([
         ChatId.PauperChat,
-        ChatId.FrankivskChat,
-        ChatId.FnmChat,
-        ChatId.GenshinChat,
-        ChatId.CbgChat
+        ChatId.PioneerChat,
+        ChatId.StandardChat,
+        ChatId.ModernChat
     ])
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
     .do(async (ctx) => {
@@ -44,6 +42,9 @@ export const registration = new CommandActionBuilder('Reaction.Registration')
                 break;
             case ChatId.StandardChat:
                 serviceName = 'Стандарт';
+                break;
+            case ChatId.PauperChat:
+                serviceName = 'Pauper';
                 break;
             default:
                 ctx.skipCooldown();
@@ -120,5 +121,5 @@ export const registration = new CommandActionBuilder('Reaction.Registration')
 
         ctx.reply.withText(text);
     })
-    .withCooldown({ seconds: 30 as Seconds })
+    .withCooldown({ cooldown: 30 as Seconds })
     .build();

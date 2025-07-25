@@ -37,5 +37,5 @@ export const dispute = new CommandActionBuilder('Reaction.Dispute')
         }
     })
     .in([ChatId.PauperChat])
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .build();

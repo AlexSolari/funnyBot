@@ -13,6 +13,6 @@ export default new CommandActionBuilder('Reaction.Kalitas')
     .do(async (ctx) => {
         ctx.reply.withImage('kalitas');
     })
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .disabled()
     .build();

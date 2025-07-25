@@ -101,5 +101,5 @@ export const banner = new CommandActionBuilder('Reaction.Banner')
             }
         }
     })
-    .withCooldown({ seconds: 30 as Seconds })
+    .withCooldown({ cooldown: 30 as Seconds })
     .build();

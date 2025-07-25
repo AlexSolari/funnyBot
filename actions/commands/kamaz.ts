@@ -13,5 +13,5 @@ export const kamaz = new CommandActionBuilder('Reaction.Kamaz')
     .do(async (ctx) => {
         ctx.reply.withImage('kamazGun');
     })
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .build();

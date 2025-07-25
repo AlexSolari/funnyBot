@@ -81,5 +81,5 @@ export const potuzhno = new CommandActionBuilderWithState<PotuzhnoState>(
         );
     })
     .withRatelimit(1)
-    .withCooldown({ seconds: hoursToSeconds(4 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(4 as Hours) })
     .build();

@@ -12,5 +12,5 @@ export const slon = new CommandActionBuilder('Reaction.Slon')
     .do(async (ctx) => {
         ctx.reply.andQuote.withVideo('slon');
     })
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .build();

@@ -12,5 +12,5 @@ export const pizda = new CommandActionBuilder('Reaction.Pizda')
     .do(async (ctx) => {
         ctx.reply.withText('пизда');
     })
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .build();

@@ -13,6 +13,6 @@ export default new CommandActionBuilder('Reaction.Rakdos')
     .do(async (ctx) => {
         ctx.reply.withImage('rakdos');
     })
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .disabled()
     .build();

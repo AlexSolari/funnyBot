@@ -65,7 +65,7 @@ export const gptIsTrue = new CommandActionBuilder('Reaction.Gpt_IsTrue')
     })
     .withRatelimit(1)
     .withCooldown({
-        seconds: 60 as Seconds,
+        cooldown: 60 as Seconds,
         message: escapeMarkdown(`Наразі не можу перевірити, спробуйте пізніше.`)
     })
     .notIn([ChatId.PauperChat])

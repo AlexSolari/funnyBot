@@ -13,5 +13,5 @@ export const ponyav = new CommandActionBuilder('Reaction.Ponyav')
     .do(async (ctx) => {
         ctx.reply.withText('в штани намоняв');
     })
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .build();

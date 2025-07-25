@@ -7,5 +7,5 @@ export const ru = new CommandActionBuilder('Reaction.IdiNahui')
     .do(async (ctx) => {
         ctx.reply.andQuote.withText('военный корабль іді нахуй');
     })
-    .withCooldown({ seconds: hoursToSeconds(1 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(1 as Hours) })
     .build();

@@ -22,5 +22,5 @@ export const lotus = new CommandActionBuilder('Reaction.Lotus')
 
         ctx.reply.withImage(imageName);
     })
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .build();

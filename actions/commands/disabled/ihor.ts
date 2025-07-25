@@ -9,6 +9,6 @@ export default new CommandActionBuilder('Reaction.Ihor')
     .do(async (ctx) => {
         ctx.reply.withImage('ihor');
     })
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .disabled()
     .build();

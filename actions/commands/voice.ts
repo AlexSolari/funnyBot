@@ -12,5 +12,5 @@ export const voice = new CommandActionBuilder('Reaction.Voice')
     .do(async (ctx) => {
         ctx.reply.withText('сам свою залупу слухай');
     })
-    .withCooldown({ seconds: hoursToSeconds(1 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(1 as Hours) })
     .build();

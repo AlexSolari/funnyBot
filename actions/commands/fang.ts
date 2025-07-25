@@ -28,5 +28,5 @@ export const fang = new CommandActionBuilder('Reaction.Fang')
                 break;
         }
     })
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .build();

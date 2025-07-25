@@ -68,5 +68,5 @@ export const dvach = new CommandActionBuilder('Reaction.Dvach')
     .do(async (ctx) => {
         ctx.reply.withImage('dvach');
     })
-    .withCooldown({ seconds: 1 as Seconds })
+    .withCooldown({ cooldown: 1 as Seconds })
     .build();

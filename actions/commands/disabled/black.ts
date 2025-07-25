@@ -12,6 +12,6 @@ export default new CommandActionBuilder('Reaction.Black')
     .do(async (ctx) => {
         ctx.reply.withImage('monoB');
     })
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .disabled()
     .build();

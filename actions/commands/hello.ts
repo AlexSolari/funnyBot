@@ -7,5 +7,5 @@ export const hello = new CommandActionBuilder('Reaction.Hello')
     .do(async (ctx) => {
         ctx.reply.withText('hello');
     })
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .build();

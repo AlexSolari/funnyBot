@@ -93,5 +93,5 @@ export const ternopil = new CommandActionBuilder('Reaction.Ternopil')
                 break;
         }
     })
-    .withCooldown({ seconds: hoursToSeconds(8 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(8 as Hours) })
     .build();

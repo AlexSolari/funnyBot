@@ -14,5 +14,5 @@ export const rating = new CommandActionBuilder('Reaction.Rating')
     .do(async (ctx) => {
         ctx.reply.withImage('bad');
     })
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .build();

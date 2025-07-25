@@ -17,5 +17,5 @@ export const rozklad = new CommandActionBuilder('Reaction.Schedule')
 
         ctx.reply.withText(`[Розклад на цей тиждень](https://t.me/${link})`);
     })
-    .withCooldown({ seconds: 30 as Seconds })
+    .withCooldown({ cooldown: 30 as Seconds })
     .build();

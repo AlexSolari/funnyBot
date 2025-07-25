@@ -116,5 +116,5 @@ export const gpt = new CommandActionBuilderWithState(
         );
     })
     .withRatelimit(1)
-    .withCooldown({ seconds: hoursToSeconds(20 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(20 as Hours) })
     .build();

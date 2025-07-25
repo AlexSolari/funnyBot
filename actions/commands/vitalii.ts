@@ -9,5 +9,5 @@ export const vitalii = new CommandActionBuilder('Reaction.Vitalii')
     .do(async (ctx) => {
         ctx.reply.withImage('malifo');
     })
-    .withCooldown({ seconds: hoursToSeconds(24 as Hours) })
+    .withCooldown({ cooldown: hoursToSeconds(24 as Hours) })
     .build();
