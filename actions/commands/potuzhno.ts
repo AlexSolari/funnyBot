@@ -1,23 +1,20 @@
 import PotuzhnoState from '../../state/potuzhnoState';
 import {
     CommandActionBuilderWithState,
-    Hours,
-    hoursToSeconds,
     ICaptureController,
     MessageType,
     Seconds,
     secondsToMilliseconds
 } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
 import { randomInt } from '../../helpers/randomInt';
 import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
+import { featureSetConfiguration } from '../../helpers/getFeatures';
 
 export const potuzhno = new CommandActionBuilderWithState<PotuzhnoState>(
     'Reaction.Potuzhno',
     () => new PotuzhnoState()
 )
     .on(MessageType.Any)
-    .notIn([ChatId.PauperChat])
     .when(
         (ctx) =>
             Math.random() < 0.01 && ctx.messageInfo.text != 'топ потужності'
@@ -81,5 +78,5 @@ export const potuzhno = new CommandActionBuilderWithState<PotuzhnoState>(
         );
     })
     .withRatelimit(1)
-    .withCooldown({ seconds: hoursToSeconds(4 as Hours) })
+    .withConfiguration(() => featureSetConfiguration)
     .build();

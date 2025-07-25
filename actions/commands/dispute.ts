@@ -1,7 +1,7 @@
 import { load } from 'cheerio';
-import { CommandActionBuilder, Hours, hoursToSeconds } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
+import { CommandActionBuilder } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
+import { featureSetConfiguration } from '../../helpers/getFeatures';
 
 export const dispute = new CommandActionBuilder('Reaction.Dispute')
     .on(/mtggoldfish\.com\/deck\/(\d+)/i)
@@ -36,6 +36,5 @@ export const dispute = new CommandActionBuilder('Reaction.Dispute')
             ctx.reply.withReaction('🍌');
         }
     })
-    .in([ChatId.PauperChat])
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withConfiguration(() => featureSetConfiguration)
     .build();

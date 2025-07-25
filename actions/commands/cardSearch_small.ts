@@ -3,7 +3,6 @@ import {
     CommandActionBuilder,
     MessageContext
 } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
 import { MtgCardSearchService } from '../../services/cardSearchService';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 
@@ -84,5 +83,4 @@ export const cardSearch = new CommandActionBuilder('Reaction.CardSearch_Small')
             `@${escapeMarkdown(botUsername)} \\#rules \\#price consider\n\n` +
             'Також бот може шукати картки за сетом та номером, для цього використовуйте синтаксис *\\[код\\_сету номер\\]*, наприклад: *\\[dom 101\\]* знайде картку з сету Dominaria під номером 101 \\(Rat Colony\\)\\.\n\n'
     )
-    .notIn([ChatId.GenshinChat])
     .build();

@@ -1,17 +1,42 @@
 import { readFileSync, watch, writeFileSync } from 'fs';
 import {
+    ActionFeatureSet,
     BotFeatureSetsConfiguration,
     createDefaultBotConfig
 } from './features/genericActionFeatureSet';
 import { replacer, reviver } from '../helpers/mapJsonUtils';
 import { ActionKey } from 'chz-telegram-bot/dist/types/action';
+import { Seconds } from 'chz-telegram-bot';
 
 class FeatureProvider {
-    config?: BotFeatureSetsConfiguration;
+    config!: BotFeatureSetsConfiguration;
     storagePath: string;
 
     constructor(path?: string) {
         this.storagePath = path ?? 'storage';
+    }
+
+    load() {
+        const botConfigs = createDefaultBotConfig();
+        const fileContent = readFileSync(`${this.storagePath}/features.json`, {
+            encoding: 'utf-8',
+            flag: 'a+'
+        });
+
+        if (!fileContent) {
+            writeFileSync(
+                `${this.storagePath}/features.json`,
+                JSON.stringify(botConfigs, replacer),
+                {
+                    encoding: 'utf-8',
+                    flag: 'a+'
+                }
+            );
+        }
+
+        this.config = fileContent
+            ? JSON.parse(fileContent, reviver)
+            : botConfigs;
 
         watch(`${this.storagePath}/features.json`, (eventType, _) => {
             if (eventType === 'change') {
@@ -30,39 +55,32 @@ class FeatureProvider {
         });
     }
 
-    get defaultConfig() {
-        if (this.config) return this.config;
-
-        const defaultBotConfig = createDefaultBotConfig();
-        const fileContent = readFileSync(`${this.storagePath}/features.json`, {
-            encoding: 'utf-8',
-            flag: 'a+'
-        });
-
-        if (!fileContent) {
-            writeFileSync(
-                `${this.storagePath}/features.json`,
-                JSON.stringify(defaultBotConfig, replacer),
-                {
-                    encoding: 'utf-8',
-                    flag: 'a+'
-                }
-            );
+    getFeaturesForAction(botName: string, key: ActionKey) {
+        if (this.config == null) {
+            return {
+                description: '',
+                active: false,
+                cooldownSeconds: 0 as Seconds,
+                cooldownMessage: undefined,
+                chatWhitelist: [],
+                chatBlacklist: [],
+                userWhitelist: [],
+                extraFeatures: new Map<string, boolean>()
+            };
         }
 
-        this.config = fileContent
-            ? JSON.parse(fileContent, reviver)
-            : defaultBotConfig;
+        const defaultFeatures = this.config.default;
+        const botFeatures =
+            botName in this.config
+                ? this.config[botName as keyof typeof this.config]
+                : new Map<ActionKey, ActionFeatureSet>();
 
-        return this.config as BotFeatureSetsConfiguration;
-    }
+        const actionFeatures = botFeatures.get(key) ?? defaultFeatures.get(key);
+        if (actionFeatures) return actionFeatures;
 
-    getFeaturesForAction(
-        botName: keyof BotFeatureSetsConfiguration,
-        chatId: number,
-        key: ActionKey
-    ) {
-        return this.defaultConfig[botName].get(chatId)!.get(key)!;
+        throw new Error(
+            `Missing both default and specific features configuration for ${key}, fallback failed.`
+        );
     }
 }
 

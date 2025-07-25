@@ -5,12 +5,9 @@ import {
     IMwApiResponseDateSlot
 } from '../../types/externalApiDefinitions/mw';
 import { ChatId } from '../../types/chatIds';
-import {
-    CommandActionBuilder,
-    Seconds,
-    secondsToMilliseconds
-} from 'chz-telegram-bot';
+import { CommandActionBuilder, secondsToMilliseconds } from 'chz-telegram-bot';
 import moment from 'moment';
+import { featureSetConfiguration } from '../../helpers/getFeatures';
 
 const daysMap = {
     неділя: 'неділю',
@@ -23,14 +20,6 @@ const daysMap = {
 } as Record<string, string>;
 
 export const registration = new CommandActionBuilder('Reaction.Registration')
-    .notIn([
-        ChatId.LvivChat,
-        ChatId.PauperChat,
-        ChatId.FrankivskChat,
-        ChatId.FnmChat,
-        ChatId.GenshinChat,
-        ChatId.CbgChat
-    ])
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
     .do(async (ctx) => {
         let serviceName = '';
@@ -120,5 +109,5 @@ export const registration = new CommandActionBuilder('Reaction.Registration')
 
         ctx.reply.withText(text);
     })
-    .withCooldown({ seconds: 30 as Seconds })
+    .withConfiguration(() => featureSetConfiguration)
     .build();

@@ -1,8 +1,6 @@
 import {
     ChatInfo,
     CommandActionBuilderWithState,
-    Hours,
-    hoursToSeconds,
     IActionState,
     MessageType,
     ReplyContext,
@@ -16,6 +14,7 @@ import openAiToken from '../../openAiToken.json';
 import { SpecificUsers } from '../../types/userIds';
 import GptState from '../../state/gptState';
 import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
+import { featureSetConfiguration } from '../../helpers/getFeatures';
 
 const whitelist = [SpecificUsers.nerdik, SpecificUsers.otabapa];
 const client = new OpenAI({
@@ -49,7 +48,6 @@ export const gpt = new CommandActionBuilderWithState(
     () => new GptState()
 )
     .on(MessageType.Text)
-    .notIn([ChatId.PauperChat])
     .when(
         (ctx, state) =>
             Math.random() < 0.05 &&
@@ -116,5 +114,5 @@ export const gpt = new CommandActionBuilderWithState(
         );
     })
     .withRatelimit(1)
-    .withCooldown({ seconds: hoursToSeconds(20 as Hours) })
+    .withConfiguration(() => featureSetConfiguration)
     .build();

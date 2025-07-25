@@ -1,11 +1,10 @@
-import { CommandActionBuilder, Hours, hoursToSeconds } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
+import { CommandActionBuilder } from 'chz-telegram-bot';
+import { featureSetConfiguration } from '../../helpers/getFeatures';
 
 export const hello = new CommandActionBuilder('Reaction.Hello')
     .on('ні')
-    .notIn([ChatId.LvivChat, ChatId.FrankivskChat])
     .do(async (ctx) => {
         ctx.reply.withText('hello');
     })
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withConfiguration(() => featureSetConfiguration)
     .build();

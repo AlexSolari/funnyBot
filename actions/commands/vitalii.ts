@@ -1,13 +1,10 @@
-import { CommandActionBuilder, Hours, hoursToSeconds } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
-import { SpecificUsers } from '../../types/userIds';
+import { CommandActionBuilder } from 'chz-telegram-bot';
+import { featureSetConfiguration } from '../../helpers/getFeatures';
 
 export const vitalii = new CommandActionBuilder('Reaction.Vitalii')
     .on(/маліфо/i)
-    .from(SpecificUsers.vitalii)
-    .in([ChatId.LvivChat])
     .do(async (ctx) => {
         ctx.reply.withImage('malifo');
     })
-    .withCooldown({ seconds: hoursToSeconds(24 as Hours) })
+    .withConfiguration(() => featureSetConfiguration)
     .build();

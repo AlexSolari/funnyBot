@@ -1,10 +1,9 @@
 import { load } from 'cheerio';
-import { CommandActionBuilder, Seconds } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
+import { CommandActionBuilder } from 'chz-telegram-bot';
+import { featureSetConfiguration } from '../../helpers/getFeatures';
 
 export const rozklad = new CommandActionBuilder('Reaction.Schedule')
     .on(['розклад'])
-    .in([ChatId.LvivChat])
     .do(async (ctx) => {
         const response = await fetch(
             `https://t.me/s/otawaratcg?q=%D1%80%D0%BE%D0%B7%D0%BA%D0%BB%D0%B0%D0%B4`
@@ -17,5 +16,5 @@ export const rozklad = new CommandActionBuilder('Reaction.Schedule')
 
         ctx.reply.withText(`[Розклад на цей тиждень](https://t.me/${link})`);
     })
-    .withCooldown({ seconds: 30 as Seconds })
+    .withConfiguration(() => featureSetConfiguration)
     .build();

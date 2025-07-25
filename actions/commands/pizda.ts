@@ -1,16 +1,10 @@
-import { CommandActionBuilder, Hours, hoursToSeconds } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
+import { CommandActionBuilder } from 'chz-telegram-bot';
+import { featureSetConfiguration } from '../../helpers/getFeatures';
 
 export const pizda = new CommandActionBuilder('Reaction.Pizda')
     .on('да')
-    .notIn([
-        ChatId.LvivChat,
-        ChatId.PauperChat,
-        ChatId.FrankivskChat,
-        ChatId.CbgChat
-    ])
     .do(async (ctx) => {
         ctx.reply.withText('пизда');
     })
-    .withCooldown({ seconds: hoursToSeconds(2 as Hours) })
+    .withConfiguration(() => featureSetConfiguration)
     .build();

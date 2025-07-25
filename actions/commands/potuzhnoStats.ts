@@ -1,13 +1,12 @@
 import { CommandActionBuilder } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import PotuzhnoState from '../../state/potuzhnoState';
 import { nameSave } from './nameSave';
 import { potuzhno } from './potuzhno';
+import { featureSetConfiguration } from '../../helpers/getFeatures';
 
 export const potuzhnoStats = new CommandActionBuilder('Reaction.PotuzhnoStats')
     .on('топ потужності')
-    .notIn([ChatId.PauperChat])
     .do(async (ctx) => {
         const potuzhnoState = await ctx.loadStateOf(potuzhno);
         const namesState = await ctx.loadStateOf(nameSave);
@@ -46,4 +45,5 @@ export const potuzhnoStats = new CommandActionBuilder('Reaction.PotuzhnoStats')
             )
         );
     })
+    .withConfiguration(() => featureSetConfiguration)
     .build();
