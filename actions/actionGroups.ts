@@ -30,7 +30,7 @@ import { gpt } from './commands/gpt';
 import { gptIsTrue } from './commands/gptIsTrue';
 import { sadwhy } from './commands/sadwhy';
 
-const allCommands = [
+const commands = [
     cardSearch,
     dispute,
     fang,
@@ -60,18 +60,18 @@ const allCommands = [
 ] as CommandAction<IActionState>[];
 
 export const testCommands = {
-    commands: allCommands,
+    commands,
     scheduled: [] as ScheduledAction<IActionState>[],
     inline: [inlineCardSearch]
 };
 
 export const mtgCommands = {
-    commands: allCommands,
+    commands,
     scheduled: [meta, lowCount] as ScheduledAction<IActionState>[],
     inline: [inlineCardSearch]
 };
 
 export const genshinCommands = {
-    commands: allCommands,
+    commands,
     scheduled: [becker] as unknown as ScheduledAction<IActionState>[]
 };

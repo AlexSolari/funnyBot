@@ -1,6 +1,11 @@
-import { ActionKey, IAction } from 'chz-telegram-bot/dist/types/action';
 import { ChatId } from '../types/chatIds';
-import { Hours, hoursToSeconds, Seconds } from 'chz-telegram-bot';
+import {
+    ActionKey,
+    Hours,
+    hoursToSeconds,
+    IAction,
+    Seconds
+} from 'chz-telegram-bot';
 import escapeMarkdown from './escapeMarkdown';
 import { SpecificUsers } from '../types/userIds';
 

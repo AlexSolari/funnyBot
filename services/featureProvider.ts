@@ -5,7 +5,7 @@ import {
     createDefaultBotConfig
 } from '../helpers/defaultFeaturesConfiguration';
 import { replacer, reviver } from '../helpers/mapJsonUtils';
-import { ActionKey } from 'chz-telegram-bot/dist/types/action';
+import { ActionKey } from 'chz-telegram-bot';
 
 class FeatureProvider {
     config!: BotFeatureSetsConfiguration;
