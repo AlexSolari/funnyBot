@@ -3,10 +3,13 @@ import {
     genshinCommands,
     mtgCommands,
     testCommands
-} from './actions/actionGroups.js';
-import { ChatId } from './types/chatIds.js';
-import { cardSearch } from './actions/commands/cardSearch_small.js';
-import { inlineCardSearch } from './actions/inline/inline_cardSearch.js';
+} from './actions/actionGroups';
+import { ChatId } from './types/chatIds';
+import { cardSearch } from './actions/commands/cardSearch';
+import { inlineCardSearch } from './actions/inline/inline_cardSearch';
+import { featureProvider } from './services/featureProvider';
+
+await featureProvider.load();
 
 if (process.env.NODE_ENV == 'production') {
     botOrchestrator.startBot({

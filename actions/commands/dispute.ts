@@ -1,9 +1,8 @@
 import { load } from 'cheerio';
-import { CommandActionBuilder, Hours, hoursToSeconds } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
 import { randomInt } from '../../helpers/randomInt';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
-export const dispute = new CommandActionBuilder('Reaction.Dispute')
+export const dispute = new CommandBuilder('Reaction.Dispute')
     .on(/mtggoldfish\.com\/deck\/(\d+)/i)
     .do(async (ctx) => {
         const deckId = ctx.matchResults[0][1];
@@ -36,6 +35,4 @@ export const dispute = new CommandActionBuilder('Reaction.Dispute')
             ctx.reply.withReaction('🍌');
         }
     })
-    .in([ChatId.PauperChat])
-    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .build();

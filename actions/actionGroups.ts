@@ -1,6 +1,6 @@
 import { CommandAction, IActionState, ScheduledAction } from 'chz-telegram-bot';
 import { banner } from './commands/banner';
-import { cardSearch } from './commands/cardSearch_small';
+import { cardSearch } from './commands/cardSearch';
 import { dispute } from './commands/dispute';
 import { fang } from './commands/fang';
 import { hello } from './commands/hello';
@@ -27,66 +27,51 @@ import { nameSave } from './commands/nameSave';
 import { long } from './commands/long';
 import { voice } from './commands/voice';
 import { gpt } from './commands/gpt';
-import { gptIsTrue } from './commands/gpt_isTrue';
+import { gptIsTrue } from './commands/gptIsTrue';
 import { sadwhy } from './commands/sadwhy';
 
+const commands = [
+    cardSearch,
+    dispute,
+    fang,
+    hello,
+    kamaz,
+    lotus,
+    pizda,
+    ponyav,
+    potuzhno,
+    potuzhnoStats,
+    rating,
+    registration,
+    rozklad,
+    slon,
+    ternopil,
+    vitalii,
+    nameSave,
+    long,
+    voice,
+    gpt,
+    gptIsTrue,
+    sadwhy,
+    banner,
+    test,
+    dvach,
+    ru
+] as CommandAction<IActionState>[];
+
 export const testCommands = {
-    commands: [
-        test,
-        cardSearch,
-        pizda,
-        banner,
-        potuzhno,
-        potuzhnoStats,
-        nameSave,
-        gpt,
-        dvach
-    ] as CommandAction<IActionState>[],
+    commands,
     scheduled: [] as ScheduledAction<IActionState>[],
     inline: [inlineCardSearch]
 };
 
 export const mtgCommands = {
-    commands: [
-        cardSearch,
-        dispute,
-        fang,
-        hello,
-        kamaz,
-        lotus,
-        pizda,
-        ponyav,
-        potuzhno,
-        potuzhnoStats,
-        rating,
-        registration,
-        rozklad,
-        slon,
-        ternopil,
-        vitalii,
-        nameSave,
-        long,
-        voice,
-        gpt,
-        gptIsTrue,
-        sadwhy
-    ] as CommandAction<IActionState>[],
+    commands,
     scheduled: [meta, lowCount] as ScheduledAction<IActionState>[],
     inline: [inlineCardSearch]
 };
 
 export const genshinCommands = {
-    commands: [
-        banner,
-        hello,
-        pizda,
-        potuzhno,
-        potuzhnoStats,
-        dvach,
-        ru,
-        nameSave,
-        long,
-        gptIsTrue
-    ] as CommandAction<IActionState>[],
+    commands,
     scheduled: [becker] as unknown as ScheduledAction<IActionState>[]
 };

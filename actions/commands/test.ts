@@ -1,20 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { CommandActionBuilderWithState } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
 import TestState from '../../state/testState';
+import { featureProvider } from '../../services/featureProvider';
+import { CommandBuilderWithState } from '../../helpers/commandBuilder';
 
-const testActionBuilder = new CommandActionBuilderWithState<TestState>(
+const testActionBuilder = new CommandBuilderWithState<TestState>(
     'Reaction.Test',
-    () => new TestState()
+    TestState
 )
     .on('test')
-    .in([ChatId.TestChat])
     .do(async (ctx, state) => {
-        ctx.reply.withText('test response');
+        const features = featureProvider.getFeaturesForAction(
+            ctx.botName,
+            ctx.actionKey
+        );
+        if (features.extraFeatures.get('test'))
+            ctx.reply.withText('test response feature on');
+        else ctx.reply.withText('test response feature off');
     });
-
-if (process.env.NODE_ENV == 'production') {
-    testActionBuilder.disabled();
-}
 
 export const test = testActionBuilder.build();

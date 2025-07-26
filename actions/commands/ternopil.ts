@@ -1,19 +1,10 @@
-import {
-    CommandActionBuilder,
-    Hours,
-    hoursToSeconds,
-    Seconds,
-    secondsToMilliseconds
-} from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
-import { SpecificUsers } from '../../types/userIds';
+import { MessageType, Seconds, secondsToMilliseconds } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
-export const ternopil = new CommandActionBuilder('Reaction.Ternopil')
-    .on(/.+/i)
-    .from([SpecificUsers.pontiff, SpecificUsers.trigan, SpecificUsers.zohan])
-    .in([ChatId.LvivChat])
+export const ternopil = new CommandBuilder('Reaction.Ternopil')
+    .on(MessageType.Any)
     .do(async (ctx) => {
         switch (randomInt(0, 4)) {
             case 0:
@@ -93,5 +84,4 @@ export const ternopil = new CommandActionBuilder('Reaction.Ternopil')
                 break;
         }
     })
-    .withCooldown({ cooldown: hoursToSeconds(8 as Hours) })
     .build();

@@ -1,16 +1,9 @@
-import {
-    CommandActionBuilder,
-    Hours,
-    hoursToSeconds,
-    MessageType
-} from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
+import { MessageType } from 'chz-telegram-bot';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
-export const voice = new CommandActionBuilder('Reaction.Voice')
+export const voice = new CommandBuilder('Reaction.Voice')
     .on(MessageType.Voice)
-    .in([ChatId.FrankivskChat])
     .do(async (ctx) => {
         ctx.reply.withText('сам свою залупу слухай');
     })
-    .withCooldown({ cooldown: hoursToSeconds(1 as Hours) })
     .build();

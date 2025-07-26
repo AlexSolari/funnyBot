@@ -1,17 +1,11 @@
-import {
-    CommandActionBuilder,
-    Hours,
-    MessageType,
-    hoursToSeconds
-} from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
+import { MessageType } from 'chz-telegram-bot';
 import { SpecificUsers } from '../../types/userIds';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
 const whitelist = [SpecificUsers.nerdik, SpecificUsers.otabapa];
 
-export const long = new CommandActionBuilder('Reaction.Long')
+export const long = new CommandBuilder('Reaction.Long')
     .on(MessageType.Text)
-    .notIn([ChatId.PauperChat])
     .when(
         (ctx) =>
             !ctx.messageInfo.text.includes('send.monobank') &&
@@ -21,5 +15,4 @@ export const long = new CommandActionBuilder('Reaction.Long')
     .do(async (ctx) => {
         ctx.reply.withImage('long');
     })
-    .withCooldown({ cooldown: hoursToSeconds(20 as Hours) })
     .build();
