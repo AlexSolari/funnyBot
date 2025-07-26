@@ -8,105 +8,15 @@ import {
 } from 'chz-telegram-bot';
 import escapeMarkdown from './escapeMarkdown';
 import { SpecificUsers } from '../types/userIds';
-
-const ActionNames = {
-    banner: 'banner',
-    cardSearch: 'cardSearch',
-    dispute: 'dispute',
-    dvach: 'dvach',
-    fang: 'fang',
-    gptIsTrue: 'gptIsTrue',
-    gpt: 'gpt',
-    hello: 'hello',
-    kamaz: 'kamaz',
-    long: 'long',
-    lotus: 'lotus',
-    nameSave: 'nameSave',
-    pizda: 'pizda',
-    ponyav: 'ponyav',
-    potuzhno: 'potuzhno',
-    potuzhnoStats: 'potuzhnoStats',
-    rating: 'rating',
-    registration: 'registration',
-    rozklad: 'rozklad',
-    ru: 'ru',
-    sadwhy: 'sadwhy',
-    slon: 'slon',
-    ternopil: 'ternopil',
-    test: 'test',
-    vitalii: 'vitalii',
-    voice: 'voice'
-} as const;
-
-type ActionName = (typeof ActionNames)[keyof typeof ActionNames];
-
-const actions = new Map<ActionName, IAction>();
-async function importAction(name: string) {
-    const module = await import(`../../actions/commands/${name}`);
-    return module[name];
-}
-
-const actionDescriptions: Record<ActionName, string> = {
-    [ActionNames.banner]:
-        'Надає актуальну інформацію про поточні та майбутні банери в Genshin Impact',
-    [ActionNames.cardSearch]: 'Пошук карток через Scryfall API',
-    [ActionNames.dispute]:
-        'Аналізує деклісти з MTGGoldfish та надає гумористичні коментарі',
-    [ActionNames.dvach]: 'Посилає нахуй за репост з двачу',
-    [ActionNames.fang]:
-        'Реагує тематичними картинками коли в чаті згадують слова "фанг" або "мотомиш"',
-    [ActionNames.gptIsTrue]: 'GROK IS THIS TRUE',
-    [ActionNames.gpt]:
-        'Використовує ШІ для генерації контекстуальних відповідей на випадкові повідомлення',
-    [ActionNames.hello]:
-        'Автоматично відповідає "hello" коли хтось пише "нi" в чаті',
-    [ActionNames.kamaz]:
-        'Автоматично ділиться тематичною картинкою коли згадують "камаз"',
-    [ActionNames.long]:
-        'Виявляє надмірно довгі повідомлення та реагує картинкою',
-    [ActionNames.lotus]:
-        'Публікує картинки зі дампінг сферою у відповідь на згадки про "лотос"',
-    [ActionNames.nameSave]:
-        'Фоновий сервіс, що зберігає останні нікнейми користувачів',
-    [ActionNames.pizda]: 'Відповідає "пізда" на повідомлення "да"',
-    [ActionNames.ponyav]:
-        'Відповідає жартом "в штани намоняв" коли хтось пише "поняв"',
-    [ActionNames.potuzhno]:
-        'Випадковим чином реагує "Потужно" на повідомлення та веде рахунок активності користувачів',
-    [ActionNames.potuzhnoStats]:
-        'Показує топ-10 учасників чату за рейтингом "потужності"',
-    [ActionNames.rating]: 'Рандомно відповідає на посилання на ютуб відео.',
-    [ActionNames.registration]: 'Показує регу на івенти в МВ',
-    [ActionNames.rozklad]: 'Показує розклад в Отаварі',
-    [ActionNames.ru]: 'русскій воєнний корабль іді нахуй',
-    [ActionNames.sadwhy]:
-        'Реагує сумними/емоційними реакціями коли негативно згадують "железяка"',
-    [ActionNames.slon]: 'Реагує на згадки "слон" тематичним відео',
-    [ActionNames.ternopil]:
-        'Надає спеціальні відповіді на повідомлення від користувачів з Тернополя',
-    [ActionNames.test]: 'тест',
-    [ActionNames.vitalii]: 'Відслідковує коли Віталій згадує "маліфо"',
-    [ActionNames.voice]: 'Посилає нахуй за голосовухі'
-};
-
-export type BotFeatureSetsConfiguration = {
-    default: Map<ActionKey, ActionFeatureSet>;
-    kekruga: Map<ActionKey, ActionFeatureSet>;
-    botseiju: Map<ActionKey, ActionFeatureSet>;
-    xiao: Map<ActionKey, ActionFeatureSet>;
-    test: Map<ActionKey, ActionFeatureSet>;
-};
-
-export interface ActionFeatureSet {
-    description: string;
-    active: boolean;
-    cooldownSeconds: Seconds;
-    cooldownMessage: string | undefined;
-    chatWhitelist: ChatId[];
-    chatBlacklist: ChatId[];
-    userWhitelist: SpecificUsers[];
-    extraFeatures: Map<string, boolean>;
-}
+import {
+    ActionFeatureSet,
+    BotFeatureSetsConfiguration
+} from '../types/featureSet';
+import {
+    actionDescriptions,
+    ActionName,
+    ActionNames
+} from '../types/actionNames';
 
 async function config(
     actionName: ActionName,
@@ -120,14 +30,14 @@ async function config(
         extraFeatures?: Map<string, boolean>;
     }
 ): Promise<readonly [ActionKey, ActionFeatureSet]> {
-    if (!actions.has(actionName)) {
-        const action = await importAction(actionName);
-        actions.set(actionName, action);
-    }
-    const action = actions.get(actionName)!;
+    const actionKey = (
+        (await import(`../../actions/commands/${actionName}`))[
+            actionName
+        ] as IAction
+    ).key;
 
     return [
-        action.key,
+        actionKey,
         {
             description: actionDescriptions[actionName],
             active,

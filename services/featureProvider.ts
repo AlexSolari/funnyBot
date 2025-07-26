@@ -1,11 +1,11 @@
 import { readFileSync, watch, writeFileSync } from 'fs';
-import {
-    ActionFeatureSet,
-    BotFeatureSetsConfiguration,
-    createDefaultBotConfig
-} from '../helpers/defaultFeaturesConfiguration';
+import { createDefaultBotConfig } from '../helpers/defaultFeaturesConfiguration';
 import { replacer, reviver } from '../helpers/mapJsonUtils';
 import { ActionKey } from 'chz-telegram-bot';
+import {
+    BotFeatureSetsConfiguration,
+    ActionFeatureSet
+} from '../types/featureSet';
 
 class FeatureProvider {
     config!: BotFeatureSetsConfiguration;
