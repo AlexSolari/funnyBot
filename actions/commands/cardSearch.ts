@@ -1,11 +1,7 @@
-import {
-    ActionStateBase,
-    CommandActionBuilder,
-    MessageContext
-} from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
+import { ActionStateBase, MessageContext } from 'chz-telegram-bot';
 import { MtgCardSearchService } from '../../services/cardSearchService';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
 const TELEGRAM_MAX_MESSAGE_LENGTH = 3000;
 const SET_AND_NUMBER_REGEX = /(\w{3,5})\s(\d+)/gi;
@@ -33,7 +29,7 @@ function sendInChunks(
     }
 }
 
-export const cardSearch = new CommandActionBuilder('Reaction.CardSearch_Small')
+export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
     .on(/\[([^[]+)\]/gi)
     .do(async (ctx) => {
         for (const matchResult of ctx.matchResults) {
@@ -84,5 +80,4 @@ export const cardSearch = new CommandActionBuilder('Reaction.CardSearch_Small')
             `@${escapeMarkdown(botUsername)} \\#rules \\#price consider\n\n` +
             'Також бот може шукати картки за сетом та номером, для цього використовуйте синтаксис *\\[код\\_сету номер\\]*, наприклад: *\\[dom 101\\]* знайде картку з сету Dominaria під номером 101 \\(Rat Colony\\)\\.\n\n'
     )
-    .notIn([ChatId.GenshinChat])
     .build();

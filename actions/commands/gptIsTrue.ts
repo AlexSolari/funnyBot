@@ -1,14 +1,13 @@
 import {
-    CommandActionBuilder,
     Hours,
     hoursToSeconds,
-    Seconds,
     TelegrafContextMessage
 } from 'chz-telegram-bot';
 import OpenAI from 'openai';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { ChatId } from '../../types/chatIds';
 import openAiToken from '../../openAiToken.json';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
 const client = new OpenAI({
     apiKey: openAiToken.token
@@ -32,7 +31,7 @@ function getTextContentsFromReply(messageUpdateObject: TelegrafContextMessage) {
     return '';
 }
 
-export const gptIsTrue = new CommandActionBuilder('Reaction.Gpt_IsTrue')
+export const gptIsTrue = new CommandBuilder('Reaction.Gpt_IsTrue')
     .on(/is (this|it|that) true\??/gi)
     .when(
         (ctx) =>
@@ -64,9 +63,4 @@ export const gptIsTrue = new CommandActionBuilder('Reaction.Gpt_IsTrue')
             ctx.startCustomCooldown(hoursToSeconds(4 as Hours));
     })
     .withRatelimit(1)
-    .withCooldown({
-        cooldown: 60 as Seconds,
-        message: escapeMarkdown(`Наразі не можу перевірити, спробуйте пізніше.`)
-    })
-    .notIn([ChatId.PauperChat])
     .build();

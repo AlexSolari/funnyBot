@@ -1,16 +1,8 @@
-import { CommandActionBuilder, Hours, hoursToSeconds } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
 import { randomInt } from '../../helpers/randomInt';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
-export const lotus = new CommandActionBuilder('Reaction.Lotus')
+export const lotus = new CommandBuilder('Reaction.Lotus')
     .on(/лотус/i)
-    .notIn([
-        ChatId.LvivChat,
-        ChatId.PauperChat,
-        ChatId.FrankivskChat,
-        ChatId.GenshinChat,
-        ChatId.CbgChat
-    ])
     .do(async (ctx) => {
         let imageName = randomInt(0, 1)
             ? 'dampingSphere_funny'
@@ -22,5 +14,4 @@ export const lotus = new CommandActionBuilder('Reaction.Lotus')
 
         ctx.reply.withImage(imageName);
     })
-    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .build();

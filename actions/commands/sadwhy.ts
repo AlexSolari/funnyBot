@@ -1,11 +1,10 @@
-import { CommandActionBuilder, Milliseconds } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
+import { Milliseconds } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
-export const sadwhy = new CommandActionBuilder('Reaction.SadWhy')
+export const sadwhy = new CommandBuilder('Reaction.SadWhy')
     .on(/железяка/i)
-    .notIn([ChatId.PauperChat])
     .do(async (ctx) => {
         const isDerogatory =
             ctx.messageInfo.text.includes('нахуй') ||

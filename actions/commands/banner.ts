@@ -1,7 +1,6 @@
-import { CommandActionBuilder, Seconds } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
 import { load } from 'cheerio';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
 function chuckBanners(input: string[]) {
     const result: { version: string; links: string[] }[] = [];
@@ -30,9 +29,8 @@ function chuckBanners(input: string[]) {
     return result;
 }
 
-export const banner = new CommandActionBuilder('Reaction.Banner')
+export const banner = new CommandBuilder('Reaction.Banner')
     .on('баннер')
-    .in([ChatId.GenshinChat, ChatId.TestChat])
     .do(async (ctx) => {
         const domain = 'https://genshin-impact.fandom.com';
 
@@ -101,5 +99,4 @@ export const banner = new CommandActionBuilder('Reaction.Banner')
             }
         }
     })
-    .withCooldown({ cooldown: 30 as Seconds })
     .build();

@@ -1,16 +1,8 @@
-import { CommandActionBuilder, Hours, hoursToSeconds } from 'chz-telegram-bot';
-import { ChatId } from '../../types/chatIds';
 import { randomInt } from '../../helpers/randomInt';
+import { CommandBuilder } from '../../helpers/commandBuilder';
 
-export const fang = new CommandActionBuilder('Reaction.Fang')
+export const fang = new CommandBuilder('Reaction.Fang')
     .on(/(фанг|мотом[иы]ш)/i)
-    .notIn([
-        ChatId.LvivChat,
-        ChatId.PauperChat,
-        ChatId.FrankivskChat,
-        ChatId.GenshinChat,
-        ChatId.CbgChat
-    ])
     .do(async (ctx) => {
         const i = randomInt(0, 2);
 
@@ -28,5 +20,4 @@ export const fang = new CommandActionBuilder('Reaction.Fang')
                 break;
         }
     })
-    .withCooldown({ cooldown: hoursToSeconds(2 as Hours) })
     .build();

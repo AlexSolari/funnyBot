@@ -1,9 +1,10 @@
-import { CommandActionBuilderWithState, MessageType } from 'chz-telegram-bot';
+import { MessageType } from 'chz-telegram-bot';
 import NameState from '../../state/nameState';
+import { CommandBuilderWithState } from '../../helpers/commandBuilder';
 
-export const nameSave = new CommandActionBuilderWithState(
+export const nameSave = new CommandBuilderWithState(
     'Reaction.NameSave',
-    () => new NameState()
+    NameState
 )
     .on(MessageType.Any)
     .when(
