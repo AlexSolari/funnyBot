@@ -31,7 +31,7 @@ async function config(
     }
 ): Promise<readonly [ActionKey, ActionFeatureSet]> {
     const actionKey = (
-        (await import(`../../actions/commands/${actionName}`))[
+        (await import(`./../actions/commands/${actionName}`))[
             actionName
         ] as IAction
     ).key;
