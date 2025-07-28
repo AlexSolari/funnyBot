@@ -21,7 +21,7 @@ import {
 async function config(
     actionName: ActionName,
     active: boolean,
-    cooldownSeconds: number,
+    cooldownSeconds: number = 0,
     optional?: {
         cooldownMessage?: string;
         chatWhitelist?: ChatId[];
@@ -53,7 +53,7 @@ async function config(
 
 export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfiguration> {
     const defaultFeatures = await Promise.all([
-        config(ActionNames.banner, false, 30),
+        config(ActionNames.banner, false),
         config(ActionNames.cardSearch, true, 0),
         config(ActionNames.dispute, true, hoursToSeconds(2 as Hours), {
             chatWhitelist: [ChatId.PauperChat]
@@ -124,7 +124,7 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
         config(ActionNames.rozklad, true, 30, {
             chatWhitelist: [ChatId.LvivChat]
         }),
-        config(ActionNames.ru, false, hoursToSeconds(1 as Hours)),
+        config(ActionNames.ru, false),
         config(ActionNames.sadwhy, true, 30, {
             chatBlacklist: [ChatId.PauperChat]
         }),
@@ -136,6 +136,16 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
                 ChatId.GenshinChat
             ]
         }),
+        config(ActionNames.ternopil, false),
+        config(ActionNames.test, false),
+        config(ActionNames.vitalii, false),
+        config(ActionNames.voice, false)
+    ]);
+
+    const botseijuFeatures = await Promise.all([
+        config(ActionNames.rozklad, true, 30, {
+            chatWhitelist: [ChatId.LvivChat]
+        }),
         config(ActionNames.ternopil, true, hoursToSeconds(8 as Hours), {
             chatWhitelist: [ChatId.LvivChat],
             userWhitelist: [
@@ -144,7 +154,6 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
                 SpecificUsers.zohan
             ]
         }),
-        config(ActionNames.test, false, 1),
         config(ActionNames.vitalii, true, hoursToSeconds(24 as Hours), {
             chatWhitelist: [ChatId.LvivChat],
             userWhitelist: [SpecificUsers.vitalii]
@@ -156,7 +165,20 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
 
     const xiaoFeatures = await Promise.all([
         config(ActionNames.banner, true, 30),
-        config(ActionNames.ru, true, hoursToSeconds(1 as Hours))
+        config(ActionNames.ru, true, hoursToSeconds(1 as Hours)),
+        config(ActionNames.dvach, true, 1),
+        config(ActionNames.gptIsTrue, true, 10, {
+            cooldownMessage: escapeMarkdown(
+                `Наразі не можу перевірити, спробуйте пізніше.`
+            )
+        }),
+        config(ActionNames.long, true, hoursToSeconds(20 as Hours)),
+        config(ActionNames.nameSave, true, 0),
+        config(ActionNames.pizda, true, hoursToSeconds(2 as Hours)),
+        config(ActionNames.potuzhno, true, hoursToSeconds(4 as Hours)),
+        config(ActionNames.potuzhnoStats, true, 30),
+        config(ActionNames.rating, true, hoursToSeconds(2 as Hours)),
+        config(ActionNames.voice, true, hoursToSeconds(1 as Hours))
     ]);
 
     const testFeatures = await Promise.all([
@@ -166,10 +188,35 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
     ]);
 
     return {
+        version: 1,
+
         default: new Map(defaultFeatures),
-        botseiju: new Map([]),
-        kekruga: new Map([]),
-        xiao: new Map(xiaoFeatures),
-        test: new Map(testFeatures)
+
+        chats: {
+            botseiju: {
+                featureSets: new Map(botseijuFeatures),
+                settings: {
+                    fallbackBehaviour: 'inherit'
+                }
+            },
+            kekruga: {
+                featureSets: new Map([]),
+                settings: {
+                    fallbackBehaviour: 'inherit'
+                }
+            },
+            xiao: {
+                featureSets: new Map(xiaoFeatures),
+                settings: {
+                    fallbackBehaviour: 'disable'
+                }
+            },
+            test: {
+                featureSets: new Map(testFeatures),
+                settings: {
+                    fallbackBehaviour: 'disable'
+                }
+            }
+        }
     };
 }

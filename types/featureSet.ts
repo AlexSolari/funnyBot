@@ -3,11 +3,22 @@ import { ChatId } from './chatIds';
 import { SpecificUsers } from './userIds';
 
 export type BotFeatureSetsConfiguration = {
+    version: number;
+
     default: Map<ActionKey, ActionFeatureSet>;
-    kekruga: Map<ActionKey, ActionFeatureSet>;
-    botseiju: Map<ActionKey, ActionFeatureSet>;
-    xiao: Map<ActionKey, ActionFeatureSet>;
-    test: Map<ActionKey, ActionFeatureSet>;
+    chats: {
+        kekruga: ChatFeatureSetsConfiguration;
+        botseiju: ChatFeatureSetsConfiguration;
+        xiao: ChatFeatureSetsConfiguration;
+        test: ChatFeatureSetsConfiguration;
+    };
+};
+
+export type ChatFeatureSetsConfiguration = {
+    featureSets: Map<ActionKey, ActionFeatureSet>;
+    settings: {
+        fallbackBehaviour: 'disable' | 'inherit';
+    };
 };
 
 export interface ActionFeatureSet {

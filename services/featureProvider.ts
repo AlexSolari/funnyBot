@@ -1,7 +1,7 @@
 import { readFileSync, watch, writeFileSync } from 'fs';
 import { createDefaultBotConfig } from '../helpers/defaultFeaturesConfiguration';
 import { replacer, reviver } from '../helpers/mapJsonUtils';
-import { ActionKey } from 'chz-telegram-bot';
+import { ActionKey, Seconds } from 'chz-telegram-bot';
 import {
     BotFeatureSetsConfiguration,
     ActionFeatureSet
@@ -16,35 +16,38 @@ class FeatureProvider {
     }
 
     async load() {
-        const fileContent = readFileSync(`${this.storagePath}/features.json`, {
+        const filePath = `${this.storagePath}/features.json`;
+        const defaultConfig = await createDefaultBotConfig();
+        const fileContent = readFileSync(filePath, {
             encoding: 'utf-8',
             flag: 'a+'
         });
 
         if (!fileContent) {
-            const botConfigs = await createDefaultBotConfig();
-            writeFileSync(
-                `${this.storagePath}/features.json`,
-                JSON.stringify(botConfigs, replacer),
-                {
-                    encoding: 'utf-8',
-                    flag: 'a+'
-                }
-            );
-            this.config = botConfigs;
+            writeFileSync(filePath, JSON.stringify(defaultConfig, replacer), {
+                encoding: 'utf-8',
+                flag: 'w+'
+            });
+            this.config = defaultConfig;
         } else {
             this.config = JSON.parse(fileContent, reviver);
+
+            if (this.config.version < defaultConfig.version) {
+                this.config.version = defaultConfig.version;
+                this.config.default = defaultConfig.default;
+                writeFileSync(filePath, JSON.stringify(this.config, replacer), {
+                    encoding: 'utf-8',
+                    flag: 'w+'
+                });
+            }
         }
 
-        watch(`${this.storagePath}/features.json`, (eventType, _) => {
+        watch(filePath, (eventType, _) => {
             if (eventType === 'change') {
-                const fileContent = readFileSync(
-                    `${this.storagePath}/features.json`,
-                    {
-                        encoding: 'utf-8',
-                        flag: 'a+'
-                    }
-                );
+                const fileContent = readFileSync(filePath, {
+                    encoding: 'utf-8',
+                    flag: 'w+'
+                });
 
                 if (fileContent) {
                     this.config = JSON.parse(fileContent, reviver);
@@ -60,11 +63,24 @@ class FeatureProvider {
 
         const defaultFeatures = this.config.default;
         const botFeatures =
-            botName in this.config
-                ? this.config[botName as keyof typeof this.config]
-                : new Map<ActionKey, ActionFeatureSet>();
+            this.config.chats[botName as keyof typeof this.config.chats];
 
-        const actionFeatures = botFeatures.get(key) ?? defaultFeatures.get(key);
+        const fallbackFeature: ActionFeatureSet =
+            botFeatures.settings.fallbackBehaviour == 'inherit'
+                ? defaultFeatures.get(key)!
+                : {
+                      description: '',
+                      active: false,
+                      cooldownMessage: undefined,
+                      cooldownSeconds: 0 as Seconds,
+                      chatBlacklist: [],
+                      chatWhitelist: [],
+                      userWhitelist: [],
+                      extraFeatures: new Map()
+                  };
+
+        const actionFeatures =
+            botFeatures.featureSets.get(key)! ?? fallbackFeature;
         if (actionFeatures) return actionFeatures;
 
         throw new Error(
