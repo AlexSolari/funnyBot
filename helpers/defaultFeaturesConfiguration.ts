@@ -118,7 +118,8 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
             chatWhitelist: [
                 ChatId.StandardChat,
                 ChatId.ModernChat,
-                ChatId.PioneerChat
+                ChatId.PioneerChat,
+                ChatId.PauperChat
             ]
         }),
         config(ActionNames.rozklad, true, 30, {
