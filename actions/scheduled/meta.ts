@@ -95,22 +95,22 @@ async function showFrankivskTournaments<TActionState extends IActionState>(
     getCached: <TResult>(key: string) => Promise<TResult>,
     ctx: ChatContext<TActionState>
 ) {
-    const pioneerTournaments = await getCached<string>(Format.Pioneer);
+    const pauperTournaments = await getCached<string>(Format.Pauper);
     const standardTournaments = await getCached<string>(Format.Standard);
 
-    let pioneerString = '';
+    let pauperString = '';
     let standardString = '';
 
-    if (pioneerTournaments.length > 0) {
-        pioneerString = `Піонер: \n\n${pioneerTournaments}\n\n`;
+    if (pauperTournaments.length > 0) {
+        pauperString = `Паупер: \n\n${pauperTournaments}\n\n`;
     }
     if (standardTournaments.length > 0) {
         standardString = `Стандарт: \n\n${standardTournaments}\n\n`;
     }
 
-    if (pioneerString.length > 0 || standardString.length > 0) {
+    if (pauperString.length > 0 || standardString.length > 0) {
         ctx.send.text(
-            `⚔️ Свіжі турніри ⚔️\n\n ${pioneerString} ${standardString}`
+            `⚔️ Свіжі турніри ⚔️\n\n ${pauperString} ${standardString}`
         );
     }
 }
