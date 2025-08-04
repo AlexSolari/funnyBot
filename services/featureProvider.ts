@@ -109,7 +109,19 @@ class FeatureProvider {
             return botFeatures.featureSets.get(key)! ?? fallbackFeature;
         }
 
-        return defaultFeatures.get(key);
+        return (
+            defaultFeatures.get(key) ??
+            ({
+                description: '',
+                active: false,
+                cooldownMessage: undefined,
+                cooldownSeconds: 0 as Seconds,
+                chatBlacklist: [],
+                chatWhitelist: [],
+                userWhitelist: [],
+                extraFeatures: new Map()
+            } as ActionFeatureSet)
+        );
     }
 }
 
