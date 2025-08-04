@@ -47,11 +47,13 @@ export const gptIsTrue = new CommandBuilder('Reaction.Gpt_IsTrue')
         );
         const messagesBeforeTarget = ctx.chatInfo.messageHistory
             .filter((_, i) => i <= index)
-            .map((x) => `${x.from?.username}: ${x.text}\n`);
+            .map((x) => JSON.stringify(x));
 
         const input = `Analyze following message, is it factual and/or truthful, write a response to it. 
             If needed, cite sources. Be professional. Reply language should be Ukraininan and shoud not containt Markdown syntax, but can contain links. 
-            Here's chat history before the message so you now have a context of a discussion:\n\n[${messagesBeforeTarget}]\n\n
+            Here's chat history before the message so you now have a context of a discussion:\n\n[${messagesBeforeTarget.join(
+                ', '
+            )}]\n\n
             Here's the message you need to reply:\n\n${query}`;
         const response = await client.responses.create({
             model: 'gpt-4.1',

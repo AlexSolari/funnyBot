@@ -29,7 +29,7 @@ async function getReplyText(
     const index = chatInfo.messageHistory.findIndex((x) => x.text == text);
     const messagesBeforeTarget = chatInfo.messageHistory
         .filter((_, i) => i <= index)
-        .map((x) => `${x.from?.username}: ${x.text}`);
+        .map((x) => JSON.stringify(x));
 
     const response = await client.responses.create({
         model: 'gpt-4.1',
@@ -46,7 +46,7 @@ export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
     .on(MessageType.Text)
     .when(
         (ctx, state) =>
-            Math.random() < 0.05 &&
+            //Math.random() < 0.05 &&
             !whitelist.includes(ctx.userInfo.id) &&
             ctx.userInfo.id != state.lastUserId
     )
