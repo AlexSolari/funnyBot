@@ -1,8 +1,4 @@
-import {
-    Hours,
-    hoursToSeconds,
-    TelegrafContextMessage
-} from 'chz-telegram-bot';
+import { Hours, hoursToSeconds } from 'chz-telegram-bot';
 import OpenAI from 'openai';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { ChatId } from '../../types/chatIds';
@@ -13,19 +9,21 @@ const client = new OpenAI({
     apiKey: openAiToken.token
 });
 
-function getTextContentsFromReply(messageUpdateObject: TelegrafContextMessage) {
+function getTextContentsFromReply(messageUpdateObject: {
+    reply_to_message?: {
+        text?: string;
+        caption?: string;
+    };
+}) {
     if (
         'reply_to_message' in messageUpdateObject &&
         messageUpdateObject.reply_to_message
     ) {
         if ('text' in messageUpdateObject.reply_to_message)
-            return messageUpdateObject.reply_to_message.text;
+            return messageUpdateObject.reply_to_message.text ?? '';
 
-        if (
-            'caption' in messageUpdateObject.reply_to_message &&
-            messageUpdateObject.reply_to_message.caption != undefined
-        )
-            return messageUpdateObject.reply_to_message.caption;
+        if ('caption' in messageUpdateObject.reply_to_message)
+            return messageUpdateObject.reply_to_message.caption ?? '';
     }
 
     return '';

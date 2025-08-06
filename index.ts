@@ -85,10 +85,10 @@ if (process.env.NODE_ENV == 'production') {
 }
 
 process.once('SIGINT', async () => {
-    await botOrchestrator.stopBots('SIGINT');
+    await botOrchestrator.stopBots();
     process.exit(0);
 });
 process.once('SIGTERM', async () => {
-    await botOrchestrator.stopBots('SIGTERM');
+    await botOrchestrator.stopBots();
     process.exit(0);
 });

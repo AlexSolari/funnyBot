@@ -46,7 +46,7 @@ export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
     .on(MessageType.Text)
     .when(
         (ctx, state) =>
-            //Math.random() < 0.05 &&
+            Math.random() < 0.05 &&
             !whitelist.includes(ctx.userInfo.id) &&
             ctx.userInfo.id != state.lastUserId
     )
