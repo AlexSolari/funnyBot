@@ -10,12 +10,11 @@ import OpenAI from 'openai';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { ChatId } from '../../types/chatIds';
 import openAiToken from '../../openAiToken.json';
-import { SpecificUsers } from '../../types/userIds';
+import { chatAdmins } from '../../types/userIds';
 import GptState from '../../state/gptState';
 import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
 import { CommandBuilderWithState } from '../../helpers/commandBuilder';
 
-const whitelist = [SpecificUsers.nerdik, SpecificUsers.otabapa];
 const client = new OpenAI({
     apiKey: openAiToken.token
 });
@@ -47,7 +46,7 @@ export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
     .when(
         (ctx, state) =>
             Math.random() < 0.05 &&
-            !whitelist.includes(ctx.userInfo.id) &&
+            !chatAdmins.includes(ctx.userInfo.id) &&
             ctx.userInfo.id != state.lastUserId
     )
     .do(async (ctx, state) => {

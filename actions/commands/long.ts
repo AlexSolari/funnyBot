@@ -1,8 +1,6 @@
 import { MessageType } from 'chz-telegram-bot';
-import { SpecificUsers } from '../../types/userIds';
+import { chatAdmins } from '../../types/userIds';
 import { CommandBuilder } from '../../helpers/commandBuilder';
-
-const whitelist = [SpecificUsers.nerdik, SpecificUsers.otabapa];
 
 export const long = new CommandBuilder('Reaction.Long')
     .on(MessageType.Text)
@@ -10,7 +8,7 @@ export const long = new CommandBuilder('Reaction.Long')
         (ctx) =>
             !ctx.messageInfo.text.includes('send.monobank') &&
             ctx.messageInfo.text.length >= 400 &&
-            !whitelist.includes(ctx.userInfo.id)
+            !chatAdmins.includes(ctx.userInfo.id)
     )
     .do(async (ctx) => {
         ctx.reply.withImage('long');
