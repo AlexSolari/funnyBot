@@ -1,17 +1,17 @@
-import { watch } from 'fs';
 import { createDefaultBotConfig } from '../helpers/defaultFeaturesConfiguration';
 import { replacer, reviver } from '../helpers/mapJsonUtils';
-import { ActionKey, Seconds } from 'chz-telegram-bot';
+import { ActionKey, Seconds, secondsToMilliseconds } from 'chz-telegram-bot';
 import {
     BotFeatureSetsConfiguration,
     ActionFeatureSet
 } from '../types/featureSet';
-import { writeFile, readFile } from 'fs/promises';
+import { writeFile, readFile, stat } from 'fs/promises';
 
 class FeatureProvider {
-    config!: BotFeatureSetsConfiguration;
-    filePath: string;
-    storagePath: string;
+    private readonly filePath: string;
+    private readonly storagePath: string;
+    private config!: BotFeatureSetsConfiguration;
+    private lastModifiedDate!: Date;
 
     constructor(path?: string) {
         this.storagePath = path ?? 'storage';
@@ -67,8 +67,14 @@ class FeatureProvider {
             await this.useConfigFromFile(fileContent, defaultConfig);
         }
 
-        watch(this.filePath, async (eventType, _) => {
-            if (eventType === 'change') {
+        this.lastModifiedDate = new Date();
+
+        setInterval(async () => {
+            const stats = await stat(this.filePath);
+
+            if (stats.mtime > this.lastModifiedDate) {
+                this.lastModifiedDate = stats.mtime;
+
                 const fileContent = await readFile(this.filePath, {
                     encoding: 'utf-8',
                     flag: 'w+'
@@ -78,7 +84,7 @@ class FeatureProvider {
                     this.config = JSON.parse(fileContent, reviver);
                 }
             }
-        });
+        }, secondsToMilliseconds((5 * 60) as Seconds));
     }
 
     getFeaturesForAction(botName: string, key: ActionKey) {
