@@ -3,7 +3,7 @@ import { ScheduledActionBuilderWithState } from 'chz-telegram-bot';
 import BeckerState from '../../state/beckerState';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { randomInt } from '../../helpers/randomInt';
-import { ICmerApiResponse } from '../../types/externalApiDefinitions/cmer';
+import { CmerApiResponse } from '../../types/externalApiDefinitions/cmer';
 
 export const becker = new ScheduledActionBuilderWithState<BeckerState>(
     'Scheduled.Becker',
@@ -12,12 +12,13 @@ export const becker = new ScheduledActionBuilderWithState<BeckerState>(
     .runAt(11)
     .in([ChatId.GenshinChat])
     .do(async (ctx, _, state) => {
-        const offset = randomInt(0, 21) * 50;
+        const offset = randomInt(0, 26) * 50;
         const contentPage = await fetch(
-            `http://coomer.su/api/v1/onlyfans/user/alina_becker/posts-legacy?o=${offset}`
+            `https://coomer.st/api/v1/onlyfans/user/alina_becker/posts?o=${offset}`
         );
-        const data = (await contentPage.json()) as ICmerApiResponse;
-        const imageContainer = data.results[randomInt(0, 49)];
+        const data = (await contentPage.json()) as CmerApiResponse;
+        const images = data.filter((x) => x.file.path.endsWith('.jpg'));
+        const imageContainer = images[randomInt(0, images.length)];
 
         if (imageContainer.id != state.id) {
             state.id = imageContainer.id;
@@ -25,7 +26,7 @@ export const becker = new ScheduledActionBuilderWithState<BeckerState>(
             ctx.send.text(
                 `[${escapeMarkdown(
                     imageContainer.title
-                )}](https://img.coomer.su/thumbnail/data/${
+                )}](https://img.coomer.st/thumbnail/data${
                     imageContainer.file.path
                 })`
             );

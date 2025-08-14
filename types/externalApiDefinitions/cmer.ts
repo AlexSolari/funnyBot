@@ -1,9 +1,7 @@
-export interface ICmerApiResponse {
-    results: {
-        id: number;
-        title: string;
-        file: {
-            path: string;
-        };
-    }[];
-}
+export type CmerApiResponse = {
+    id: number;
+    title: string;
+    file: {
+        path: string;
+    };
+}[];
