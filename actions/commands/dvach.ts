@@ -1,10 +1,5 @@
 import { MessageInfo, MessageType } from 'chz-telegram-bot';
 import { CommandBuilder } from '../../helpers/commandBuilder';
-import { Video } from 'node-telegram-bot-api';
-
-interface VideoWithName extends Video {
-    file_name: string;
-}
 
 const DVACH_CHATIDS = [
     -1001009232144, -1001166834860, -1001660509596, -1001148195583
@@ -45,17 +40,13 @@ function hasEmoji(messageInfo: MessageInfo) {
     return false;
 }
 
-function isVideoWithName(video: Video): video is VideoWithName {
-    return video != undefined && 'file_name' in video;
-}
-
 function hasVideo(messageInfo: MessageInfo) {
     const update = messageInfo.telegramUpdateObject;
 
     const hasVideo = 'video' in update && update.video != undefined;
 
-    if (hasVideo && isVideoWithName(update.video!)) {
-        const videoName = update.video.file_name;
+    if (hasVideo && 'file_name' in update.video) {
+        const videoName = update.video.file_name ?? '';
 
         return (
             videoName.includes('dvach') ||

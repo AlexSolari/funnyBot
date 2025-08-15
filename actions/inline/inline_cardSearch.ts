@@ -22,7 +22,7 @@ export const inlineCardSearch = new InlineQueryActionBuilder(
                       }`
                     : cardData.card.name,
                 description: cardData.description,
-                thumb_url:
+                thumbnail_url:
                     cardData.card.image_uris?.art_crop ??
                     cardData.card.image_uris?.normal ??
                     ScryfallService.cardBack,
