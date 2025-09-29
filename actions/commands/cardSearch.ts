@@ -4,7 +4,7 @@ import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { CommandBuilder } from '../../helpers/commandBuilder';
 
 const TELEGRAM_MAX_MESSAGE_LENGTH = 3000;
-const SET_AND_NUMBER_REGEX = /(\w{3,5})\s(\d+)/gi;
+const SET_AND_NUMBER_REGEX = /^(\w{3,5})\s(\d+)/gi;
 
 function sendInChunks(
     message: string,
@@ -50,11 +50,23 @@ export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
                 continue;
             }
 
-            const message = await MtgCardSearchService.findForAction(
-                firstRegexMatch
-            );
+            const { message, keyboardData } =
+                await MtgCardSearchService.findForAction(firstRegexMatch);
 
             if (!message) continue;
+
+            if (keyboardData) {
+                ctx.reply.andQuote.withText(message, firstRegexMatch, {
+                    keyboard: keyboardData.map((x) => [
+                        {
+                            text: x,
+                            switch_inline_query_current_chat: x
+                        }
+                    ])
+                });
+
+                continue;
+            }
 
             if (message.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
                 sendInChunks(message, ctx, firstRegexMatch);

@@ -165,16 +165,48 @@ class CardSearchService {
                       `${query} ${subquery}`,
                       signal
                   );
+        const uniqueCardsCount = Object.keys(
+            Object.groupBy(
+                matchedCards.map((x) => ({
+                    name: x.name,
+                    id: x.oracle_id ?? x.parentId
+                })),
+                ({ id }) => id
+            )
+        ).length;
 
-        if (flags.includes(CardSearchFlags.flip)) matchedCards.shift();
+        if (uniqueCardsCount <= 1) {
+            if (flags.includes(CardSearchFlags.flip)) matchedCards.shift();
 
-        const resultCard = matchedCards[0];
-        if (!resultCard) return null;
+            const resultCard = matchedCards[0];
+            if (!resultCard)
+                return {
+                    message: null,
+                    keyboardData: null
+                };
 
-        const extraText = await this.transfromFlags(flags, resultCard, signal);
-        return `[\\${escapeMarkdown(resultCard.name)}](${
-            resultCard.image_uris.normal ?? ScryfallService.cardBack
-        })${extraText}`;
+            const extraText = await this.transfromFlags(
+                flags,
+                resultCard,
+                signal
+            );
+            return {
+                message: `[\\${escapeMarkdown(resultCard.name)}](${
+                    resultCard.image_uris.normal ?? ScryfallService.cardBack
+                })${extraText}`,
+                keyboardData: null
+            };
+        } else if (uniqueCardsCount <= 6) {
+            return {
+                message: 'Знайдено декілька карт:',
+                keyboardData: matchedCards.map((x) => x.name)
+            };
+        } else {
+            return {
+                message: 'Знайдено більше 6 карт, будь ласка уточніть запит:',
+                keyboardData: [query]
+            };
+        }
     }
 
     async findForInlineQuery(inlineQuery: string, signal?: AbortSignal) {

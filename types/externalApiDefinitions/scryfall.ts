@@ -45,6 +45,7 @@ export interface IScryfallCardFace {
     set_name: string;
     id: string;
     name: string;
+    oracle_id: string;
     mana_cost: string;
     type_line: string;
     oracle_text: string;

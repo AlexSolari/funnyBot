@@ -112,7 +112,7 @@ class ScryfallSearchService {
     }
 
     async findFuzzy(query: string, signal?: AbortSignal) {
-        return this.withRatelimit(async () => {
+        const result = await this.withRatelimit(async () => {
             const response = await fetch(
                 `https://api.scryfall.com/cards/named?fuzzy=${query}`,
                 { signal }
@@ -121,6 +121,10 @@ class ScryfallSearchService {
 
             return this.unwrapResponse(data, (x) => this.getCardFaces(x));
         });
+
+        if (result.length != 0) return result;
+
+        return await this.findWithQuery(query, signal);
     }
 
     async getRules(card: IScryfallCardFace, signal?: AbortSignal) {
