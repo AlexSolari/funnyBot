@@ -7,6 +7,7 @@ import { ChatId } from '../../types/chatIds';
 import { secondsToMilliseconds } from 'chz-telegram-bot';
 import moment from 'moment';
 import { CommandBuilder } from '../../helpers/commandBuilder';
+import spellseekerEvent from '../../content/spellseeker.json';
 
 const daysMap = {
     неділя: 'неділю',
@@ -17,6 +18,14 @@ const daysMap = {
     'п’ятниця': 'п’ятницю',
     субота: 'суботу'
 } as Record<string, string>;
+
+type EventInfo = {
+    date: string;
+    name: string;
+    id: number;
+    spaces: number;
+    usedSpaces: number;
+};
 
 export const registration = new CommandBuilder('Reaction.Registration')
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
@@ -90,7 +99,7 @@ export const registration = new CommandBuilder('Reaction.Registration')
             return;
         }
 
-        const eventInfos = resources.map((x) => ({
+        const eventInfos = resources.map<EventInfo>((x) => ({
             date: x.date,
             name: x.gt.name ?? x.gt.service?.name ?? serviceName,
             id: x.id,
@@ -98,7 +107,12 @@ export const registration = new CommandBuilder('Reaction.Registration')
             usedSpaces: x.gt.used_space
         }));
 
-        let text = eventInfos.length > 1 ? 'Реєстрації:\n\n' : '';
+        let text = eventInfos.length > 0 ? 'Реєстрації:\n\n' : '';
+
+        if (serviceName == 'Піонер')
+            text += `[${escapeMarkdown(spellseekerEvent.name)}](${
+                spellseekerEvent.link
+            }) відбудеться у ${escapeMarkdown(spellseekerEvent.date)}\n`;
 
         eventInfos.forEach((x, i) => {
             text += `[${escapeMarkdown(
