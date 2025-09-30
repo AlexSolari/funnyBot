@@ -5,10 +5,10 @@ export interface IMWEventDetail {
     date: string;
     id: number;
     gt: {
-        name: string;
+        name: string | null;
         space: number;
         used_space: number;
-        service: { name: string };
+        service?: { name: string | null };
     };
     time: { start_time: Seconds };
 }

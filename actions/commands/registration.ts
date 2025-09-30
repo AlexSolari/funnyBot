@@ -60,22 +60,17 @@ export const registration = new CommandBuilder('Reaction.Registration')
             `https://api.wlaunch.net/v1/company/7ea091e0-359a-11eb-86df-9f45a44f29bd/branch/7ea10724-359a-11eb-86df-9f45a44f29bd/slot/gt/resource?start=${today}&end=${month}&source=WIDGET&withDiscounts=true&preventBookingEnabled=true`
         );
         const data = (await response.json()) as IMWApiResponse;
-        const slots = data.slots
-            .map((x) =>
-                x.date_slots.map(
-                    (ds) =>
-                        ({
-                            date: moment.utc(ds.date),
-                            slots: ds.slots
-                        } as IMwApiResponseDateSlot)
-                )
-            )
-            .flat(Infinity) as IMwApiResponseDateSlot[];
+        const slots = data.slots.flatMap((x) =>
+            x.date_slots.map<IMwApiResponseDateSlot>((ds) => ({
+                date: moment.utc(ds.date),
+                slots: ds.slots
+            }))
+        );
 
         const resources = slots
             .filter((x) => x.slots.length > 0)
             .sort((a, b) => a.date.valueOf() - b.date.valueOf())
-            .map(({ date, slots }) =>
+            .flatMap(({ date, slots }) =>
                 slots.map((x) => {
                     x.date = moment
                         .utc(
@@ -91,8 +86,7 @@ export const registration = new CommandBuilder('Reaction.Registration')
                     return x;
                 })
             )
-            .flat()
-            .filter((x) => x.gt.service.name.includes(serviceName));
+            .filter((x) => x.gt.service?.name?.includes(serviceName));
 
         if (!resources || resources.length == 0) {
             ctx.reply.withText(`поки нема`);
