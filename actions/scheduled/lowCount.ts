@@ -44,7 +44,7 @@ export const lowCount = new ScheduledActionBuilder('Scheduled.LowCount')
                 .map((x) =>
                     x.date_slots.map((ds) =>
                         ds.slots.find(
-                            (dss) => dss.gt.service.name == serviceName
+                            (dss) => dss.gt.service?.name == serviceName
                         )
                     )
                 )
