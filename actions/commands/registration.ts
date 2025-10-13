@@ -7,7 +7,8 @@ import { ChatId } from '../../types/chatIds';
 import { secondsToMilliseconds } from 'chz-telegram-bot';
 import moment from 'moment';
 import { CommandBuilder } from '../../helpers/commandBuilder';
-import spellseekerEvent from '../../content/spellseeker.json';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 
 const daysMap = {
     неділя: 'неділю',
@@ -25,6 +26,12 @@ type EventInfo = {
     id: number;
     spaces: number;
     usedSpaces: number;
+};
+
+type SpellseekerEvent = {
+    name: string;
+    link: string;
+    date: string;
 };
 
 export const registration = new CommandBuilder('Reaction.Registration')
@@ -103,10 +110,18 @@ export const registration = new CommandBuilder('Reaction.Registration')
 
         let text = eventInfos.length > 0 ? 'Реєстрації:\n\n' : '';
 
-        if (serviceName == 'Піонер')
+        if (serviceName == 'Піонер') {
+            const spellseekerEvent = JSON.parse(
+                await readFile(
+                    join(__dirname, '../../content/spellseeker.json'),
+                    'utf-8'
+                )
+            ) as SpellseekerEvent;
+
             text += `[${escapeMarkdown(spellseekerEvent.name)}](${
                 spellseekerEvent.link
             }) відбудеться у ${escapeMarkdown(spellseekerEvent.date)}\n`;
+        }
 
         eventInfos.forEach((x, i) => {
             text += `[${escapeMarkdown(
