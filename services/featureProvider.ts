@@ -13,6 +13,17 @@ class FeatureProvider {
     private config!: BotFeatureSetsConfiguration;
     private lastModifiedDate!: Date;
 
+    private readonly disabledFeature: ActionFeatureSet = {
+        description: '',
+        active: false,
+        cooldownMessage: undefined,
+        cooldownSeconds: 0 as Seconds,
+        chatBlacklist: [],
+        chatWhitelist: [],
+        userWhitelist: [],
+        extraFeatures: new Map()
+    };
+
     constructor(path?: string) {
         this.storagePath = path ?? 'storage';
         this.filePath = `${this.storagePath}/features.json`;
@@ -98,36 +109,15 @@ class FeatureProvider {
             const botFeatures =
                 this.config.chats[botName as keyof typeof this.config.chats];
 
-            const fallbackFeature: ActionFeatureSet =
+            const fallbackFeature =
                 botFeatures.settings.fallbackBehaviour == 'inherit'
                     ? defaultFeatures.get(key)!
-                    : {
-                          description: '',
-                          active: false,
-                          cooldownMessage: undefined,
-                          cooldownSeconds: 0 as Seconds,
-                          chatBlacklist: [],
-                          chatWhitelist: [],
-                          userWhitelist: [],
-                          extraFeatures: new Map()
-                      };
+                    : this.disabledFeature;
 
             return botFeatures.featureSets.get(key)! ?? fallbackFeature;
         }
 
-        return (
-            defaultFeatures.get(key) ??
-            ({
-                description: '',
-                active: false,
-                cooldownMessage: undefined,
-                cooldownSeconds: 0 as Seconds,
-                chatBlacklist: [],
-                chatWhitelist: [],
-                userWhitelist: [],
-                extraFeatures: new Map()
-            } as ActionFeatureSet)
-        );
+        return defaultFeatures.get(key) ?? this.disabledFeature;
     }
 }
 
