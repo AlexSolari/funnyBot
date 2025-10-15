@@ -21,7 +21,7 @@ export const potuzhnoStats = new CommandBuilder('Reaction.PotuzhnoStats')
         }
 
         for (const [strId, score] of Object.entries(idScoreBoard)) {
-            const name = namesState.lastUsername[parseInt(strId)];
+            const name = namesState.lastUsername[Number.parseInt(strId)];
 
             mergedScore[name] = score;
         }

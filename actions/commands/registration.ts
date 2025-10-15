@@ -123,18 +123,16 @@ export const registration = new CommandBuilder('Reaction.Registration')
             }) відбудеться у ${escapeMarkdown(spellseekerEvent.date)}\n`;
         }
 
-        eventInfos.forEach((x, i) => {
+        for (const event of eventInfos) {
             text += `[${escapeMarkdown(
-                x.name
+                event.name
             )}](https://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${
-                x.id
-            }) \\(${x.usedSpaces} уже в резі\\) відбудеться у ${escapeMarkdown(
-                x.date
-            )}`;
+                event.id
+            }) \\(${
+                event.usedSpaces
+            } уже в резі\\) відбудеться у ${escapeMarkdown(event.date)}\n`;
+        }
 
-            if (i + 1 < eventInfos.length) text += '\n';
-        });
-
-        ctx.reply.withText(text);
+        ctx.reply.withText(text.trim());
     })
     .build();

@@ -54,7 +54,7 @@ export const potuzhno = new CommandBuilderWithState<PotuzhnoState>(
                 switch (randomInt(0, 4)) {
                     case 0:
                         replyCtx.reply.withText(
-                            'Завжди радий бачити вас щасливими\\!'
+                            String.raw`Завжди радий бачити вас щасливими\!`
                         );
                         break;
                     case 1:

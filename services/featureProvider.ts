@@ -72,10 +72,10 @@ class FeatureProvider {
             flag: 'a+'
         });
 
-        if (!fileContent) {
-            await this.useDefaultConfig(defaultConfig);
-        } else {
+        if (fileContent) {
             await this.useConfigFromFile(fileContent, defaultConfig);
+        } else {
+            await this.useDefaultConfig(defaultConfig);
         }
 
         this.lastModifiedDate = new Date();

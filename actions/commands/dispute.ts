@@ -13,15 +13,15 @@ export const dispute = new CommandBuilder('Reaction.Dispute')
         const findInDOM = load(text);
         const cards = findInDOM('.copy-paste-box').text();
 
-        const hasOffering = cards.indexOf('Fanatical Offering') != -1;
-        const hasEnforcer = cards.indexOf('Myr Enforcer') != -1;
+        const hasOffering = cards.includes('Fanatical Offering');
+        const hasEnforcer = cards.includes('Myr Enforcer');
 
         const isRakdos =
-            cards.indexOf('Mountain') != -1 &&
-            cards.indexOf('Swamp') != -1 &&
-            cards.indexOf('Island') == -1 &&
-            cards.indexOf('Plains') == -1 &&
-            cards.indexOf('Forest') == -1;
+            cards.includes('Mountain') &&
+            cards.includes('Swamp') &&
+            !cards.includes('Island') &&
+            !cards.includes('Plains') &&
+            !cards.includes('Forest');
 
         if (isRakdos) {
             ctx.reply.withText('ми досі про ракдос дрочню?');

@@ -6,7 +6,7 @@ function chuckBanners(input: string[]) {
     const result: { version: string; links: string[] }[] = [];
     let currentChunk: { version: string; links: string[] } | null = null;
 
-    input.forEach((item) => {
+    for (const item of input) {
         if (item.startsWith('Version ')) {
             if (currentChunk) result.push(currentChunk);
 
@@ -21,9 +21,8 @@ function chuckBanners(input: string[]) {
             };
             currentChunk.links.push(item);
         }
-    });
+    }
 
-    // Push the last chunk if exists
     if (currentChunk) result.push(currentChunk);
 
     return result;

@@ -49,7 +49,7 @@ export const lowCount = new ScheduledActionBuilder('Scheduled.LowCount')
                     )
                 )
                 .flat(Infinity)
-                .filter((x) => x)[0] as IMWEventDetail;
+                .find(Boolean) as IMWEventDetail;
 
             if (!target) return;
 

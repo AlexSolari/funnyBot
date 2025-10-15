@@ -41,7 +41,7 @@ export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
             if (setAndNumberMatch) {
                 const message = await MtgCardSearchService.findBySetAndNumber(
                     setAndNumberMatch[1],
-                    parseInt(setAndNumberMatch[2])
+                    Number.parseInt(setAndNumberMatch[2])
                 );
 
                 if (message)

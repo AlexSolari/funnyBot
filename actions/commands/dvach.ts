@@ -1,9 +1,9 @@
 import { MessageInfo, MessageType } from 'chz-telegram-bot';
 import { CommandBuilder } from '../../helpers/commandBuilder';
 
-const DVACH_CHATIDS = [
+const DVACH_CHATIDS = new Set([
     -1001009232144, -1001166834860, -1001660509596, -1001148195583
-];
+]);
 const DVACH_LIGHTNING_ID = '5359617799515823946';
 
 function isForwarded(messageInfo: MessageInfo) {
@@ -11,7 +11,7 @@ function isForwarded(messageInfo: MessageInfo) {
     const isForward = 'forward_origin' in update;
 
     if (isForward && update.forward_origin?.type == 'channel') {
-        return DVACH_CHATIDS.includes(update.forward_origin.chat.id);
+        return DVACH_CHATIDS.has(update.forward_origin.chat.id);
     }
 
     return false;
