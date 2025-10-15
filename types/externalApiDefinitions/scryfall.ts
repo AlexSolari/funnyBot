@@ -49,6 +49,7 @@ export interface IScryfallCardFace {
     mana_cost: string;
     type_line: string;
     oracle_text: string;
+    set_type: string;
     legalities: Record<string, 'legal' | 'not_legal' | 'restricted' | 'banned'>;
     image_uris: {
         art_crop: string;

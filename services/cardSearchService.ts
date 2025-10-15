@@ -214,6 +214,9 @@ class CardSearchService {
             return { cardsWithText: [], showSetCode: wasOneCardFound };
 
         let cards = await ScryfallService.findExact(query, signal);
+        cards = cards.filter(
+            (x) => x.set_type != 'memorabilia' && x.set_type != 'minigame'
+        );
 
         if (cards.length == 0) {
             cards = await ScryfallService.findWithQuery(query, signal);
