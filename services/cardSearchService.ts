@@ -158,13 +158,10 @@ class CardSearchService {
         const { flags, query, subquery } =
             this.getFlagsFromActionMatchResult(matchResult);
 
-        const matchedCards =
-            subquery.length == 0
-                ? await ScryfallService.findFuzzy(query, signal)
-                : await ScryfallService.findWithQuery(
-                      `${query} ${subquery}`,
-                      signal
-                  );
+        const matchedCards = await ScryfallService.findWithQuery(
+            `${query} ${subquery}`,
+            signal
+        );
         const uniqueCardsCount = Object.keys(
             Object.groupBy(
                 matchedCards.map((x) => ({
