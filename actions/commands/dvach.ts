@@ -10,15 +10,8 @@ function isForwarded(messageInfo: MessageInfo) {
     const update = messageInfo.telegramUpdateObject;
     const isForward = 'forward_origin' in update;
 
-    if (isForward) {
-        const origin = update.forward_origin as {
-            type: string;
-            chat: { id: number };
-        };
-
-        if (origin?.type == 'channel') {
-            return DVACH_CHATIDS.includes(origin.chat.id);
-        }
+    if (isForward && update.forward_origin?.type == 'channel') {
+        return DVACH_CHATIDS.includes(update.forward_origin.chat.id);
     }
 
     return false;
