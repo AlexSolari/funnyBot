@@ -53,18 +53,22 @@ export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
             const { message, keyboardData } =
                 await MtgCardSearchService.findForAction(firstRegexMatch);
 
-            if (!message) continue;
-
-            if (keyboardData) {
-                ctx.reply.andQuote.withText(message, firstRegexMatch, {
-                    keyboard: keyboardData.map((x) => [
-                        {
-                            text: x,
-                            switch_inline_query_current_chat: x
-                        }
-                    ])
-                });
-
+            if (!message) {
+                ctx.reply.andQuote.withText(
+                    `Карток з "${firstRegexMatch}" не знайдено, будь ласка уточніть назву:`,
+                    firstRegexMatch,
+                    {
+                        keyboard: [
+                            [
+                                {
+                                    text: firstRegexMatch,
+                                    switch_inline_query_current_chat:
+                                        firstRegexMatch
+                                }
+                            ]
+                        ]
+                    }
+                );
                 continue;
             }
 
@@ -74,7 +78,14 @@ export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
                 continue;
             }
 
-            ctx.reply.andQuote.withText(message, firstRegexMatch);
+            ctx.reply.andQuote.withText(message, firstRegexMatch, {
+                keyboard: keyboardData.map((x) => [
+                    {
+                        text: x,
+                        switch_inline_query_current_chat: x
+                    }
+                ])
+            });
         }
     })
     .withHelp(

@@ -1,5 +1,6 @@
 import capitalizeFirstLetter from '../helpers/capitalizeFirstLetter';
 import escapeMarkdown from '../helpers/escapeMarkdown';
+import stripPunctuation from '../helpers/stripPunctuation';
 import { CardSearchFlags } from '../types/cardSearchFlags';
 import { IScryfallCardFace } from '../types/externalApiDefinitions/scryfall';
 import { ScryfallService } from './scryfallService';
@@ -171,6 +172,8 @@ class CardSearchService {
                 ({ id }) => id
             )
         ).length;
+        const keyboardData =
+            uniqueCardsCount <= 6 ? matchedCards.map((x) => x.name) : [query];
 
         if (uniqueCardsCount <= 1) {
             if (flags.includes(CardSearchFlags.flip)) matchedCards.shift();
@@ -191,19 +194,32 @@ class CardSearchService {
                 message: `[\\${escapeMarkdown(resultCard.name)}](${
                     resultCard.image_uris.normal ?? ScryfallService.cardBack
                 })${extraText}`,
-                keyboardData: null
-            };
-        } else if (uniqueCardsCount <= 6) {
-            return {
-                message: 'Знайдено декілька карт:',
-                keyboardData: matchedCards.map((x) => x.name)
-            };
-        } else {
-            return {
-                message: 'Знайдено більше 6 карт, будь ласка уточніть запит:',
-                keyboardData: [query]
+                keyboardData: keyboardData
             };
         }
+
+        const exactMatch = matchedCards.find(
+            (x) => stripPunctuation(x.name.toLowerCase()) == query
+        );
+
+        if (exactMatch) {
+            return {
+                message: `[\\${escapeMarkdown(exactMatch.name)}](${
+                    exactMatch.image_uris.normal ?? ScryfallService.cardBack
+                })`,
+                keyboardData
+            };
+        }
+
+        const message =
+            uniqueCardsCount <= 6
+                ? 'Знайдено декілька карт:'
+                : 'Знайдено більше 6 карт, будь ласка уточніть запит:';
+
+        return {
+            message,
+            keyboardData: keyboardData
+        };
     }
 
     async findForInlineQuery(inlineQuery: string, signal?: AbortSignal) {
