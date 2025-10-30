@@ -199,7 +199,9 @@ class CardSearchService {
         }
 
         const exactMatch = matchedCards.find(
-            (x) => stripPunctuation(x.name.toLowerCase()) == query
+            (x) =>
+                stripPunctuation(x.name.toLowerCase()) ==
+                stripPunctuation(query.toLowerCase())
         );
 
         if (exactMatch) {
