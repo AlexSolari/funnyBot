@@ -209,7 +209,7 @@ class CardSearchService {
                 message: `[\\${escapeMarkdown(exactMatch.name)}](${
                     exactMatch.image_uris.normal ?? ScryfallService.cardBack
                 })`,
-                keyboardData
+                keyboardData: [query]
             };
         }
 
