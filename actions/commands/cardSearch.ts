@@ -32,7 +32,16 @@ export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
     .on(/\[([^[]+)\]/gi)
     .do(async (ctx) => {
         for (const matchResult of ctx.matchResults) {
-            const firstRegexMatch = matchResult[1];
+            if (matchResult[1].includes('|')) {
+                ctx.reply.withText(
+                    escapeMarkdown(
+                        'Використання символу *|* у запиті для пошуку карток скоро не буде підтримуватись.\n\n' +
+                            'Будь ласка, використовуйте символ *#*.'
+                    )
+                );
+            }
+
+            const firstRegexMatch = matchResult[1].replaceAll('|', '#');
             const { message, keyboardData } =
                 await MtgCardSearchService.findForAction(firstRegexMatch);
 

@@ -11,9 +11,11 @@ type InlineQueryCardSearchResult = {
     description: string;
 };
 
+const FLAGS_DELIMITER = '#';
+const SET_AND_NUMBER_REGEX = /^(\w{3,5})\s(\d+)/gi;
+
 class CardSearchService {
     private readonly rulesCache: Map<string, string> = new Map();
-    private readonly SET_AND_NUMBER_REGEX = /^(\w{3,5})\s(\d+)/gi;
     private readonly flagTransformers: Record<
         keyof typeof CardSearchFlags,
         (card: IScryfallCardFace, signal?: AbortSignal) => Promise<string>
@@ -85,85 +87,12 @@ class CardSearchService {
         flip: async (_) => ''
     };
 
-    private getFlagsFromInlineQuery(query: string) {
-        const flags: string[] = [];
-
-        while (query.startsWith('#')) {
-            const [hash, ...rest] = query.split(' ');
-            query = rest.join(' ');
-            flags.push(hash.slice(1));
-        }
-
-        return { flags, query };
-    }
-
-    public getFlagsFromActionMatchResult(matchResult: string) {
-        const hasSubquery =
-            matchResult.includes('|') || matchResult.includes('#');
-        if (!hasSubquery)
-            return { flags: [], query: matchResult, subquery: '' };
-
-        const flags: string[] = [];
-        const delimiter = matchResult.includes('|') ? '|' : '#';
-        const [query, subquery] = matchResult.split(delimiter);
-
-        let sanitizedSubquery = subquery.trim();
-        for (const flag of Object.values(CardSearchFlags)) {
-            if (sanitizedSubquery.includes(flag)) {
-                flags.push(flag);
-                sanitizedSubquery = sanitizedSubquery.replace(flag, '');
-            }
-        }
-        sanitizedSubquery = sanitizedSubquery.trim();
-
-        return { flags, query, subquery: sanitizedSubquery };
-    }
-
-    private async transfromFlags(
-        flags: string[],
-        card: IScryfallCardFace,
-        signal?: AbortSignal
-    ) {
-        let extraText = '';
-        for (const flag of flags) {
-            if (!Object.keys(CardSearchFlags).includes(flag)) continue;
-
-            extraText += await this.flagTransformers[
-                flag as keyof typeof CardSearchFlags
-            ](card, signal);
-        }
-
-        return extraText;
-    }
-
-    private async findBySetAndNumber(
-        setCode: string,
-        number: number,
-        signal?: AbortSignal
-    ) {
-        const matchedCards = await ScryfallService.findBySetAndNumber(
-            setCode,
-            number,
-            signal
-        );
-
-        const resultCard = matchedCards[0];
-        if (!resultCard) return { message: null, card: null };
-
-        return {
-            message: `[\\${escapeMarkdown(resultCard.name)}](${
-                resultCard.image_uris.normal ?? ScryfallService.cardBack
-            })`,
-            card: resultCard
-        };
-    }
-
     async findForAction(matchResult: string, signal?: AbortSignal) {
         const { flags, query, subquery } =
             this.getFlagsFromActionMatchResult(matchResult);
 
-        this.SET_AND_NUMBER_REGEX.lastIndex = 0;
-        const setAndNumberMatch = this.SET_AND_NUMBER_REGEX.exec(query);
+        SET_AND_NUMBER_REGEX.lastIndex = 0;
+        const setAndNumberMatch = SET_AND_NUMBER_REGEX.exec(query);
         if (setAndNumberMatch) {
             const { message, card } = await this.findBySetAndNumber(
                 setAndNumberMatch[1],
@@ -204,11 +133,12 @@ class CardSearchService {
             if (flags.includes(CardSearchFlags.flip)) matchedCards.shift();
 
             const resultCard = matchedCards[0];
-            if (!resultCard)
+            if (!resultCard) {
                 return {
                     message: null,
                     keyboardData: null
                 };
+            }
 
             const extraText = await this.transfromFlags(
                 flags,
@@ -252,8 +182,8 @@ class CardSearchService {
     async findForInlineQuery(inlineQuery: string, signal?: AbortSignal) {
         const { flags, query } = this.getFlagsFromInlineQuery(inlineQuery);
 
-        this.SET_AND_NUMBER_REGEX.lastIndex = 0;
-        const setAndNumberMatch = this.SET_AND_NUMBER_REGEX.exec(query);
+        SET_AND_NUMBER_REGEX.lastIndex = 0;
+        const setAndNumberMatch = SET_AND_NUMBER_REGEX.exec(query);
         if (setAndNumberMatch) {
             const { message, card } = await this.findBySetAndNumber(
                 setAndNumberMatch[1],
@@ -332,6 +262,77 @@ class CardSearchService {
         }
 
         return cardsWithText;
+    }
+
+    private getFlagsFromInlineQuery(query: string) {
+        const flags: string[] = [];
+
+        while (query.startsWith(FLAGS_DELIMITER)) {
+            const [hash, ...rest] = query.split(' ');
+            query = rest.join(' ');
+            flags.push(hash.slice(1));
+        }
+
+        return { flags, query };
+    }
+
+    public getFlagsFromActionMatchResult(matchResult: string) {
+        const hasSubquery = matchResult.includes(FLAGS_DELIMITER);
+        if (!hasSubquery)
+            return { flags: [], query: matchResult, subquery: '' };
+
+        const flags: string[] = [];
+        const [query, subquery] = matchResult.split(FLAGS_DELIMITER);
+
+        let sanitizedSubquery = subquery.trim();
+        for (const flag of Object.values(CardSearchFlags)) {
+            if (sanitizedSubquery.includes(flag)) {
+                flags.push(flag);
+                sanitizedSubquery = sanitizedSubquery.replace(flag, '');
+            }
+        }
+        sanitizedSubquery = sanitizedSubquery.trim();
+
+        return { flags, query, subquery: sanitizedSubquery };
+    }
+
+    private async transfromFlags(
+        flags: string[],
+        card: IScryfallCardFace,
+        signal?: AbortSignal
+    ) {
+        let extraText = '';
+        for (const flag of flags) {
+            if (!Object.keys(CardSearchFlags).includes(flag)) continue;
+
+            extraText += await this.flagTransformers[
+                flag as keyof typeof CardSearchFlags
+            ](card, signal);
+        }
+
+        return extraText;
+    }
+
+    private async findBySetAndNumber(
+        setCode: string,
+        number: number,
+        signal?: AbortSignal
+    ) {
+        const matchedCards = await ScryfallService.findBySetAndNumber(
+            setCode,
+            number,
+            signal
+        );
+
+        const resultCard = matchedCards[0];
+        if (!resultCard) return { message: null, card: null };
+
+        return {
+            message: `[\\${escapeMarkdown(resultCard.name)}](${
+                resultCard.image_uris.normal ?? ScryfallService.cardBack
+            })`,
+            card: resultCard
+        };
     }
 }
 
