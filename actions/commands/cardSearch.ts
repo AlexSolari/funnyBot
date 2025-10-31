@@ -4,7 +4,6 @@ import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { CommandBuilder } from '../../helpers/commandBuilder';
 
 const TELEGRAM_MAX_MESSAGE_LENGTH = 3000;
-const SET_AND_NUMBER_REGEX = /^(\w{3,5})\s(\d+)/gi;
 
 function sendInChunks(
     message: string,
@@ -34,36 +33,27 @@ export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
     .do(async (ctx) => {
         for (const matchResult of ctx.matchResults) {
             const firstRegexMatch = matchResult[1];
-
-            SET_AND_NUMBER_REGEX.lastIndex = 0;
-            const setAndNumberMatch =
-                SET_AND_NUMBER_REGEX.exec(firstRegexMatch);
-            if (setAndNumberMatch) {
-                const message = await MtgCardSearchService.findBySetAndNumber(
-                    setAndNumberMatch[1],
-                    Number.parseInt(setAndNumberMatch[2])
-                );
-
-                if (message)
-                    ctx.reply.andQuote.withText(message, firstRegexMatch);
-
-                continue;
-            }
-
             const { message, keyboardData } =
                 await MtgCardSearchService.findForAction(firstRegexMatch);
 
             if (!message) {
+                const querySplitResult =
+                    MtgCardSearchService.getFlagsFromActionMatchResult(
+                        firstRegexMatch
+                    );
+
                 ctx.reply.andQuote.withText(
-                    `Карток з "${firstRegexMatch}" не знайдено, будь ласка уточніть назву:`,
-                    firstRegexMatch,
+                    `Карток по запиту "${escapeMarkdown(
+                        querySplitResult.query
+                    )}" не знайдено, будь ласка уточніть назву:`,
+                    querySplitResult.query,
                     {
                         keyboard: [
                             [
                                 {
-                                    text: firstRegexMatch,
+                                    text: querySplitResult.query,
                                     switch_inline_query_current_chat:
-                                        firstRegexMatch
+                                        querySplitResult.query
                                 }
                             ]
                         ]

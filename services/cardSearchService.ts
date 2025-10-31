@@ -13,7 +13,7 @@ type InlineQueryCardSearchResult = {
 
 class CardSearchService {
     private readonly rulesCache: Map<string, string> = new Map();
-
+    private readonly SET_AND_NUMBER_REGEX = /^(\w{3,5})\s(\d+)/gi;
     private readonly flagTransformers: Record<
         keyof typeof CardSearchFlags,
         (card: IScryfallCardFace, signal?: AbortSignal) => Promise<string>
@@ -97,7 +97,7 @@ class CardSearchService {
         return { flags, query };
     }
 
-    private getFlagsFromActionMatchResult(matchResult: string) {
+    public getFlagsFromActionMatchResult(matchResult: string) {
         const hasSubquery =
             matchResult.includes('|') || matchResult.includes('#');
         if (!hasSubquery)
@@ -136,7 +136,7 @@ class CardSearchService {
         return extraText;
     }
 
-    async findBySetAndNumber(
+    private async findBySetAndNumber(
         setCode: string,
         number: number,
         signal?: AbortSignal
@@ -148,16 +148,41 @@ class CardSearchService {
         );
 
         const resultCard = matchedCards[0];
-        if (!resultCard) return null;
+        if (!resultCard) return { message: null, card: null };
 
-        return `[\\${escapeMarkdown(resultCard.name)}](${
-            resultCard.image_uris.normal ?? ScryfallService.cardBack
-        })`;
+        return {
+            message: `[\\${escapeMarkdown(resultCard.name)}](${
+                resultCard.image_uris.normal ?? ScryfallService.cardBack
+            })`,
+            card: resultCard
+        };
     }
 
     async findForAction(matchResult: string, signal?: AbortSignal) {
         const { flags, query, subquery } =
             this.getFlagsFromActionMatchResult(matchResult);
+
+        this.SET_AND_NUMBER_REGEX.lastIndex = 0;
+        const setAndNumberMatch = this.SET_AND_NUMBER_REGEX.exec(query);
+        if (setAndNumberMatch) {
+            const { message, card } = await this.findBySetAndNumber(
+                setAndNumberMatch[1],
+                Number.parseInt(setAndNumberMatch[2])
+            );
+
+            if (message) {
+                const extraText = await this.transfromFlags(
+                    flags,
+                    card,
+                    signal
+                );
+
+                return {
+                    message: `${message}${extraText}`,
+                    keyboardData: [card.name]
+                };
+            }
+        }
 
         const matchedCards = await ScryfallService.findWithQuery(
             `${query} ${subquery}`,
@@ -226,10 +251,30 @@ class CardSearchService {
 
     async findForInlineQuery(inlineQuery: string, signal?: AbortSignal) {
         const { flags, query } = this.getFlagsFromInlineQuery(inlineQuery);
-        let wasOneCardFound = false;
 
-        if (query.length == 0)
-            return { cardsWithText: [], showSetCode: wasOneCardFound };
+        this.SET_AND_NUMBER_REGEX.lastIndex = 0;
+        const setAndNumberMatch = this.SET_AND_NUMBER_REGEX.exec(query);
+        if (setAndNumberMatch) {
+            const { message, card } = await this.findBySetAndNumber(
+                setAndNumberMatch[1],
+                Number.parseInt(setAndNumberMatch[2])
+            );
+
+            if (message) {
+                const cardsWithText = await this.buildInlineQueryCardsResult(
+                    [card],
+                    flags,
+                    signal
+                );
+
+                return {
+                    cardsWithText,
+                    showSetCode: true
+                };
+            }
+        }
+
+        if (query.length == 0) return { cardsWithText: [], showSetCode: false };
 
         let cards = await ScryfallService.findExact(query, signal);
         cards = cards.filter(
@@ -240,6 +285,7 @@ class CardSearchService {
             cards = await ScryfallService.findWithQuery(query, signal);
         }
 
+        let wasOneCardFound = false;
         let results: IScryfallCardFace[] = [];
         if (cards.length == 1) {
             wasOneCardFound = true;
@@ -253,8 +299,22 @@ class CardSearchService {
 
         if (results.length > 50) results = results.slice(0, 49);
 
+        const cardsWithText = await this.buildInlineQueryCardsResult(
+            results,
+            flags,
+            signal
+        );
+        return { cardsWithText, showSetCode: wasOneCardFound };
+    }
+
+    private async buildInlineQueryCardsResult(
+        cards: IScryfallCardFace[],
+        flags: string[],
+        signal: AbortSignal | undefined
+    ) {
         const cardsWithText: InlineQueryCardSearchResult[] = [];
-        for (const card of results) {
+
+        for (const card of cards) {
             const responseText = `[\\${escapeMarkdown(card.name)}](${
                 card.image_uris.normal ?? ScryfallService.cardBack
             })${await this.transfromFlags(flags, card, signal)}`;
@@ -270,7 +330,8 @@ class CardSearchService {
                     : `${card.type_line ?? ''}\n${card.flavor_text ?? ''}`
             });
         }
-        return { cardsWithText, showSetCode: wasOneCardFound };
+
+        return cardsWithText;
     }
 }
 
