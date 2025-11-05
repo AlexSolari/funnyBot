@@ -39,7 +39,7 @@ export const discussion = new CommandBuilder('Reaction.Discussion')
 function genUsername(message: ChatHistoryMessage) {
     if (!message.from) return null;
 
-    if (message.from.username) return `@${message.from.first_name}`;
+    if (message.from.username) return `@${message.from.username}`;
 
     if (message.from.first_name && message.from.last_name)
         return `${message.from.first_name} ${message.from.last_name}`;
