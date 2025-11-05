@@ -29,6 +29,7 @@ import { voice } from './commands/voice';
 import { gpt } from './commands/gpt';
 import { gptIsTrue } from './commands/gptIsTrue';
 import { sadwhy } from './commands/sadwhy';
+import { discussion } from './commands/discussion';
 
 const commands = [
     cardSearch,
@@ -56,7 +57,8 @@ const commands = [
     banner,
     test,
     dvach,
-    ru
+    ru,
+    discussion
 ] as CommandAction<IActionState>[];
 
 export const testCommands = {
