@@ -24,7 +24,8 @@ export const ActionNames = {
     ternopil: 'ternopil',
     test: 'test',
     vitalii: 'vitalii',
-    voice: 'voice'
+    voice: 'voice',
+    discussion: 'discussion'
 } as const;
 
 export type ActionName = (typeof ActionNames)[keyof typeof ActionNames];
@@ -69,5 +70,6 @@ export const actionDescriptions: Record<ActionName, string> = {
         'Надає спеціальні відповіді на повідомлення від користувачів з Тернополя',
     [ActionNames.test]: 'тест',
     [ActionNames.vitalii]: 'Відслідковує коли Віталій згадує "маліфо"',
-    [ActionNames.voice]: 'Посилає нахуй за голосовухі'
+    [ActionNames.voice]: 'Посилає нахуй за голосовухі',
+    [ActionNames.discussion]: 'Слідкує за довгими дискуссіями'
 };
