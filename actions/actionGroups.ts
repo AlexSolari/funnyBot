@@ -30,6 +30,7 @@ import { gpt } from './commands/gpt';
 import { gptIsTrue } from './commands/gptIsTrue';
 import { sadwhy } from './commands/sadwhy';
 import { discussion } from './commands/discussion';
+import { spellcoins } from './commands/spellcoins';
 
 const commands = [
     cardSearch,
@@ -58,7 +59,8 @@ const commands = [
     test,
     dvach,
     ru,
-    discussion
+    discussion,
+    spellcoins
 ] as CommandAction<IActionState>[];
 
 export const testCommands = {

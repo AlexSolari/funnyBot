@@ -53,6 +53,7 @@ async function config(
 
 export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfiguration> {
     const defaultFeatures = await Promise.all([
+        config(ActionNames.spellcoins, true, 10),
         config(ActionNames.discussion, true, hoursToSeconds(8 as Hours), {
             chatBlacklist: [ChatId.PauperChat]
         }),
@@ -188,11 +189,12 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
     const testFeatures = await Promise.all([
         config(ActionNames.test, true, 1, {
             extraFeatures: new Map([['test', true]])
-        })
+        }),
+        config(ActionNames.spellcoins, true, 1)
     ]);
 
     return {
-        version: 2,
+        version: 3,
 
         default: new Map(defaultFeatures),
 
