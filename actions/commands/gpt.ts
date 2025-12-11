@@ -28,7 +28,7 @@ async function getReplyText(
     const index = chatInfo.messageHistory.findIndex((x) => x.text == text);
     const messagesBeforeTarget = chatInfo.messageHistory
         .filter((_, i) => i <= index)
-        .map((x) => JSON.stringify(x));
+        .map((x) => `${x.from?.username ?? x.from?.first_name}: ${x.text}`);
 
     const response = await client.responses.create({
         model: 'gpt-4.1',

@@ -40,7 +40,7 @@ export const gptIsTrue = new CommandBuilder('Reaction.Gpt_IsTrue')
         );
         const messagesBeforeTarget = ctx.chatInfo.messageHistory
             .filter((_, i) => i <= index)
-            .map((x) => JSON.stringify(x));
+            .map((x) => `${x.from?.username ?? x.from?.first_name}: ${x.text}`);
 
         const input = `Analyze following message, is it factual and/or truthful, write a response to it. 
             If needed, cite sources. Be professional. Reply language should be Ukraininan and shoud not containt Markdown syntax, but can contain links. 
