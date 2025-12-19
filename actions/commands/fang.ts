@@ -4,7 +4,7 @@ import { CommandBuilder } from '../../helpers/commandBuilder';
 export const fang = new CommandBuilder('Reaction.Fang')
     .on(/(фанг|мотом[иы]ш)/i)
     .do(async (ctx) => {
-        const i = randomInt(0, 2);
+        const i = randomInt(0, 1);
 
         switch (i) {
             case 0:
@@ -12,9 +12,6 @@ export const fang = new CommandBuilder('Reaction.Fang')
                 break;
             case 1:
                 ctx.reply.withImage('fangEsper');
-                break;
-            case 2:
-                ctx.reply.withImage('fangLove');
                 break;
             default:
                 break;
