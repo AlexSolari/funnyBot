@@ -4,7 +4,7 @@ import {
     IMwApiResponseDateSlot
 } from '../../types/externalApiDefinitions/mw';
 import { ChatId } from '../../types/chatIds';
-import { secondsToMilliseconds } from 'chz-telegram-bot';
+import { ChatInfo, secondsToMilliseconds } from 'chz-telegram-bot';
 import moment from 'moment';
 import { CommandBuilder } from '../../helpers/commandBuilder';
 import { load } from 'cheerio';
@@ -27,46 +27,22 @@ type EventInfo = {
     usedSpaces: number;
     link: string;
 };
+
 export const registration = new CommandBuilder('Reaction.Registration')
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
     .do(async (ctx) => {
-        let serviceName = '';
-
-        switch (ctx.chatInfo.id) {
-            case ChatId.PioneerChat:
-                serviceName = 'Піонер';
-                break;
-            case ChatId.ModernChat:
-                serviceName = 'Модерн';
-                break;
-            case ChatId.StandardChat:
-                serviceName = 'Стандарт';
-                break;
-            case ChatId.PauperChat:
-                serviceName = 'Pauper';
-                break;
-            default:
-                ctx.skipCooldown();
-                return;
+        const serviceName = determineServiceName(ctx.chatInfo);
+        if (!serviceName) {
+            ctx.skipCooldown();
+            return;
         }
 
-        const resourcesMagicWorld = await fetchEventsFromMagicWorld(
-            serviceName
-        );
-
-        const eventInfos = resourcesMagicWorld.map<EventInfo>((x) => ({
-            date: x.date,
-            name: x.gt.name ?? x.gt.service?.name ?? serviceName,
-            id: x.id,
-            spaces: x.gt.space,
-            usedSpaces: x.gt.used_space,
-            link: `https://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${x.id}`
-        }));
+        const eventInfos = await fetchEventsFromMagicWorld(serviceName);
 
         let text = eventInfos.length > 0 ? 'Реєстрації:\n\n' : '';
 
         if (serviceName == 'Піонер') {
-            eventInfos.push(await fetchEventsFromSpellseeker());
+            eventInfos.push(...(await fetchEventsFromSpellseeker()));
         }
 
         if (eventInfos.length == 0) {
@@ -87,6 +63,21 @@ export const registration = new CommandBuilder('Reaction.Registration')
         ctx.reply.withText(text.trim());
     })
     .build();
+
+function determineServiceName(chatInfo: ChatInfo) {
+    switch (chatInfo.id) {
+        case ChatId.PioneerChat:
+            return 'Піонер';
+        case ChatId.ModernChat:
+            return 'Модерн';
+        case ChatId.StandardChat:
+            return 'Стандарт';
+        case ChatId.PauperChat:
+            return 'Pauper';
+        default:
+            return null;
+    }
+}
 
 async function fetchEventsFromMagicWorld(serviceName: string) {
     const today = moment().startOf('day').format('YYYY-MM-DD');
@@ -122,10 +113,18 @@ async function fetchEventsFromMagicWorld(serviceName: string) {
                 return x;
             })
         )
-        .filter((x) => x.gt.service?.name?.includes(serviceName));
+        .filter((x) => x.gt.service?.name?.includes(serviceName))
+        .map<EventInfo>((x) => ({
+            date: x.date,
+            name: x.gt.name ?? x.gt.service?.name ?? serviceName,
+            id: x.id,
+            spaces: x.gt.space,
+            usedSpaces: x.gt.used_space,
+            link: `https://w.wlaunch.net/c/magic_world/events/b/7ea10724-359a-11eb-86df-9f45a44f29bd/e/${x.id}`
+        }));
 }
 
-async function fetchEventsFromSpellseeker(): Promise<EventInfo> {
+async function fetchEventsFromSpellseeker(): Promise<EventInfo[]> {
     let response = await fetch('https://t.me/s/spellseeker_pioneer_announces');
     let html = await response.text();
     let findInDOM = load(html);
@@ -149,17 +148,26 @@ async function fetchEventsFromSpellseeker(): Promise<EventInfo> {
         .text()
         .split(',');
 
-    return {
-        date: `${day
-            .trim()
-            .replace(
-                /неділя|понеділок|вівторок|середа|четвер|п’ятниця|субота/,
-                (day) => daysMap[day]
-            )}, ${date.trim()}, ${time.trim()}`,
-        name: `${name.trim()}`,
-        id: Math.random(),
-        spaces: 0,
-        usedSpaces: -1,
-        link: lastLink
-    };
+    const today = Number.parseInt(moment().startOf('day').format('DD'));
+    const eventDay = Number.parseInt(date.split(' ')[0]);
+
+    if (today > eventDay && Math.abs(today - eventDay) <= 7) {
+        return [];
+    }
+
+    return [
+        {
+            date: `${day
+                .trim()
+                .replace(
+                    /неділя|понеділок|вівторок|середа|четвер|п’ятниця|субота/,
+                    (day) => daysMap[day]
+                )}, ${date.trim()}, ${time.trim()}`,
+            name: `${name.trim()}`,
+            id: Math.random(),
+            spaces: 0,
+            usedSpaces: -1,
+            link: lastLink
+        }
+    ];
 }
