@@ -12,7 +12,6 @@ import { potuzhno } from './commands/potuzhno';
 import { potuzhnoStats } from './commands/potuzhnoStats';
 import { rating } from './commands/rating';
 import { registration } from './commands/registration';
-import { rozklad } from './commands/rozklad';
 import { slon } from './commands/slon';
 import { ternopil } from './commands/ternopil';
 import { test } from './commands/test';
@@ -45,7 +44,6 @@ const commands = [
     potuzhnoStats,
     rating,
     registration,
-    rozklad,
     slon,
     ternopil,
     vitalii,
