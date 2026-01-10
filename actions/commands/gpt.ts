@@ -1,5 +1,7 @@
 import {
     ChatInfo,
+    Hours,
+    hoursToSeconds,
     IActionState,
     MessageType,
     ReplyContext,
@@ -107,6 +109,9 @@ export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
             replyHandler,
             controller
         );
+
+        if (ctx.chatInfo.id == ChatId.LvivChat)
+            ctx.startCustomCooldown(hoursToSeconds(20 as Hours));
     })
     .withRatelimit(1)
     .build();
