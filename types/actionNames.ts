@@ -17,7 +17,6 @@ export const ActionNames = {
     potuzhnoStats: 'potuzhnoStats',
     rating: 'rating',
     registration: 'registration',
-    rozklad: 'rozklad',
     ru: 'ru',
     sadwhy: 'sadwhy',
     slon: 'slon',
@@ -62,7 +61,6 @@ export const actionDescriptions: Record<ActionName, string> = {
         'Показує топ-10 учасників чату за рейтингом "потужності"',
     [ActionNames.rating]: 'Рандомно відповідає на посилання на ютуб відео.',
     [ActionNames.registration]: 'Показує регу на івенти в МВ',
-    [ActionNames.rozklad]: 'Показує розклад в Отаварі',
     [ActionNames.ru]: 'русскій воєнний корабль іді нахуй',
     [ActionNames.sadwhy]:
         'Реагує сумними/емоційними реакціями коли негативно згадують "железяка"',

@@ -126,9 +126,6 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
                 ChatId.PauperChat
             ]
         }),
-        config(ActionNames.rozklad, true, 30, {
-            chatWhitelist: [ChatId.LvivChat]
-        }),
         config(ActionNames.ru, false),
         config(ActionNames.sadwhy, true, 30, {
             chatBlacklist: [ChatId.PauperChat]
@@ -148,9 +145,6 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
     ]);
 
     const botseijuFeatures = await Promise.all([
-        config(ActionNames.rozklad, true, 30, {
-            chatWhitelist: [ChatId.LvivChat]
-        }),
         config(ActionNames.ternopil, true, hoursToSeconds(8 as Hours), {
             chatWhitelist: [ChatId.LvivChat],
             userWhitelist: [
