@@ -136,6 +136,11 @@ async function fetchPioneerEventsFromSpellseeker(): Promise<EventInfo[]> {
             '.tgme_widget_message_wrap:last-of-type .tgme_widget_message_text'
         )[0]
     ).text();
+
+    if (!lastLink.includes('http:')) {
+        return [];
+    }
+
     response = await fetch(`${lastLink}?embed=1&mode=tme`, {
         headers: {
             referrer: lastLink
@@ -184,6 +189,10 @@ async function fetchPauperEventsFromSpellseeker(): Promise<EventInfo[]> {
             '.tgme_widget_message_wrap:last-of-type .tgme_widget_message_text'
         )[0]
     ).text();
+
+    if (!lastLink.includes('http:')) {
+        return [];
+    }
 
     return [
         {
