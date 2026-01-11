@@ -10,25 +10,15 @@ export const potuzhnoStats = new CommandBuilder('Reaction.PotuzhnoStats')
         const potuzhnoState = await ctx.loadStateOf(potuzhno);
         const namesState = await ctx.loadStateOf(nameSave);
 
-        const legacyScoreBoard = potuzhnoState.scoreBoard ?? {};
         const idScoreBoard = potuzhnoState.idScoreBoard ?? {};
         const superChargeCount = potuzhnoState.superCharge ?? 1;
 
-        const mergedScore: Record<string, number> = {};
-
-        for (const [key, value] of Object.entries(legacyScoreBoard)) {
-            mergedScore[key] = value;
-        }
-
-        for (const [strId, score] of Object.entries(idScoreBoard)) {
-            const name = namesState.lastUsername[Number.parseInt(strId)];
-
-            mergedScore[name] = score;
-        }
-
-        const allEntries = Object.entries(mergedScore).map(([key, value]) => {
-            return { key, value };
-        });
+        const allEntries = Object.entries(idScoreBoard).map(
+            ([strId, score]) => ({
+                key: namesState.lastUsername[Number.parseInt(strId)],
+                value: score
+            })
+        );
 
         const topTen = allEntries
             .toSorted((a, b) => b.value - a.value)

@@ -24,15 +24,10 @@ export const potuzhno = new CommandBuilderWithState<PotuzhnoState>(
             ? PotuzhnoState.superChargeMultiplier * state.superCharge
             : 1;
 
-        const scoreFromLegacyBoard = state.scoreBoard[ctx.userInfo.name];
         const scoreFromIdBoard = state.idScoreBoard[ctx.userInfo.id];
 
         state.idScoreBoard[ctx.userInfo.id] =
-            (scoreFromIdBoard ?? scoreFromLegacyBoard ?? 0) + scoredPoints;
-
-        if (state.scoreBoard[ctx.userInfo.name]) {
-            delete state.scoreBoard[ctx.userInfo.name];
-        }
+            (scoreFromIdBoard ?? 0) + scoredPoints;
 
         ctx.reply.withReaction('🎉');
 
