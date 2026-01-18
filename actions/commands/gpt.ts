@@ -16,6 +16,7 @@ import { chatAdmins } from '../../types/userIds';
 import GptState from '../../state/gptState';
 import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
 import { CommandBuilderWithState } from '../../helpers/commandBuilder';
+import { scryfallTools, executeToolCall } from '../../services/openAiToolsService';
 
 const client = new OpenAI({
     apiKey: openAiToken.token
@@ -32,14 +33,51 @@ async function getReplyText(
         .filter((_, i) => i <= index)
         .map((x) => `${x.from?.username ?? x.from?.first_name}: ${x.text}`);
 
-    const response = await client.responses.create({
-        model: 'gpt-4.1',
-        input: `${promt} 
+    const inputText = `${promt}
             Here's chat history before the message so you now have a context of a discussion:\n\n[${(
                 messageHistory ?? messagesBeforeTarget
             ).join('\n')}]
-            Here's the message you need to reply:\n\n${text}`
+            Here's the message you need to reply:\n\n${text}`;
+
+    let response = await client.responses.create({
+        model: 'gpt-4.1',
+        input: inputText,
+        tools: scryfallTools
     });
+
+    const maxIterations = 10;
+    for (let i = 0; i < maxIterations; i++) {
+        const toolCalls = response.output.filter(
+            (item): item is OpenAI.Responses.ResponseFunctionToolCall =>
+                item.type === 'function_call'
+        );
+
+        if (toolCalls.length === 0) break;
+
+        const toolResults: OpenAI.Responses.ResponseInputItem.FunctionCallOutput[] =
+            await Promise.all(
+                toolCalls.map(async (toolCall) => {
+                    const args = JSON.parse(toolCall.arguments) as Record<
+                        string,
+                        unknown
+                    >;
+                    const result = await executeToolCall(toolCall.name, args);
+                    return {
+                        type: 'function_call_output' as const,
+                        call_id: toolCall.call_id,
+                        output: result
+                    };
+                })
+            );
+
+        response = await client.responses.create({
+            model: 'gpt-4.1',
+            previous_response_id: response.id,
+            input: toolResults,
+            tools: scryfallTools
+        });
+    }
+
     return response;
 }
 

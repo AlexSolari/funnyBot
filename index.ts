@@ -8,6 +8,7 @@ import { ChatId } from './types/chatIds';
 import { cardSearch } from './actions/commands/cardSearch';
 import { inlineCardSearch } from './actions/inline/inline_cardSearch';
 import { featureProvider } from './services/featureProvider';
+import { mcpClient } from './services/mcpClientService';
 
 await featureProvider.load();
 
@@ -85,10 +86,12 @@ if (process.env.NODE_ENV == 'production') {
 }
 
 process.once('SIGINT', async () => {
+    await mcpClient.disconnect();
     await botOrchestrator.stopBots();
     process.exit(0);
 });
 process.once('SIGTERM', async () => {
+    await mcpClient.disconnect();
     await botOrchestrator.stopBots();
     process.exit(0);
 });
