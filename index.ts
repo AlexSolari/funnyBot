@@ -9,10 +9,20 @@ import { cardSearch } from './actions/commands/cardSearch';
 import { inlineCardSearch } from './actions/inline/inline_cardSearch';
 import { featureProvider } from './services/featureProvider';
 
+function getEventHandler(botName: string) {
+    return (e: string, timestamp: number, data: unknown) => {
+        if (e.startsWith('task') || e.startsWith('storage')) return;
+
+        console.log(
+            `${botName} - ${new Date(timestamp).toISOString()} - ${e} - ${JSON.stringify(data)}`
+        );
+    };
+}
+
 await featureProvider.load();
 
 if (process.env.NODE_ENV == 'production') {
-    botOrchestrator.startBot({
+    const kekruga = await botOrchestrator.startBot({
         name: 'kekruga',
         tokenFilePath: 'token.prod',
         actions: {
@@ -29,7 +39,7 @@ if (process.env.NODE_ENV == 'production') {
         },
         scheduledPeriod: (60 * 5) as Seconds
     });
-    botOrchestrator.startBot({
+    const botseiju = await botOrchestrator.startBot({
         name: 'botseiju',
         tokenFilePath: 'token.lviv',
         actions: {
@@ -43,7 +53,7 @@ if (process.env.NODE_ENV == 'production') {
         },
         scheduledPeriod: (60 * 5) as Seconds
     });
-    botOrchestrator.startBot({
+    const xiao = await botOrchestrator.startBot({
         name: 'xiao',
         tokenFilePath: 'token.genshit',
         actions: {
@@ -56,7 +66,7 @@ if (process.env.NODE_ENV == 'production') {
         },
         scheduledPeriod: (60 * 5) as Seconds
     });
-    botOrchestrator.startBot({
+    const zirda = await botOrchestrator.startBot({
         name: 'zirda',
         tokenFilePath: 'token.zirda',
         actions: {
@@ -67,8 +77,12 @@ if (process.env.NODE_ENV == 'production') {
         chats: {},
         scheduledPeriod: (60 * 5) as Seconds
     });
+
+    [botseiju, kekruga, zirda, xiao].forEach((bot) => {
+        bot.eventEmitter.onEach(getEventHandler(bot.name));
+    });
 } else {
-    botOrchestrator.startBot({
+    const bot = await botOrchestrator.startBot({
         name: 'test',
         tokenFilePath: 'token.test',
         actions: {
@@ -82,6 +96,8 @@ if (process.env.NODE_ENV == 'production') {
         scheduledPeriod: 60 as Seconds,
         verboseLoggingForIncomingMessage: false
     });
+
+    bot.eventEmitter.onEach(getEventHandler(bot.name));
 }
 
 process.once('SIGINT', async () => {
