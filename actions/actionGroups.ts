@@ -30,6 +30,7 @@ import { gptIsTrue } from './commands/gptIsTrue';
 import { sadwhy } from './commands/sadwhy';
 import { discussion } from './commands/discussion';
 import { spellcoins } from './commands/spellcoins';
+import { mtgrdle } from './scheduled/mtgrdle';
 
 const commands = [
     cardSearch,
@@ -63,13 +64,13 @@ const commands = [
 
 export const testCommands = {
     commands,
-    scheduled: [] as ScheduledAction<IActionState>[],
+    scheduled: [] as unknown as ScheduledAction<IActionState>[],
     inline: [inlineCardSearch]
 };
 
 export const mtgCommands = {
     commands,
-    scheduled: [meta, lowCount] as ScheduledAction<IActionState>[],
+    scheduled: [meta, lowCount, mtgrdle] as ScheduledAction<IActionState>[],
     inline: [inlineCardSearch]
 };
 

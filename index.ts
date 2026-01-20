@@ -11,8 +11,12 @@ import { featureProvider } from './services/featureProvider';
 
 function getEventHandler(botName: string) {
     return (e: string, timestamp: number, data: unknown) => {
-        if (e.startsWith('task') || e.startsWith('storage')) return;
-
+        if (
+            e.startsWith('task') ||
+            e.startsWith('storage') ||
+            !e.startsWith('error')
+        )
+            return;
         console.log(
             `${botName} - ${new Date(timestamp).toISOString()} - ${e} - ${JSON.stringify(data)}`
         );
