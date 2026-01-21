@@ -9,6 +9,9 @@ import {
 import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { ScryfallService } from '../../services/scryfallService';
+import { potuzhno } from '../commands/potuzhno';
+
+const WIN_BONUS_POINTS = 5;
 
 type CardInfo = {
     name: string;
@@ -184,8 +187,17 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
                     replyCtx.reply.withText(
                         `🎉 *Правильно\\!* Ти вгадав карту: [\\${escapeMarkdown(card.name)}](${
                             card.image_uris.normal ?? ScryfallService.cardBack
-                        })`
+                        })\n\n 💪 \\+5 потужності! 💪`
                     );
+
+                    await ctx.updateStateOf(potuzhno, async (state) => {
+                        const scoreFromIdBoard =
+                            state.idScoreBoard[replyCtx.userInfo.id];
+
+                        state.idScoreBoard[replyCtx.userInfo.id] =
+                            (scoreFromIdBoard ?? 0) + WIN_BONUS_POINTS;
+                    });
+
                     abortController.abort();
                 } else {
                     const clues = generateClues(card, guessCard);
