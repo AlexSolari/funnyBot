@@ -39,7 +39,8 @@ if (process.env.NODE_ENV == 'production') {
             PioneerChat: ChatId.PioneerChat,
             SpellSeeker: ChatId.SpellSeeker,
             StandardChat: ChatId.StandardChat,
-            PauperChat: ChatId.PauperChat
+            PauperChat: ChatId.PauperChat,
+            CbgChant: ChatId.CbgChat
         },
         scheduledPeriod: (60 * 5) as Seconds
     });
@@ -97,8 +98,7 @@ if (process.env.NODE_ENV == 'production') {
         chats: {
             TestChat: ChatId.TestChat
         },
-        scheduledPeriod: 60 as Seconds,
-        verboseLoggingForIncomingMessage: false
+        scheduledPeriod: 60 as Seconds
     });
 
     bot.eventEmitter.onEach(getEventHandler(bot.name));
