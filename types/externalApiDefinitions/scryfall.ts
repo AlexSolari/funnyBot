@@ -51,7 +51,7 @@ export interface IScryfallCardFace {
     oracle_text: string;
     set_type: string;
     legalities: Record<string, 'legal' | 'not_legal' | 'restricted' | 'banned'>;
-    cmc: number;
+    cmc?: number;
     image_uris: {
         art_crop: string;
         normal: string;

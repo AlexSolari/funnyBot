@@ -49,7 +49,7 @@ async function fetchRandomCard(): Promise<CardInfo | null> {
     try {
         // Fetch a random card from a random set
         const randomCards = await ScryfallService.findWithQuery(
-            'is:hires game:paper legal:modern tix>1 is:firstprinting -is:dfc'
+            'game:paper legal:modern tix>1 is:firstprinting -is:dfc'
         );
 
         if (randomCards.length === 0) return null;
@@ -63,7 +63,7 @@ async function fetchRandomCard(): Promise<CardInfo | null> {
 
         return {
             name: randomCard.name,
-            cmc: randomCard.cmc,
+            cmc: randomCard.cmc!,
             colors,
             types: randomCard.type_line.replace(' — ', ' ').split(' '),
             setName: randomCard.set_name,
@@ -133,7 +133,7 @@ function generateClues(targetCard: CardInfo, guessCard: CardInfo): string {
 
 export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
     .runAt(0)
-    .in([ChatId.PioneerChat, ChatId.LvivChat, ChatId.CbgChat])
+    .in([ChatId.PioneerChat, ChatId.LvivChat, ChatId.CbgChat, ChatId.TestChat])
     .do(async (ctx) => {
         const card = await fetchRandomCard();
         if (!card) {
@@ -143,8 +143,8 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
 
         const captureController = ctx.send.text(
             `🃏 *Гра в вгадування MTG картки\\!* 🃏\n\n` +
-                `Нова карта вибрана\\!\n\n` +
-                `Напишіть назву карти англійською у відповідь на це повідомлення, щоб спробувати вгадати\\!\n`
+                `Нова карта вибрана: ${card.name.replaceAll(/\S/g, '?')}\n\n` +
+                `Напишіть назву карти англійською у відповідь на це повідомлення, щоб спробувати вгадати та отримати \\+${WIN_BONUS_POINTS} потужності\\!\n`
         );
 
         const abortController = getAbortControllerWithTimeout(
@@ -156,7 +156,10 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
             if (!guess) return;
 
             try {
-                const guessedCards = await ScryfallService.findExact(guess);
+                const guessedCards = await ScryfallService.findWithQuery(
+                    `${guess} game:paper is:firstprinting`
+                );
+
                 if (guessedCards.length === 0) {
                     replyCtx.reply.withText(
                         escapeMarkdown(
@@ -166,17 +169,45 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
                     return;
                 }
 
+                const guessedCardFace =
+                    guessedCards.length > 1
+                        ? guessedCards.find(
+                              (x) =>
+                                  x.name.replaceAll(/\S/g, ' ').toLowerCase() ==
+                                  guess.replaceAll(/\S/g, ' ').toLowerCase()
+                          )
+                        : guessedCards[0];
+
+                if (!guessedCardFace) {
+                    replyCtx.reply.withText(
+                        escapeMarkdown(
+                            `Карта "${escapeMarkdown(guess)}" не знайдена. Спробуй іншу карту!`
+                        )
+                    );
+                    return;
+                }
+
+                const guessedCardCmc = guessedCardFace.cmc
+                    ? guessedCardFace.cmc
+                    : guessedCardFace.mana_cost
+                          .replaceAll(/[{}]/g, ' ')
+                          .split(' ')
+                          .filter(Boolean)
+                          .map((x) => Number.parseInt(x))
+                          .map((x) => (Number.isNaN(x) ? 1 : x))
+                          .reduce((x, y) => x + y, 0);
+
                 const guessCard: CardInfo = {
-                    name: guessedCards[0].name,
-                    cmc: guessedCards[0].cmc,
-                    colors: guessedCards[0].mana_cost
-                        ? parseColors(guessedCards[0].mana_cost)
+                    name: guessedCardFace.name,
+                    cmc: guessedCardCmc,
+                    colors: guessedCardFace.mana_cost
+                        ? parseColors(guessedCardFace.mana_cost)
                         : ['Colorless'],
-                    types: guessedCards[0].type_line
+                    types: guessedCardFace.type_line
                         .replace(' — ', ' ')
                         .split(' '),
-                    setName: guessedCards[0].set_name,
-                    id: guessedCards[0].id,
+                    setName: guessedCardFace.set_name,
+                    id: guessedCardFace.id,
                     image_uris: {
                         art_crop: '',
                         normal: ''
@@ -187,7 +218,7 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
                     replyCtx.reply.withText(
                         `🎉 *Правильно\\!* Ти вгадав карту: [\\${escapeMarkdown(card.name)}](${
                             card.image_uris.normal ?? ScryfallService.cardBack
-                        })\n\n 💪 \\+5 потужності! 💪`
+                        })\n\n 💪 \\+${WIN_BONUS_POINTS} потужності\\! 💪`
                     );
 
                     await ctx.updateStateOf(potuzhno, async (state) => {
