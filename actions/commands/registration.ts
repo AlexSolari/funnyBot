@@ -74,6 +74,7 @@ function determineServiceName(chatInfo: ChatInfo) {
             return 'Модерн';
         case ChatId.StandardChat:
             return 'Стандарт';
+        case ChatId.TestChat:
         case ChatId.PauperChat:
             return 'Pauper';
         default:
@@ -137,7 +138,7 @@ async function fetchPioneerEventsFromSpellseeker(): Promise<EventInfo[]> {
         )[0]
     ).text();
 
-    if (!lastLink.includes('http:')) {
+    if (!lastLink.includes('https:')) {
         return [];
     }
 
@@ -190,7 +191,8 @@ async function fetchPauperEventsFromSpellseeker(): Promise<EventInfo[]> {
         )[0]
     ).text();
 
-    if (!lastLink.includes('http:')) {
+    console.log(lastLink);
+    if (!lastLink.includes('https:')) {
         return [];
     }
 
