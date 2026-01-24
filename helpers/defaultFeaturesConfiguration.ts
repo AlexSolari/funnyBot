@@ -188,7 +188,7 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
     ]);
 
     return {
-        version: 3,
+        version: 4,
 
         default: new Map(defaultFeatures),
 
@@ -214,7 +214,7 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
             test: {
                 featureSets: new Map(testFeatures),
                 settings: {
-                    fallbackBehaviour: 'disable'
+                    fallbackBehaviour: 'inherit'
                 }
             }
         }
