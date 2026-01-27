@@ -49,7 +49,7 @@ export const gptIsTrue = new CommandBuilder('Reaction.Gpt_IsTrue')
             )}]\n\n
             Here's the message you need to reply:\n\n${query}`;
         const response = await client.responses.create({
-            model: 'gpt-4.1',
+            model: 'gpt-5',
             input
         });
         ctx.reply.withText(escapeMarkdown(response.output_text));
