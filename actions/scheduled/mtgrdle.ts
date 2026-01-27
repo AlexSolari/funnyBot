@@ -221,7 +221,7 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
                         })\n\n 💪 \\+${WIN_BONUS_POINTS} потужності\\! 💪`
                     );
 
-                    await ctx.updateStateOf(potuzhno, async (state) => {
+                    await replyCtx.updateStateOf(potuzhno, async (state) => {
                         const scoreFromIdBoard =
                             state.idScoreBoard[replyCtx.userInfo.id];
 
