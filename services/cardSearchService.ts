@@ -27,9 +27,12 @@ class CardSearchService {
                     await ScryfallService.getRules(card, signal)
                 );
 
-                setTimeout(() => {
-                    this.rulesCache.delete(card.name);
-                }, 1000 * 60 * 60 * 24); // 1 day
+                setTimeout(
+                    () => {
+                        this.rulesCache.delete(card.name);
+                    },
+                    1000 * 60 * 60 * 24
+                ); // 1 day
             }
             const rulesText = this.rulesCache.get(card.name)!;
 
@@ -160,10 +163,16 @@ class CardSearchService {
         );
 
         if (exactMatch) {
+            const extraText = await this.transfromFlags(
+                flags,
+                exactMatch,
+                signal
+            );
+
             return {
                 message: `[\\${escapeMarkdown(exactMatch.name)}](${
                     exactMatch.image_uris.normal ?? ScryfallService.cardBack
-                })`,
+                })${extraText}`,
                 keyboardData: [query]
             };
         }
