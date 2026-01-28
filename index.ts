@@ -11,8 +11,8 @@ import { featureProvider } from './services/featureProvider';
 
 function getEventHandler(botName: string) {
     return (e: string, timestamp: number, data: unknown) => {
-        if (e.startsWith('bot') || e.startsWith('error'))
-            console.log(
+        if (e.startsWith('error'))
+            console.error(
                 `${botName} - ${new Date(timestamp).toISOString()} - ${e} - ${JSON.stringify(data)}`
             );
     };
