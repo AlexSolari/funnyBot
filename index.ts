@@ -15,6 +15,16 @@ function getEventHandler(botName: string) {
             console.error(
                 `${botName} - ${new Date(timestamp).toISOString()} - ${e} - ${JSON.stringify(data)}`
             );
+
+        if (
+            process.env.NODE_ENV != 'production' &&
+            !e.startsWith('storage') &&
+            !e.startsWith('task') &&
+            !e.startsWith('inline.processing')
+        )
+            console.log(
+                `${botName} - ${new Date(timestamp).toISOString()} - ${e} - ${JSON.stringify(data)}`
+            );
     };
 }
 
