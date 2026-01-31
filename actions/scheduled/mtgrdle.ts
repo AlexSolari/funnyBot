@@ -1,5 +1,6 @@
 import { ChatId } from '../../types/chatIds';
 import {
+    ChatInfo,
     Hours,
     hoursToMilliseconds,
     IActionState,
@@ -45,12 +46,22 @@ function parseColors(manaCost: string): string[] {
     return Array.from(colors);
 }
 
-async function fetchRandomCard(): Promise<CardInfo | null> {
+const ChatQueryMap = {
+    [ChatId.LvivChat]:
+        'game:paper (legal:t2 or legal:pauper) tix>0.1 is:firstprinting -is:dfc',
+    [ChatId.PioneerChat]:
+        'game:paper legal:pioneer tix>0.1 is:firstprinting -is:dfc',
+    [ChatId.CbgChat]:
+        'game:paper legal:edh is:firstprinting -is:dfc is:commander tix>0.02'
+} as Record<number, string>;
+
+async function fetchRandomCard(chatInfo: ChatInfo): Promise<CardInfo | null> {
     try {
+        const query =
+            ChatQueryMap[chatInfo.id] ??
+            'game:paper tix>1 is:firstprinting -is:dfc';
         // Fetch a random card from a random set
-        const randomCards = await ScryfallService.findWithQuery(
-            'game:paper legal:modern tix>1 is:firstprinting -is:dfc'
-        );
+        const randomCards = await ScryfallService.findWithQuery(query);
 
         if (randomCards.length === 0) return null;
 
@@ -135,7 +146,7 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
     .runAt(0)
     .in([ChatId.PioneerChat, ChatId.LvivChat, ChatId.CbgChat, ChatId.TestChat])
     .do(async (ctx) => {
-        const card = await fetchRandomCard();
+        const card = await fetchRandomCard(ctx.chatInfo);
         if (!card) {
             ctx.send.text('Не вдалося отримати карту. Спробуй пізніше.');
             return;
@@ -143,7 +154,7 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
 
         const captureController = ctx.send.text(
             `🃏 *Гра в вгадування MTG картки\\!* 🃏\n\n` +
-                `Нова карта вибрана: ${card.name.replaceAll(/\S/g, '?')}\n\n` +
+                `Нова карта вибрана: ${card.name.replaceAll(/./g, '?')}\n\n` +
                 `Напишіть назву карти англійською у відповідь на це повідомлення, щоб спробувати вгадати та отримати \\+${WIN_BONUS_POINTS} потужності\\!\n`
         );
 
@@ -235,7 +246,7 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
                     replyCtx.reply
                         .withText(
                             escapeMarkdown(
-                                `❔ ${card.name.replaceAll(/\S/g, '?')} ❔\n\n${clues}\n\nСпробуй ще раз!`
+                                `❔ ${card.name.replaceAll(/./g, '?')} ❔\n\n${clues}\n\nСпробуй ще раз!`
                             )
                         )
                         .captureReplies([/.+/], replyHandler, abortController);
