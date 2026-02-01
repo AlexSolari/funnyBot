@@ -33,7 +33,7 @@ async function getReplyText(
         .map((x) => `${x.from?.username ?? x.from?.first_name}: ${x.text}`);
 
     const response = await client.responses.create({
-        model: 'gpt-5',
+        model: 'gpt-5-nano',
         input: `${promt} 
             Here's chat history before the message so you now have a context of a discussion:\n\n[${(
                 messageHistory ?? messagesBeforeTarget
