@@ -8,9 +8,18 @@ import { ChatId } from './types/chatIds';
 import { cardSearch } from './actions/commands/cardSearch';
 import { inlineCardSearch } from './actions/inline/inline_cardSearch';
 import { featureProvider } from './services/featureProvider';
+import {
+    startDashboardServer,
+    createMonitoringEventHandler
+} from './monitoring';
 
 function getEventHandler(botName: string) {
+    const monitoringHandler = createMonitoringEventHandler(botName);
+
     return (e: string, timestamp: number, data: unknown) => {
+        // Feed events to monitoring system
+        monitoringHandler(e, timestamp, data);
+
         if (e.startsWith('error'))
             console.error(
                 `${botName} - ${new Date(timestamp).toISOString()} - ${e} - ${JSON.stringify(data)}`
@@ -29,6 +38,9 @@ function getEventHandler(botName: string) {
 }
 
 await featureProvider.load();
+
+// Start the monitoring dashboard
+await startDashboardServer();
 
 if (process.env.NODE_ENV == 'production') {
     const kekruga = await botOrchestrator.startBot({

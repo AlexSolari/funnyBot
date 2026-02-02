@@ -3,13 +3,14 @@
     "dependencies": {
         "async-sema": "^3.1.1",
         "cheerio": "^1.2.0",
-        "chz-telegram-bot": "^0.7.5",
+        "chz-telegram-bot": "^0.7.6",
         "markdown-escape": "^2.0.0",
         "moment": "^2.30.1",
         "openai": "^5.23.2"
     },
     "devDependencies": {
         "@eslint/js": "^9.39.2",
+        "@types/bun": "^1.3.8",
         "@types/markdown-escape": "^1.1.3",
         "@types/node": "^22.19.7",
         "eslint": "^9.39.2",
