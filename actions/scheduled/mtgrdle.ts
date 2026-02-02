@@ -20,6 +20,7 @@ type CardInfo = {
     colors: string[];
     types: string[];
     setName: string;
+    releasedAt: string;
     id: string;
     image_uris: {
         art_crop: string;
@@ -78,6 +79,7 @@ async function fetchRandomCard(chatInfo: ChatInfo): Promise<CardInfo | null> {
             colors,
             types: randomCard.type_line.replace(' — ', ' ').split(' '),
             setName: randomCard.set_name,
+            releasedAt: randomCard.released_at,
             id: randomCard.id,
             image_uris: randomCard.image_uris
         };
@@ -129,11 +131,29 @@ function getTypeClue(targetTypes: string[], guessTypes: string[]): string {
     return `🟥 Тип: ❔`;
 }
 
+function getSetClue(targetCard: CardInfo, guessCard: CardInfo): string {
+    if (guessCard.setName === targetCard.setName) {
+        return `🟩 Сет: ${targetCard.setName}`;
+    }
+
+    const targetYear = new Date(targetCard.releasedAt).getFullYear();
+    const guessYear = new Date(guessCard.releasedAt).getFullYear();
+
+    let arrow = '';
+    if (targetYear > guessYear) {
+        arrow = '🔼';
+    } else if (targetYear < guessYear) {
+        arrow = '🔽';
+    } else {
+        return `🟨 Сет: ${guessCard.name} випущена в ${guessYear} ✔️`;
+    }
+
+    return `🟥 Сет: ${guessCard.name} випущена в ${guessYear} ${arrow}`;
+}
+
 function generateClues(targetCard: CardInfo, guessCard: CardInfo): string {
     const clues = [
-        guessCard.setName === targetCard.setName
-            ? `🟩 Сет: ${targetCard.setName}`
-            : `🟥 Сет: ${targetCard.setName.replaceAll(/\S/g, '?')}`,
+        getSetClue(targetCard, guessCard),
         getColorClue(targetCard.colors, guessCard.colors),
         getManaCostClue(targetCard.cmc, guessCard.cmc),
         getTypeClue(targetCard.types, guessCard.types)
@@ -218,6 +238,7 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
                         .replace(' — ', ' ')
                         .split(' '),
                     setName: guessedCardFace.set_name,
+                    releasedAt: guessedCardFace.released_at,
                     id: guessedCardFace.id,
                     image_uris: {
                         art_crop: '',

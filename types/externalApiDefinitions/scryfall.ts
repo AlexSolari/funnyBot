@@ -52,6 +52,8 @@ export interface IScryfallCardFace {
     set_type: string;
     legalities: Record<string, 'legal' | 'not_legal' | 'restricted' | 'banned'>;
     cmc?: number;
+    /** Day string formatted as YYYY-MM-DD */
+    released_at: string;
     image_uris: {
         art_crop: string;
         normal: string;
