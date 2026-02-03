@@ -26,6 +26,8 @@ class ScryfallSearchService {
                   x.parentId = card.id;
                   x.prices ??= card.prices;
                   x.legalities ??= card.legalities;
+                  x.released_at ??= card.released_at;
+                  x.cmc ??= card.cmc;
                   return x;
               })
             : [card];
