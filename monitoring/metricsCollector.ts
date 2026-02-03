@@ -8,7 +8,8 @@ import {
     DashboardData,
     LatencyHistogramBucket,
     TraceSearchQuery,
-    HeaviestCommand
+    HeaviestCommand,
+    TagValue
 } from './types';
 
 // Ring buffer for efficient fixed-size storage
@@ -42,6 +43,19 @@ class RingBuffer<T> {
         return arr.slice(-n);
     }
 
+    find(predicate: (item: T) => boolean): T | undefined {
+        // Search from most recent to oldest for better performance
+        // when looking for recent items
+        for (let i = 0; i < this.size; i++) {
+            const index = (this.head - 1 - i + this.capacity) % this.capacity;
+            const item = this.buffer[index];
+            if (item !== undefined && predicate(item)) {
+                return item;
+            }
+        }
+        return undefined;
+    }
+
     clear(): void {
         this.buffer = new Array(this.capacity);
         this.head = 0;
@@ -63,6 +77,8 @@ class TimeSeriesCounter {
     private readonly buckets: Map<number, number> = new Map();
     private readonly bucketSizeMs: number;
     private readonly maxBuckets: number;
+    private lastCleanup = 0;
+    private static readonly CLEANUP_INTERVAL_MS = 100000;
 
     constructor(bucketSizeMs = 60000, maxBuckets = 60) {
         this.bucketSizeMs = bucketSizeMs;
@@ -73,7 +89,15 @@ class TimeSeriesCounter {
         const bucketKey =
             Math.floor(timestamp / this.bucketSizeMs) * this.bucketSizeMs;
         this.buckets.set(bucketKey, (this.buckets.get(bucketKey) || 0) + 1);
-        this.cleanup();
+
+        // Throttle cleanup to avoid running on every increment
+        if (
+            timestamp - this.lastCleanup >
+            TimeSeriesCounter.CLEANUP_INTERVAL_MS
+        ) {
+            this.cleanup();
+            this.lastCleanup = timestamp;
+        }
     }
 
     private cleanup(): void {
@@ -158,13 +182,110 @@ export class MetricsCollector {
     > = new Map();
     private readonly apiRequestStart: Map<string, number> = new Map();
 
-    registerBot(botName: string): void {
-        this.botNames.add(botName);
+    // Cleanup configuration
+    private static readonly STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+    private static readonly CLEANUP_INTERVAL_MS = 60 * 1000; // 1 minute
+    private cleanupIntervalId: ReturnType<typeof setInterval> | null = null;
+
+    constructor() {
+        this.startCleanupInterval();
     }
 
-    // Generate unique keys for tracking
-    private generateKey(): string {
-        return randomUUID();
+    private startCleanupInterval(): void {
+        this.cleanupIntervalId = setInterval(() => {
+            this.cleanupStaleEntries();
+        }, MetricsCollector.CLEANUP_INTERVAL_MS);
+    }
+
+    /**
+     * Cleanup stale entries to prevent memory leaks.
+     * Removes pending spans and processing start entries that have been
+     * waiting longer than STALE_THRESHOLD_MS.
+     */
+    private cleanupStaleEntries(): void {
+        const now = Date.now();
+        const threshold = MetricsCollector.STALE_THRESHOLD_MS;
+
+        this.cleanupStaleMapEntries(
+            this.pendingSpans,
+            now,
+            threshold,
+            (span) => span.startTime
+        );
+        this.cleanupStaleMapEntries(
+            this.messageProcessingStart,
+            now,
+            threshold,
+            (ts) => ts
+        );
+        this.cleanupStaleMapEntries(
+            this.commandExecutionStart,
+            now,
+            threshold,
+            (info) => info.timestamp
+        );
+        this.cleanupStaleMapEntries(
+            this.inlineProcessingStart,
+            now,
+            threshold,
+            (ts) => ts
+        );
+        this.cleanupStaleMapEntries(
+            this.scheduledExecutionStart,
+            now,
+            threshold,
+            (info) => info.timestamp
+        );
+        this.cleanupStaleMapEntries(
+            this.apiRequestStart,
+            now,
+            threshold,
+            (ts) => ts
+        );
+        this.cleanupStaleTraces(now, threshold);
+    }
+
+    /**
+     * Generic helper to cleanup stale entries from a Map.
+     */
+    private cleanupStaleMapEntries<K, V>(
+        map: Map<K, V>,
+        now: number,
+        threshold: number,
+        getTimestamp: (value: V) => number
+    ): void {
+        for (const [key, value] of map) {
+            if (now - getTimestamp(value) > threshold) {
+                map.delete(key);
+            }
+        }
+    }
+
+    /**
+     * Cleanup stale active traces that never completed.
+     */
+    private cleanupStaleTraces(now: number, threshold: number): void {
+        for (const [traceId, trace] of this.traces) {
+            if (now - trace.startTime > threshold) {
+                // Move to ring buffer before deleting so we don't lose the data
+                this.traceRing.push(trace);
+                this.traces.delete(traceId);
+            }
+        }
+    }
+
+    /**
+     * Stop the cleanup interval. Call this when shutting down.
+     */
+    dispose(): void {
+        if (this.cleanupIntervalId) {
+            clearInterval(this.cleanupIntervalId);
+            this.cleanupIntervalId = null;
+        }
+    }
+
+    registerBot(botName: string): void {
+        this.botNames.add(botName);
     }
 
     // Trace management
@@ -172,7 +293,7 @@ export class MetricsCollector {
         botName: string,
         operationType: Trace['operationType'],
         operationName: string,
-        tags: Record<string, string | number | boolean> = {}
+        tags: Record<string, TagValue> = {}
     ): string {
         const traceId = randomUUID();
         return this.startTraceWithId(
@@ -189,8 +310,10 @@ export class MetricsCollector {
         botName: string,
         operationType: Trace['operationType'],
         operationName: string,
-        tags: Record<string, string | number | boolean> = {}
+        tags: Record<string, TagValue> = {}
     ): string {
+        const now = Date.now();
+
         // Check if trace already exists - if so, add a span instead
         const existingTrace = this.traces.get(traceId);
         if (existingTrace) {
@@ -201,7 +324,7 @@ export class MetricsCollector {
                 spanId,
                 parentSpanId: existingTrace.rootSpan.spanId,
                 operationName,
-                startTime: Date.now(),
+                startTime: now,
                 tags: { botName, ...tags },
                 logs: [],
                 status: 'pending'
@@ -212,7 +335,6 @@ export class MetricsCollector {
         }
 
         const spanId = randomUUID();
-        const now = Date.now();
 
         const rootSpan: TraceSpan = {
             traceId,
@@ -243,7 +365,7 @@ export class MetricsCollector {
         traceId: string,
         operationName: string,
         parentSpanId?: string,
-        tags: Record<string, string | number | boolean> = {}
+        tags: Record<string, TagValue> = {}
     ): string | null {
         const trace = this.traces.get(traceId);
         if (!trace) return null;
@@ -324,7 +446,7 @@ export class MetricsCollector {
         botName: string,
         operationType: Trace['operationType'],
         spanName: string,
-        tags: Record<string, string | number | boolean> = {},
+        tags: Record<string, TagValue> = {},
         messagePreview?: string
     ): string | undefined {
         if (!traceId) return undefined;
@@ -333,12 +455,9 @@ export class MetricsCollector {
         const now = Date.now();
 
         // Check if trace exists in active map first, then in ring buffer
-        let existingTrace = this.traces.get(traceId);
-        if (!existingTrace) {
-            // Look in the ring buffer for completed traces
-            const completedTraces = this.traceRing.toArray();
-            existingTrace = completedTraces.find((t) => t.traceId === traceId);
-        }
+        const existingTrace =
+            this.traces.get(traceId) ??
+            this.traceRing.find((t) => t.traceId === traceId);
 
         if (existingTrace) {
             // Add a new span to the existing trace (without endTime/duration yet)
@@ -393,7 +512,7 @@ export class MetricsCollector {
         traceId: string | undefined,
         spanName: string,
         status: 'success' | 'error' = 'success',
-        additionalTags: Record<string, string | number | boolean> = {}
+        additionalTags: Record<string, TagValue> = {}
     ): void {
         if (!traceId) return;
 
@@ -402,9 +521,8 @@ export class MetricsCollector {
         let isCompletedTrace = false;
 
         if (!trace) {
-            // Look in the ring buffer for completed traces
-            const completedTraces = this.traceRing.toArray();
-            trace = completedTraces.find((t) => t.traceId === traceId);
+            // Look in the ring buffer for completed traces using efficient find
+            trace = this.traceRing.find((t) => t.traceId === traceId);
             isCompletedTrace = true;
         }
 
@@ -438,7 +556,7 @@ export class MetricsCollector {
         botName: string,
         operationType: Trace['operationType'],
         eventName: string,
-        tags: Record<string, string | number | boolean> = {},
+        tags: Record<string, TagValue> = {},
         messagePreview?: string
     ): void {
         if (!traceId) return;

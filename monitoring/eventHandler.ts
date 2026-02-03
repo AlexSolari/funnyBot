@@ -1,71 +1,32 @@
+import { BotEventType, BotEventArgumentsMap } from 'chz-telegram-bot';
 import { metricsCollector } from './metricsCollector';
 
-// Event name constants from chz-telegram-bot
-const BotEventType = {
-    error: 'error.generic',
-    messageRecieved: 'message.recieved',
-    messageProcessingStarted: 'message.processingStarted',
-    messageBeforeActionsExecuting: 'message.beforeActionsExecuting',
-    messageProcessingFinished: 'message.processingFinished',
-    commandActionExecuting: 'command.actionExecuting',
-    commandActionExecuted: 'command.actionExecuted',
-    commandCaptionStarted: 'command.captionStarted',
-    commandActionCaptureStarted: 'command.actionCaptureStarted',
-    commandActionCaptureAborted: 'command.actionCaptureAborted',
-    replyActionExecuting: 'reply.actionExecuting',
-    replyActionExecuted: 'reply.actionExecuted',
-    inlineQueryRecieved: 'inline.queryRecieved',
-    inlineActionExecuting: 'inline.actionExecuting',
-    inlineActionExecuted: 'inline.actionExecuted',
-    inlineProcessingAborting: 'inline.processingAborting',
-    inlineProcessingAborted: 'inline.processingAborted',
-    inlineProcessingFinished: 'inline.processingFinished',
-    scheduledActionExecuting: 'scheduled.actionExecuting',
-    scheduledActionExecuted: 'scheduled.actionExecuted',
-    apiRequestSending: 'api.requestSending',
-    apiRequestSent: 'api.requestSent'
-} as const;
-
-// Base event data with traceId
-interface BaseEventData {
+// Helper type to extract event data with traceId
+type EventData<K extends keyof BotEventArgumentsMap> = {
     traceId: string;
-}
+} & BotEventArgumentsMap[K];
 
-interface MessageEventData extends BaseEventData {
-    botInfo: { id: number; first_name: string };
-    message: { messageId: number; chatInfo: { id: number }; text?: string };
-}
-
-interface MessageBeforeActionsEventData extends BaseEventData {
-    commands?: string[];
-}
-
-interface CommandEventData extends BaseEventData {
-    action: { key: string };
-    ctx: { messageInfo: { id: number }; chatInfo: { id: number } };
-    state?: unknown;
-}
-
-interface InlineEventData extends BaseEventData {
-    query?: { id: string };
-    action?: { key: string };
-    ctx?: { incomingQuery: { id: string } };
-}
-
-interface ScheduledEventData extends BaseEventData {
-    action: { key: string };
-    ctx: { chatInfo: { id: number } };
-    state?: unknown;
-}
-
-interface ApiEventData extends BaseEventData {
-    response: unknown;
-    telegramMethod: string | null;
-}
-
-interface ErrorEventData extends BaseEventData {
-    error: Error;
-}
+// Type aliases for cleaner code
+type MessageEventData = EventData<typeof BotEventType.messageRecieved>;
+type BeforeActionsEventData = EventData<
+    typeof BotEventType.beforeActionsExecuting
+>;
+type CommandEventData = EventData<typeof BotEventType.commandActionExecuting>;
+type InlineQueryEventData = EventData<typeof BotEventType.inlineQueryRecieved>;
+type InlineActionEventData = EventData<
+    typeof BotEventType.inlineActionExecuting
+>;
+type InlineAbortEventData = EventData<
+    typeof BotEventType.inlineProcessingAborted
+>;
+type ScheduledEventData = EventData<
+    typeof BotEventType.scheduledActionExecuting
+>;
+type ApiEventData = EventData<typeof BotEventType.apiRequestSending>;
+type CaptureEventData = EventData<
+    typeof BotEventType.commandActionCaptureStarted
+>;
+type ErrorEventData = EventData<typeof BotEventType.error>;
 
 export function createMonitoringEventHandler(botName: string) {
     // Register the bot with metrics collector
@@ -73,7 +34,7 @@ export function createMonitoringEventHandler(botName: string) {
 
     return (event: string, _timestamp: number, data: unknown) => {
         try {
-            const baseData = data as BaseEventData;
+            const baseData = data as { traceId: string };
             const traceId = baseData?.traceId;
 
             switch (event) {
@@ -105,14 +66,12 @@ export function createMonitoringEventHandler(botName: string) {
                     break;
                 }
 
-                case BotEventType.messageBeforeActionsExecuting: {
-                    const beforeActionsData =
-                        data as MessageBeforeActionsEventData;
-                    const commandsList = Array.isArray(
-                        beforeActionsData.commands
-                    )
-                        ? beforeActionsData.commands.join(', ')
-                        : String(beforeActionsData.commands ?? 'none');
+                case BotEventType.beforeActionsExecuting: {
+                    const beforeActionsData = data as BeforeActionsEventData;
+                    const commands = beforeActionsData.commands;
+                    const commandsList = [...commands]
+                        .map((c) => c.key)
+                        .join(', ');
                     metricsCollector.onEvent(
                         traceId,
                         botName,
@@ -183,40 +142,29 @@ export function createMonitoringEventHandler(botName: string) {
                     break;
                 }
 
-                case BotEventType.commandCaptionStarted: {
-                    metricsCollector.onEvent(
-                        traceId,
-                        botName,
-                        'command',
-                        'command.captionStarted',
-                        { phase: 'response' }
-                    );
-                    break;
-                }
-
                 case BotEventType.commandActionCaptureStarted: {
-                    const cmdData = data as CommandEventData;
-                    const actionName = cmdData.action.key;
+                    const captureData = data as CaptureEventData;
+                    const parentMessageId = captureData.parentMessageId;
 
                     metricsCollector.onSpanStart(
                         traceId,
                         botName,
                         'command',
-                        `command.capture.${actionName}`,
-                        { actionName, phase: 'capture' }
+                        `command.capture.${parentMessageId}`,
+                        { parentMessageId, phase: 'capture' }
                     );
                     break;
                 }
 
                 case BotEventType.commandActionCaptureAborted: {
-                    const cmdData = data as CommandEventData;
-                    const actionName = cmdData.action.key;
+                    const captureData = data as CaptureEventData;
+                    const parentMessageId = captureData.parentMessageId;
 
                     metricsCollector.onSpanEnd(
                         traceId,
-                        `command.capture.${actionName}`,
+                        `command.capture.${parentMessageId}`,
                         'error',
-                        { actionName, phase: 'capture', aborted: true }
+                        { parentMessageId, phase: 'capture', aborted: true }
                     );
                     break;
                 }
@@ -261,8 +209,8 @@ export function createMonitoringEventHandler(botName: string) {
                 }
 
                 case BotEventType.inlineQueryRecieved: {
-                    const inlineData = data as InlineEventData;
-                    const queryId = inlineData.query?.id || 'unknown';
+                    const inlineData = data as InlineQueryEventData;
+                    const queryId = inlineData.query.queryId;
 
                     metricsCollector.onEvent(
                         traceId,
@@ -276,10 +224,9 @@ export function createMonitoringEventHandler(botName: string) {
                 }
 
                 case BotEventType.inlineActionExecuting: {
-                    const inlineData = data as InlineEventData;
-                    const actionName = inlineData.action?.key || 'unknown';
-                    const queryId =
-                        inlineData.ctx?.incomingQuery?.id || 'unknown';
+                    const inlineData = data as InlineActionEventData;
+                    const actionName = inlineData.action.key;
+                    const queryId = inlineData.ctx.queryText || 'unknown';
 
                     metricsCollector.onSpanStart(
                         traceId,
@@ -292,10 +239,9 @@ export function createMonitoringEventHandler(botName: string) {
                 }
 
                 case BotEventType.inlineActionExecuted: {
-                    const inlineData = data as InlineEventData;
-                    const actionName = inlineData.action?.key || 'unknown';
-                    const queryId =
-                        inlineData.ctx?.incomingQuery?.id || 'unknown';
+                    const inlineData = data as InlineActionEventData;
+                    const actionName = inlineData.action.key;
+                    const queryId = inlineData.ctx.queryText || 'unknown';
 
                     metricsCollector.onSpanEnd(
                         traceId,
@@ -307,8 +253,10 @@ export function createMonitoringEventHandler(botName: string) {
                 }
 
                 case BotEventType.inlineProcessingAborting: {
-                    const inlineData = data as InlineEventData;
-                    const queryId = inlineData.query?.id || 'unknown';
+                    const inlineData = data as EventData<
+                        typeof BotEventType.inlineProcessingAborting
+                    >;
+                    const queryId = inlineData.abortedQuery.queryId;
 
                     metricsCollector.onSpanStart(
                         traceId,
@@ -321,8 +269,8 @@ export function createMonitoringEventHandler(botName: string) {
                 }
 
                 case BotEventType.inlineProcessingAborted: {
-                    const inlineData = data as InlineEventData;
-                    const queryId = inlineData.query?.id || 'unknown';
+                    const inlineData = data as InlineAbortEventData;
+                    const queryId = inlineData.abortedQuery.queryId;
 
                     metricsCollector.onSpanEnd(
                         traceId,
@@ -334,8 +282,8 @@ export function createMonitoringEventHandler(botName: string) {
                 }
 
                 case BotEventType.inlineProcessingFinished: {
-                    const inlineData = data as InlineEventData;
-                    const queryId = inlineData.query?.id || 'unknown';
+                    // inlineProcessingFinished only has botName in the library
+                    const queryId = 'completed';
 
                     metricsCollector.onEvent(
                         traceId,

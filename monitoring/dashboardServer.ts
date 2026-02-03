@@ -100,93 +100,66 @@ function getInlineDashboard(): string {
 </html>`;
 }
 
-async function handleRequest(req: Request): Promise<Response> {
+function handleCorsOptions(): Response {
+    return new Response(null, {
+        status: 204,
+        headers: CORS_HEADERS
+    });
+}
+
+function handleDashboard(): Response {
+    return jsonResponse(metricsCollector.getDashboardData());
+}
+
+function handleStats(): Response {
+    return jsonResponse(metricsCollector.getCurrentStats());
+}
+
+function handleThroughput(): Response {
+    return jsonResponse(metricsCollector.getThroughputMetrics());
+}
+
+function handleLatency(): Response {
+    return jsonResponse(metricsCollector.getLatencyMetrics());
+}
+
+function handleTraces(req: Request): Response {
+    const params = parseQueryString(req.url);
+    const query: TraceSearchQuery = {
+        traceId: params.traceId || undefined,
+        botName: params.botName || undefined,
+        operationType: params.operationType || undefined,
+        minDuration: params.minDuration
+            ? Number.parseInt(params.minDuration, 10)
+            : undefined,
+        maxDuration: params.maxDuration
+            ? Number.parseInt(params.maxDuration, 10)
+            : undefined,
+        status: params.status || undefined,
+        fromTime: params.fromTime
+            ? Number.parseInt(params.fromTime, 10)
+            : undefined,
+        toTime: params.toTime ? Number.parseInt(params.toTime, 10) : undefined,
+        limit: params.limit ? Number.parseInt(params.limit, 10) : 100
+    };
+
+    return jsonResponse(metricsCollector.searchTraces(query));
+}
+
+function handleTraceById(req: Request & { params: { id: string } }): Response {
+    const traceId = req.params.id;
+    const trace = metricsCollector.getTraceById(traceId);
+
+    if (trace) {
+        return jsonResponse(trace);
+    }
+    return errorResponse('Trace not found', 404);
+}
+
+async function handleAssets(req: Request): Promise<Response> {
     const url = new URL(req.url);
-    const path = url.pathname;
-
-    // Handle CORS preflight
-    if (req.method === 'OPTIONS') {
-        return new Response(null, {
-            status: 204,
-            headers: CORS_HEADERS
-        });
-    }
-
-    try {
-        // API Routes
-        if (path === '/api/dashboard') {
-            return jsonResponse(metricsCollector.getDashboardData());
-        }
-
-        if (path === '/api/stats') {
-            return jsonResponse(metricsCollector.getCurrentStats());
-        }
-
-        if (path === '/api/throughput') {
-            return jsonResponse(metricsCollector.getThroughputMetrics());
-        }
-
-        if (path === '/api/latency') {
-            return jsonResponse(metricsCollector.getLatencyMetrics());
-        }
-
-        if (path === '/api/traces') {
-            const params = parseQueryString(req.url);
-            const query: TraceSearchQuery = {
-                traceId: params.traceId || undefined,
-                botName: params.botName || undefined,
-                operationType: params.operationType || undefined,
-                minDuration: params.minDuration
-                    ? Number.parseInt(params.minDuration, 10)
-                    : undefined,
-                maxDuration: params.maxDuration
-                    ? Number.parseInt(params.maxDuration, 10)
-                    : undefined,
-                status: params.status || undefined,
-                fromTime: params.fromTime
-                    ? Number.parseInt(params.fromTime, 10)
-                    : undefined,
-                toTime: params.toTime
-                    ? Number.parseInt(params.toTime, 10)
-                    : undefined,
-                limit: params.limit ? Number.parseInt(params.limit, 10) : 100
-            };
-
-            return jsonResponse(metricsCollector.searchTraces(query));
-        }
-
-        if (path.startsWith('/api/trace/')) {
-            const traceId = path.replace('/api/trace/', '');
-            const trace = metricsCollector.getTraceById(traceId);
-
-            if (trace) {
-                return jsonResponse(trace);
-            }
-            return errorResponse('Trace not found', 404);
-        }
-
-        // Serve dashboard HTML
-        if (path === '/' || path === '/index.html') {
-            return serveStaticFile('index.html');
-        }
-
-        // Serve static assets from React build
-        if (path.startsWith('/assets/')) {
-            const assetPath = path.substring(1); // Remove leading /
-            return serveStaticFile(assetPath);
-        }
-
-        // For SPA routing, serve index.html for non-API routes
-        if (!path.startsWith('/api/')) {
-            return serveStaticFile('index.html');
-        }
-
-        // 404 for other routes
-        return errorResponse('Not found', 404);
-    } catch (error) {
-        console.error('Dashboard server error:', error);
-        return errorResponse('Internal server error', 500);
-    }
+    const assetPath = url.pathname.substring(1); // Remove leading /
+    return serveStaticFile(assetPath);
 }
 
 export function startDashboardServer(
@@ -196,16 +169,64 @@ export function startDashboardServer(
         try {
             Bun.serve({
                 port,
-                fetch: handleRequest,
+                routes: {
+                    // Dashboard root
+                    '/': () => serveStaticFile('index.html'),
+                    '/index.html': () => serveStaticFile('index.html'),
+
+                    // API Routes
+                    '/api/dashboard': {
+                        OPTIONS: handleCorsOptions,
+                        GET: handleDashboard
+                    },
+                    '/api/stats': {
+                        OPTIONS: handleCorsOptions,
+                        GET: handleStats
+                    },
+                    '/api/throughput': {
+                        OPTIONS: handleCorsOptions,
+                        GET: handleThroughput
+                    },
+                    '/api/latency': {
+                        OPTIONS: handleCorsOptions,
+                        GET: handleLatency
+                    },
+                    '/api/traces': {
+                        OPTIONS: handleCorsOptions,
+                        GET: handleTraces
+                    },
+                    '/api/trace/:id': {
+                        OPTIONS: handleCorsOptions,
+                        GET: handleTraceById
+                    },
+
+                    // Static assets
+                    '/assets/*': handleAssets
+                },
+                // Fallback for SPA routing and unmatched routes
+                fetch(req) {
+                    const url = new URL(req.url);
+
+                    // Handle CORS preflight for any route
+                    if (req.method === 'OPTIONS') {
+                        return handleCorsOptions();
+                    }
+
+                    // For SPA routing, serve index.html for non-API routes
+                    if (!url.pathname.startsWith('/api/')) {
+                        return serveStaticFile('index.html');
+                    }
+
+                    // 404 for unmatched API routes
+                    return errorResponse('Not found', 404);
+                },
                 error(error: Error) {
                     console.error('Dashboard server error:', error);
                     return errorResponse('Internal server error', 500);
                 }
             });
 
-            console.log(
-                `📊 Monitoring dashboard running at http://localhost:${port}`
-            );
+            console.log(`📊 Monitoring dashboard running at ${port}`);
             resolve();
         } catch (err) {
             console.error('Failed to start dashboard server:', err);

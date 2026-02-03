@@ -1,3 +1,6 @@
+// Common type alias for tag values
+export type TagValue = string | number | boolean;
+
 export interface TraceSpan {
     traceId: string;
     spanId: string;
@@ -6,7 +9,7 @@ export interface TraceSpan {
     startTime: number;
     endTime?: number;
     duration?: number;
-    tags: Record<string, string | number | boolean>;
+    tags: Record<string, TagValue>;
     logs: Array<{ timestamp: number; message: string }>;
     status: 'pending' | 'success' | 'error';
 }
