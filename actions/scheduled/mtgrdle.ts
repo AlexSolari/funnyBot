@@ -11,6 +11,8 @@ import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWith
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { ScryfallService } from '../../services/scryfallService';
 import { potuzhno } from '../commands/potuzhno';
+import { Day } from '../../types/daysOfTheWeek';
+import moment from 'moment';
 
 const WIN_BONUS_POINTS = 5;
 
@@ -166,6 +168,12 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
     .runAt(0)
     .in([ChatId.PioneerChat, ChatId.LvivChat, ChatId.CbgChat, ChatId.TestChat])
     .do(async (ctx) => {
+        const today = moment().day();
+        const isWeekend = today == Day.Sunday || today == Day.Saturday;
+        if (ctx.chatInfo.id == ChatId.LvivChat && !isWeekend) {
+            return;
+        }
+
         const card = await fetchRandomCard(ctx.chatInfo);
         if (!card) {
             ctx.send.text('Не вдалося отримати карту. Спробуй пізніше.');
