@@ -55,7 +55,9 @@ const ChatQueryMap = {
     [ChatId.PioneerChat]:
         'game:paper legal:pioneer tix>0.1 is:firstprinting -is:dfc',
     [ChatId.CbgChat]:
-        'game:paper legal:edh is:firstprinting -is:dfc is:commander tix>0.02'
+        'game:paper legal:edh is:firstprinting -is:dfc is:commander tix>0.02',
+    [ChatId.PauperChat]:
+        'game:paper legal:pauper tix>0.2 is:firstprinting -is:dfc'
 } as Record<number, string>;
 
 async function fetchRandomCard(chatInfo: ChatInfo): Promise<CardInfo | null> {
@@ -166,7 +168,12 @@ function generateClues(targetCard: CardInfo, guessCard: CardInfo): string {
 
 export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
     .runAt(0)
-    .in([ChatId.PioneerChat, ChatId.LvivChat, ChatId.CbgChat, ChatId.TestChat])
+    .in([
+        ChatId.PioneerChat,
+        ChatId.LvivChat,
+        ChatId.CbgChat,
+        ChatId.PauperChat
+    ])
     .do(async (ctx) => {
         const today = moment().day();
         const isWeekend = today == Day.Sunday || today == Day.Saturday;
