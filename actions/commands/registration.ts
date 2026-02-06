@@ -191,7 +191,6 @@ async function fetchPauperEventsFromSpellseeker(): Promise<EventInfo[]> {
         )[0]
     ).text();
 
-    console.log(lastLink);
     if (!lastLink.includes('https:')) {
         return [];
     }
