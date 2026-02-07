@@ -262,19 +262,11 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
                 };
 
                 if (guessCard.name === card.name) {
-                    replyCtx.reply.withText(
-                        `🎉 *Правильно\\!* Ти вгадав карту: [\\${escapeMarkdown(card.name)}](${
-                            card.image_uris.normal ?? ScryfallService.cardBack
-                        })\n\n 💪 \\+${WIN_BONUS_POINTS} потужності\\! 💪`
-                    );
-
-                    await replyCtx.updateStateOf(potuzhno, async (state) => {
-                        const scoreFromIdBoard =
-                            state.idScoreBoard[replyCtx.userInfo.id];
-
-                        state.idScoreBoard[replyCtx.userInfo.id] =
-                            (scoreFromIdBoard ?? 0) + WIN_BONUS_POINTS;
-                    });
+                    if (replyCtx.chatInfo.id == ChatId.PauperChat) {
+                        replyCtx.reply.withText(
+                            `🎉 *Правильно\\!* Ти вгадав карту: [\\${escapeMarkdown(card.name)}](${card.image_uris.normal ?? ScryfallService.cardBack})`
+                        );
+                    } else await rewardPotuzhnoPoints(replyCtx, card);
 
                     abortController.abort();
                 } else {
@@ -296,3 +288,19 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
         captureController.captureReplies([/.+/], replyHandler, abortController);
     })
     .build();
+
+async function rewardPotuzhnoPoints(
+    replyCtx: ReplyContext<IActionState>,
+    card: CardInfo
+) {
+    replyCtx.reply.withText(
+        `🎉 *Правильно\\!* Ти вгадав карту: [\\${escapeMarkdown(card.name)}](${card.image_uris.normal ?? ScryfallService.cardBack})\n\n 💪 \\+${WIN_BONUS_POINTS} потужності\\! 💪`
+    );
+
+    await replyCtx.updateStateOf(potuzhno, async (state) => {
+        const scoreFromIdBoard = state.idScoreBoard[replyCtx.userInfo.id];
+
+        state.idScoreBoard[replyCtx.userInfo.id] =
+            (scoreFromIdBoard ?? 0) + WIN_BONUS_POINTS;
+    });
+}
