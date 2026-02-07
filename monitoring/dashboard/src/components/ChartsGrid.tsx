@@ -2,6 +2,7 @@ import {
     Chart as ChartJS,
     CategoryScale,
     LinearScale,
+    LogarithmicScale,
     PointElement,
     LineElement,
     BarElement,
@@ -23,6 +24,7 @@ import { formatTime } from '../utils/formatters';
 ChartJS.register(
     CategoryScale,
     LinearScale,
+    LogarithmicScale,
     PointElement,
     LineElement,
     BarElement,
@@ -53,7 +55,39 @@ const chartDefaults: ChartOptions<'line'> = {
     }
 };
 
-const barChartOptions: ChartOptions<'bar'> = {
+const logLatencyChartOptions: ChartOptions<'line'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            labels: { color: '#8b949e' }
+        }
+    },
+    scales: {
+        x: {
+            ticks: { color: '#8b949e' },
+            grid: { color: '#30363d' }
+        },
+        y: {
+            type: 'logarithmic',
+            ticks: {
+                color: '#8b949e',
+                autoSkip: false,
+                callback: (value) => {
+                    const v = Number(value);
+                    const log = Math.log10(v);
+                    if (!Number.isInteger(log)) return '';
+                    if (v >= 1000) return `${v / 1000}s`;
+                    return `${v}ms`;
+                }
+            },
+            grid: { color: '#30363d' },
+            min: 1
+        }
+    }
+};
+
+const logBarChartOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -65,9 +99,19 @@ const barChartOptions: ChartOptions<'bar'> = {
             grid: { color: '#30363d' }
         },
         y: {
-            ticks: { color: '#8b949e' },
+            type: 'logarithmic',
+            ticks: {
+                color: '#8b949e',
+                autoSkip: false,
+                callback: (value) => {
+                    const v = Number(value);
+                    const log = Math.log10(v);
+                    if (!Number.isInteger(log)) return '';
+                    return v.toLocaleString();
+                }
+            },
             grid: { color: '#30363d' },
-            beginAtZero: true
+            min: 1
         }
     }
 };
@@ -205,7 +249,7 @@ export function ChartsGrid({
             <div className="chart-card">
                 <h3>Average Latency (rolling 1 min)</h3>
                 <div className="chart-container">
-                    <Line data={latencyData} options={chartDefaults} />
+                    <Line data={latencyData} options={logLatencyChartOptions} />
                 </div>
             </div>
             <div className="chart-card">
@@ -213,7 +257,7 @@ export function ChartsGrid({
                 <div className="chart-container">
                     <Bar
                         data={histogramData}
-                        options={barChartOptions}
+                        options={logBarChartOptions}
                     />
                 </div>
                 <div className="latency-grid">

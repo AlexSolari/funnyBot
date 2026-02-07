@@ -18,6 +18,8 @@
         "typescript-eslint": "^8.54.0"
     },
     "scripts": {
-        "lint": "npx eslint && tsc --noEmit"
+        "lint": "npx eslint && tsc --noEmit",
+        "build": "cd monitoring\\\\dashboard && bun run build",
+        "start": "bun run build && bun index.ts"
     }
 }

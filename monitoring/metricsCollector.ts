@@ -1059,11 +1059,18 @@ export class MetricsCollector {
             }
         > = new Map();
 
-        // Gather all traces (both active and completed)
-        const allTraces = [
-            ...this.traces.values(),
-            ...this.traceRing.toArray()
-        ];
+        // Gather all traces (both active and completed), deduplicated by traceId
+        // (endTrace keeps traces in this.traces for 60s after pushing to traceRing)
+        const traceMap = new Map<string, Trace>();
+        for (const trace of this.traceRing.toArray()) {
+            traceMap.set(trace.traceId, trace);
+        }
+        for (const trace of this.traces.values()) {
+            if (!traceMap.has(trace.traceId)) {
+                traceMap.set(trace.traceId, trace);
+            }
+        }
+        const allTraces = [...traceMap.values()];
 
         // Analyze each trace for command spans
         for (const trace of allTraces) {
@@ -1080,6 +1087,10 @@ export class MetricsCollector {
             { latencies: number[]; traceIds: Set<string> }
         >
     ): void {
+        // Find the command action name from spans in this trace
+        // Use a Set to avoid counting the same trace multiple times for the same action
+        const actionsInTrace = new Set<string>();
+
         for (const span of trace.spans) {
             // Look for command action spans (command.action.*, reply.action.*)
             if (
@@ -1094,10 +1105,16 @@ export class MetricsCollector {
                 span.operationName.split('.').pop() ||
                 'unknown';
 
-            // Calculate duration consistently using helper
-            const duration = this.getSpanDuration(span);
-            if (duration <= 0) continue;
+            actionsInTrace.add(actionName);
+        }
 
+        if (actionsInTrace.size === 0) return;
+
+        // Use full trace duration to match what the trace explorer shows
+        const duration = this.getTraceDuration(trace);
+        if (duration <= 0) return;
+
+        for (const actionName of actionsInTrace) {
             if (!commandStats.has(actionName)) {
                 commandStats.set(actionName, {
                     latencies: [],
