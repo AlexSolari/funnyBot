@@ -7,7 +7,7 @@ export const sadwhy = new CommandBuilder('Reaction.SadWhy')
     .on(/железяка/i)
     .do(async (ctx) => {
         const isDerogatory =
-            ctx.messageInfo.text.includes('нахуй') ||
+            ctx.messageInfo.text.includes('хуй') ||
             ctx.messageInfo.text.includes('йобана') ||
             ctx.messageInfo.text.includes('єбан') ||
             ctx.messageInfo.text.includes('іді');
@@ -32,6 +32,8 @@ export const sadwhy = new CommandBuilder('Reaction.SadWhy')
                     ctx.reply.withReaction('😭');
                     break;
             }
+        } else if (randomInt(0, 1) == 1) {
+            ctx.reply.withImage('ragebait');
         }
     })
     .build();
