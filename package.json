@@ -20,6 +20,6 @@
     "scripts": {
         "lint": "npx eslint && tsc --noEmit",
         "build": "cd monitoring\\\\dashboard && bun run build",
-        "start": "bun run build && bun index.ts"
+        "start": "bun index.ts"
     }
 }

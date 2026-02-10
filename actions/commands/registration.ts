@@ -28,6 +28,8 @@ type EventInfo = {
     link: string;
 };
 
+const timeRegex = /Час початку: (\d\d:\d\d) (\d\d\.\d\d) (\W+) 💰/gm;
+
 export const registration = new CommandBuilder('Reaction.Registration')
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
     .do(async (ctx) => {
@@ -68,13 +70,13 @@ export const registration = new CommandBuilder('Reaction.Registration')
 
 function determineServiceName(chatInfo: ChatInfo) {
     switch (chatInfo.id) {
+        case ChatId.TestChat:
         case ChatId.PioneerChat:
             return 'Піонер';
         case ChatId.ModernChat:
             return 'Модерн';
         case ChatId.StandardChat:
             return 'Стандарт';
-        case ChatId.TestChat:
         case ChatId.PauperChat:
             return 'Pauper';
         default:
@@ -131,53 +133,77 @@ async function fetchPioneerEventsFromSpellseeker(): Promise<EventInfo[]> {
     let response = await fetch('https://t.me/s/spellseeker_pioneer_announces');
     let html = await response.text();
     let findInDOM = load(html);
+    const results = [];
 
-    const lastLink = load(
-        findInDOM(
-            '.tgme_widget_message_wrap:last-of-type .tgme_widget_message_text'
-        )[0]
-    ).text();
-
-    if (!lastLink.includes('https:')) {
-        return [];
-    }
-
-    response = await fetch(`${lastLink}?embed=1&mode=tme`, {
-        headers: {
-            referrer: lastLink
-        }
-    });
-    html = await response.text();
-    findInDOM = load(html);
-
-    const [date, day, name, time] = findInDOM(
-        '.tgme_widget_message_poll_question'
-    )
-        .text()
-        .split(',');
-
-    const today = Number.parseInt(moment().startOf('day').format('DD'));
-    const eventDay = Number.parseInt(date.split(' ')[0]);
-
-    if (today > eventDay && Math.abs(today - eventDay) <= 7) {
-        return [];
-    }
-
-    return [
-        {
-            date: `${day
-                .trim()
-                .replace(
-                    /неділя|понеділок|вівторок|середа|четвер|п’ятниця|субота/,
-                    (day) => daysMap[day]
-                )}, ${date.trim()}, ${time.trim()}`,
-            name: `${name.trim()}`,
-            id: Math.random(),
-            spaces: 0,
-            usedSpaces: -1,
-            link: lastLink
-        }
+    const links = [
+        ...findInDOM(
+            '.tgme_widget_message_wrap:last-of-type .tgme_widget_message_text a'
+        )
     ];
+
+    for (const linkElem of links) {
+        const lastLink = load(linkElem).text();
+
+        if (!lastLink.includes('https:')) {
+            continue;
+        }
+
+        response = await fetch(`${lastLink}?embed=1&mode=tme`, {
+            headers: {
+                referrer: lastLink
+            }
+        });
+        html = await response.text();
+        findInDOM = load(html);
+
+        const title = findInDOM('.tgme_widget_message_poll_question').text();
+        if (title.startsWith('🎴 АНОНС ТУРНІРУ Pioneer')) {
+            timeRegex.lastIndex = 0;
+            const match = [...title.matchAll(timeRegex)][0];
+            const [_, time, date, day] = match;
+
+            results.push({
+                date: `${day
+                    .toLowerCase()
+                    .trim()
+                    .replace("'", '’')
+                    .replace(
+                        /неділя|понеділок|вівторок|середа|четвер|п’ятниця|субота/,
+                        (day) => daysMap[day]
+                    )}, ${date.trim()}, ${time.trim()}`,
+                name: `Spellseeker Pioneer`,
+                id: Math.random(),
+                spaces: 0,
+                usedSpaces: -1,
+                link: lastLink
+            });
+        } else {
+            const [date, day, name, time] = title.split(',');
+
+            const today = Number.parseInt(moment().startOf('day').format('DD'));
+            const eventDay = Number.parseInt(date.split(' ')[0]);
+
+            if (today > eventDay && Math.abs(today - eventDay) <= 7) {
+                continue;
+            }
+
+            results.push({
+                date: `${day
+                    .trim()
+                    .replace(
+                        /неділя|понеділок|вівторок|середа|четвер|п’ятниця|субота/,
+                        (day) => daysMap[day]
+                    )}, ${date.trim()}, ${time.trim()}`,
+                name: `${name.trim()}`,
+                id: Math.random(),
+                spaces: 0,
+                usedSpaces: -1,
+                link: lastLink
+            });
+        }
+    }
+
+    return results;
 }
 
 async function fetchPauperEventsFromSpellseeker(): Promise<EventInfo[]> {
