@@ -44,9 +44,21 @@ export const registration = new CommandBuilder('Reaction.Registration')
         let text = eventInfos.length > 0 ? 'Реєстрації:\n\n' : '';
 
         if (serviceName == 'Піонер') {
-            eventInfos.push(...(await fetchPioneerEventsFromSpellseeker()));
+            eventInfos.push(
+                ...(await loadSpellseekerEvents(
+                    'https://t.me/s/spellseeker_pioneer_announces',
+                    '🎴 АНОНС ТУРНІРУ Pioneer',
+                    `Spellseeker Pioneer`
+                ))
+            );
         } else if (serviceName == 'Pauper') {
-            eventInfos.push(...(await fetchPauperEventsFromSpellseeker()));
+            eventInfos.push(
+                ...(await loadSpellseekerEvents(
+                    'https://t.me/s/spellseeker_pauper_announces',
+                    '📍 АНОНС ТУРНІРУ PAUPER',
+                    `Spellseeker Pauper`
+                ))
+            );
         }
 
         if (eventInfos.length == 0) {
@@ -129,8 +141,12 @@ async function fetchEventsFromMagicWorld(serviceName: string) {
         }));
 }
 
-async function fetchPioneerEventsFromSpellseeker(): Promise<EventInfo[]> {
-    let response = await fetch('https://t.me/s/spellseeker_pioneer_announces');
+async function loadSpellseekerEvents(
+    helperUrl: string,
+    titlePart: string,
+    defaultName: string
+): Promise<EventInfo[]> {
+    let response = await fetch(helperUrl);
     let html = await response.text();
     let findInDOM = load(html);
     const results = [];
@@ -157,7 +173,7 @@ async function fetchPioneerEventsFromSpellseeker(): Promise<EventInfo[]> {
         findInDOM = load(html);
 
         const title = findInDOM('.tgme_widget_message_poll_question').text();
-        if (title.startsWith('🎴 АНОНС ТУРНІРУ Pioneer')) {
+        if (title.startsWith(titlePart)) {
             timeRegex.lastIndex = 0;
             const match = [...title.matchAll(timeRegex)][0];
             const [_, time, date, day] = match;
@@ -171,7 +187,7 @@ async function fetchPioneerEventsFromSpellseeker(): Promise<EventInfo[]> {
                         /неділя|понеділок|вівторок|середа|четвер|п’ятниця|субота/,
                         (day) => daysMap[day]
                     )}, ${date.trim()}, ${time.trim()}`,
-                name: `Spellseeker Pioneer`,
+                name: defaultName,
                 id: Math.random(),
                 spaces: 0,
                 usedSpaces: -1,
@@ -204,31 +220,4 @@ async function fetchPioneerEventsFromSpellseeker(): Promise<EventInfo[]> {
     }
 
     return results;
-}
-
-async function fetchPauperEventsFromSpellseeker(): Promise<EventInfo[]> {
-    const response = await fetch('https://t.me/s/spellseeker_pauper_announces');
-    const html = await response.text();
-    const findInDOM = load(html);
-
-    const lastLink = load(
-        findInDOM(
-            '.tgme_widget_message_wrap:last-of-type .tgme_widget_message_text'
-        )[0]
-    ).text();
-
-    if (!lastLink.includes('https:')) {
-        return [];
-    }
-
-    return [
-        {
-            date: `неділю`,
-            name: `Паупер у Спелсікері`,
-            id: Math.random(),
-            spaces: 0,
-            usedSpaces: -1,
-            link: lastLink
-        }
-    ];
 }
