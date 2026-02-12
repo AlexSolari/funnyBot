@@ -398,6 +398,10 @@ export class MetricsCollector {
         this.pendingSpans.delete(spanId);
     }
 
+    private isCaptureSpan(span: TraceSpan): boolean {
+        return span.tags.phase === 'capture';
+    }
+
     endTrace(traceId: string, status: 'success' | 'error' = 'success'): void {
         const trace = this.traces.get(traceId);
         if (!trace) return;
@@ -406,10 +410,14 @@ export class MetricsCollector {
 
         // Calculate actual end time based on the latest span end time
         // This ensures we capture async operations that complete after message processing
-        // For each span: if it has duration, use startTime + duration; else use endTime or startTime
+        // Exclude capture spans as they represent long-running waits (e.g. 30s timeouts)
+        // that would incorrectly inflate the trace duration
+        const nonCaptureSpans = trace.spans.filter(
+            (s) => !this.isCaptureSpan(s)
+        );
         const latestSpanEndTime = Math.max(
             now,
-            ...trace.spans.map((s) => {
+            ...nonCaptureSpans.map((s) => {
                 if (s.duration && s.duration > 0) {
                     return s.startTime + s.duration;
                 }
@@ -539,7 +547,13 @@ export class MetricsCollector {
                 Object.assign(span.tags, additionalTags);
 
                 // If this span ends after the trace's recorded end time, update the trace duration
-                if (isCompletedTrace && trace.endTime && now > trace.endTime) {
+                // Skip duration update for capture spans as they inflate trace duration
+                if (
+                    isCompletedTrace &&
+                    trace.endTime &&
+                    now > trace.endTime &&
+                    !this.isCaptureSpan(span)
+                ) {
                     trace.endTime = now;
                     trace.totalDuration = now - trace.startTime;
                     trace.rootSpan.endTime = now;
@@ -801,8 +815,14 @@ export class MetricsCollector {
      * This ensures consistent duration calculation across all components.
      */
     private getTraceDuration(trace: Trace): number {
+        // Exclude capture spans from duration calculation as they represent
+        // long-running waits that would inflate the trace duration
+        const nonCaptureSpans = trace.spans.filter(
+            (s) => !this.isCaptureSpan(s)
+        );
+        if (nonCaptureSpans.length === 0) return 0;
         const maxEndTime = Math.max(
-            ...trace.spans.map((s) => {
+            ...nonCaptureSpans.map((s) => {
                 // If span has a duration, use startTime + duration (most reliable)
                 if (s.duration && s.duration > 0) {
                     return s.startTime + s.duration;
@@ -1174,12 +1194,14 @@ export class MetricsCollector {
         }
 
         // Also include completed active traces (those with all spans done)
+        // Ignore capture spans when checking for pending status, as they represent
+        // long-running waits that shouldn't block trace completion
         for (const trace of this.traces.values()) {
-            const hasPendingSpans = trace.spans.some(
-                (s) => s.status === 'pending'
+            const hasPendingNonCaptureSpans = trace.spans.some(
+                (s) => s.status === 'pending' && !this.isCaptureSpan(s)
             );
             if (
-                !hasPendingSpans &&
+                !hasPendingNonCaptureSpans &&
                 trace.totalDuration &&
                 trace.totalDuration > 0
             ) {
