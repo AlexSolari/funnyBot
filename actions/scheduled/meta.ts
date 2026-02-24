@@ -44,74 +44,22 @@ async function sendRecentTournaments<TActionState extends IActionState>(
     }
 }
 
-async function showLvivTournaments<TActionState extends IActionState>(
+async function sendMultiFormatTournaments<TActionState extends IActionState>(
     getCached: <TResult>(key: string) => Promise<TResult>,
-    ctx: ChatContext<TActionState>
+    ctx: ChatContext<TActionState>,
+    formats: { format: Format; label: string }[]
 ) {
-    const pauperTournaments = await getCached<string>(Format.Pauper);
-    const pioneerTournaments = await getCached<string>(Format.Pioneer);
-    const modernTournaments = await getCached<string>(Format.Modern);
-    const standardTournaments = await getCached<string>(Format.Standard);
-    const commander1v1Tournaments = await getCached<string>(
-        Format.DuelCommander
+    const sections = await Promise.all(
+        formats.map(async ({ format, label }) => {
+            const tournaments = await getCached<string>(format);
+            return tournaments.length > 0 ? `${label}: \n\n${tournaments}` : '';
+        })
     );
 
-    let pauperString = '';
-    let pioneerString = '';
-    let modernString = '';
-    let standardString = '';
-    let commander1v1String = '';
+    const content = sections.filter((s) => s.length > 0).join('\n\n');
 
-    if (pioneerTournaments.length > 0) {
-        pioneerString = `Піонер: \n\n${pioneerTournaments}\n\n`;
-    }
-    if (pauperTournaments.length > 0) {
-        pauperString = `Паупер: \n\n${pauperTournaments}\n\n`;
-    }
-    if (modernTournaments.length > 0) {
-        modernString = `Модерн: \n\n${modernTournaments}\n\n`;
-    }
-    if (standardTournaments.length > 0) {
-        standardString = `Стандарт: \n\n${standardTournaments}\n\n`;
-    }
-    if (commander1v1Tournaments.length > 0) {
-        commander1v1String = `Duel Commander: \n\n${commander1v1Tournaments}`;
-    }
-
-    if (
-        pioneerString.length > 0 ||
-        modernString.length > 0 ||
-        standardString.length > 0 ||
-        pauperString.length > 0 ||
-        commander1v1String.length > 0
-    ) {
-        ctx.send.text(
-            `⚔️ Свіжі турніри ⚔️\n\n ${pauperString} ${modernString} ${pioneerString} ${standardString} ${commander1v1String}`
-        );
-    }
-}
-
-async function showFrankivskTournaments<TActionState extends IActionState>(
-    getCached: <TResult>(key: string) => Promise<TResult>,
-    ctx: ChatContext<TActionState>
-) {
-    const pauperTournaments = await getCached<string>(Format.Pauper);
-    const standardTournaments = await getCached<string>(Format.Standard);
-
-    let pauperString = '';
-    let standardString = '';
-
-    if (pauperTournaments.length > 0) {
-        pauperString = `Паупер: \n\n${pauperTournaments}\n\n`;
-    }
-    if (standardTournaments.length > 0) {
-        standardString = `Стандарт: \n\n${standardTournaments}\n\n`;
-    }
-
-    if (pauperString.length > 0 || standardString.length > 0) {
-        ctx.send.text(
-            `⚔️ Свіжі турніри ⚔️\n\n ${pauperString} ${standardString}`
-        );
+    if (content.length > 0) {
+        ctx.send.text(`⚔️ Свіжі турніри ⚔️\n\n ${content}`);
     }
 }
 
@@ -147,10 +95,17 @@ export const meta = new ScheduledActionBuilder('Scheduled.Meta')
                 await sendRecentTournaments(Format.Pauper, ctx, getCached);
                 break;
             case ChatId.LvivChat:
-                await showLvivTournaments(getCached, ctx);
+                await sendMultiFormatTournaments(getCached, ctx, [
+                    { format: Format.Pauper, label: 'Паупер' },
+                    { format: Format.Standard, label: 'Стандарт' },
+                    { format: Format.DuelCommander, label: 'Duel Commander' }
+                ]);
                 break;
             case ChatId.FrankivskChat:
-                await showFrankivskTournaments(getCached, ctx);
+                await sendMultiFormatTournaments(getCached, ctx, [
+                    { format: Format.Pauper, label: 'Паупер' },
+                    { format: Format.Standard, label: 'Стандарт' }
+                ]);
                 break;
             default:
                 return;
