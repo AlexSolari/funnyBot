@@ -8,6 +8,7 @@ import { ChatInfo, secondsToMilliseconds } from 'chz-telegram-bot';
 import moment from 'moment';
 import { CommandBuilder } from '../../helpers/commandBuilder';
 import { load } from 'cheerio';
+import { Format } from '../../types/mtgFormats';
 
 const daysMap = {
     неділя: 'неділю',
@@ -28,7 +29,7 @@ type EventInfo = {
     link: string;
 };
 
-const timeRegex = /Час початку: (\d\d:\d\d) (\d\d\.\d\d) (\W+) 💰/gm;
+const timeRegex = /Час початку:\s+(\d\d[.:]\d\d)\s+(\d\d\.\d\d)\s+(\S+)\s+💰/gm;
 
 export const registration = new CommandBuilder('Reaction.Registration')
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
@@ -47,7 +48,7 @@ export const registration = new CommandBuilder('Reaction.Registration')
             eventInfos.push(
                 ...(await loadSpellseekerEvents(
                     'https://t.me/s/spellseeker_pioneer_announces',
-                    '🎴 АНОНС ТУРНІРУ Pioneer',
+                    Format.Pioneer,
                     `Spellseeker Pioneer`
                 ))
             );
@@ -55,7 +56,7 @@ export const registration = new CommandBuilder('Reaction.Registration')
             eventInfos.push(
                 ...(await loadSpellseekerEvents(
                     'https://t.me/s/spellseeker_pauper_announces',
-                    '📍 АНОНС ТУРНІРУ PAUPER',
+                    Format.Pauper,
                     `Spellseeker Pauper`
                 ))
             );
@@ -143,7 +144,7 @@ async function fetchEventsFromMagicWorld(serviceName: string) {
 
 async function loadSpellseekerEvents(
     helperUrl: string,
-    titlePart: string,
+    formatName: Format,
     defaultName: string
 ): Promise<EventInfo[]> {
     let response = await fetch(helperUrl);
@@ -173,7 +174,11 @@ async function loadSpellseekerEvents(
         findInDOM = load(html);
 
         const title = findInDOM('.tgme_widget_message_poll_question').text();
-        if (title.startsWith(titlePart)) {
+        const titleLowercase = title.toLowerCase();
+        if (
+            titleLowercase.includes(formatName) &&
+            titleLowercase.includes('анонс')
+        ) {
             timeRegex.lastIndex = 0;
             const match = [...title.matchAll(timeRegex)][0];
             const [_, time, date, day] = match;
