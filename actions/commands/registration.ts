@@ -29,7 +29,7 @@ type EventInfo = {
     link: string;
 };
 
-const timeRegex = /Час початку:\s+(\d\d[.:]\d\d)\s+(\d\d\.\d\d)\s+(\S+)\s+💰/gm;
+const timeRegex = /Час початку:\s*(\d\d[.:]\d\d)\s+(\d\d\.\d\d)\s+(\S+)\s*💰/gm;
 
 export const registration = new CommandBuilder('Reaction.Registration')
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
