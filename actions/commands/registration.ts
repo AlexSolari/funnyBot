@@ -40,32 +40,45 @@ export const registration = new CommandBuilder('Reaction.Registration')
             return;
         }
 
-        const eventInfos = await fetchEventsFromMagicWorld(serviceName);
+        let showRetryLaterMessage = false;
+        const eventInfos: EventInfo[] = [];
 
-        let text = eventInfos.length > 0 ? 'Реєстрації:\n\n' : '';
-
-        if (serviceName == 'Піонер') {
-            eventInfos.push(
-                ...(await loadSpellseekerEvents(
-                    'https://t.me/s/spellseeker_pioneer_announces',
-                    Format.Pioneer,
-                    `Spellseeker Pioneer`
-                ))
-            );
-        } else if (serviceName == 'Pauper') {
-            eventInfos.push(
-                ...(await loadSpellseekerEvents(
-                    'https://t.me/s/spellseeker_pauper_announces',
-                    Format.Pauper,
-                    `Spellseeker Pauper`
-                ))
-            );
+        try {
+            eventInfos.push(...(await fetchEventsFromMagicWorld(serviceName)));
+        } catch (error) {
+            console.error(error);
+            showRetryLaterMessage = true;
         }
 
-        if (eventInfos.length == 0) {
+        try {
+            if (serviceName == 'Піонер') {
+                eventInfos.push(
+                    ...(await loadSpellseekerEvents(
+                        'https://t.me/s/spellseeker_pioneer_announces',
+                        Format.Pioneer,
+                        `Spellseeker Pioneer`
+                    ))
+                );
+            } else if (serviceName == 'Pauper') {
+                eventInfos.push(
+                    ...(await loadSpellseekerEvents(
+                        'https://t.me/s/spellseeker_pauper_announces',
+                        Format.Pauper,
+                        `Spellseeker Pauper`
+                    ))
+                );
+            }
+        } catch (error) {
+            console.error(error);
+            showRetryLaterMessage = true;
+        }
+
+        if (eventInfos.length == 0 && !showRetryLaterMessage) {
             ctx.reply.withText(`поки нема`);
             return;
         }
+
+        let text = eventInfos.length > 0 ? 'Реєстрації:\n\n' : '';
 
         for (const event of eventInfos) {
             const usedSpacesText =
@@ -77,6 +90,12 @@ export const registration = new CommandBuilder('Reaction.Registration')
                 event.link
             })${usedSpacesText} відбудеться у ${escapeMarkdown(event.date)}\n`;
         }
+
+        if (showRetryLaterMessage) {
+            text +=
+                '\n\nДеякі реєстрації не вдалося завантажити, спробуйте пізніше або пінганіть Чіза\\.';
+        }
+
         ctx.reply.withText(text.trim());
     })
     .build();
