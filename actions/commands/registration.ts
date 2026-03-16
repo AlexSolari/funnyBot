@@ -9,6 +9,7 @@ import moment from 'moment';
 import { CommandBuilder } from '../../helpers/commandBuilder';
 import { load } from 'cheerio';
 import { Format } from '../../types/mtgFormats';
+import capitalizeFirstLetter from '../../helpers/capitalizeFirstLetter';
 
 const daysMap = {
     неділя: 'неділю',
@@ -30,6 +31,9 @@ type EventInfo = {
 };
 
 const timeRegex = /Час початку:\s*(\d\d[.:]\d\d)\s+(\d\d\.\d\d)\s+(\S+)\s*💰/gm;
+const weekdayNameRegex =
+    /неділя|понеділок|вівторок|середа|четвер|п’ятниця|субота/;
+const SPELLSEEKER_MTG_THREAD_URL_PART = '/2/';
 
 export const registration = new CommandBuilder('Reaction.Registration')
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
@@ -52,21 +56,13 @@ export const registration = new CommandBuilder('Reaction.Registration')
 
         try {
             if (serviceName == 'Піонер') {
-                eventInfos.push(
-                    ...(await loadSpellseekerEvents(
-                        'https://t.me/s/spellseeker_pioneer_announces',
-                        Format.Pioneer,
-                        `Spellseeker Pioneer`
-                    ))
+                const pioneerEvents = await loadSpellseekerEvents(
+                    Format.Pioneer
                 );
+                eventInfos.push(...pioneerEvents);
             } else if (serviceName == 'Pauper') {
-                eventInfos.push(
-                    ...(await loadSpellseekerEvents(
-                        'https://t.me/s/spellseeker_pauper_announces',
-                        Format.Pauper,
-                        `Spellseeker Pauper`
-                    ))
-                );
+                const pauperEvents = await loadSpellseekerEvents(Format.Pauper);
+                eventInfos.push(...pauperEvents);
             }
         } catch (error) {
             console.error(error);
@@ -143,10 +139,7 @@ async function fetchEventsFromMagicWorld(serviceName: string) {
                     )
                     .locale('uk')
                     .format('dddd, DD MMMM, HH:mm')
-                    .replace(
-                        /неділя|понеділок|вівторок|середа|четвер|п’ятниця|субота/,
-                        (day) => daysMap[day]
-                    );
+                    .replace(weekdayNameRegex, (day) => daysMap[day]);
                 return x;
             })
         )
@@ -161,12 +154,10 @@ async function fetchEventsFromMagicWorld(serviceName: string) {
         }));
 }
 
-async function loadSpellseekerEvents(
-    helperUrl: string,
-    formatName: Format,
-    defaultName: string
-): Promise<EventInfo[]> {
-    let response = await fetch(helperUrl);
+async function loadSpellseekerEvents(formatName: Format): Promise<EventInfo[]> {
+    let response = await fetch(
+        `https://t.me/s/spellseeker_${formatName}_announces`
+    );
     let html = await response.text();
     let findInDOM = load(html);
     const results = [];
@@ -178,7 +169,9 @@ async function loadSpellseekerEvents(
     ];
 
     for (const linkElem of links) {
-        const lastLink = load(linkElem).text();
+        const lastLink = load(linkElem)
+            .text()
+            .replaceAll(SPELLSEEKER_MTG_THREAD_URL_PART, '/');
 
         if (!lastLink.includes('https:')) {
             continue;
@@ -193,6 +186,7 @@ async function loadSpellseekerEvents(
         findInDOM = load(html);
 
         const title = findInDOM('.tgme_widget_message_poll_question').text();
+        console.log(title);
         const titleLowercase = title.toLowerCase();
         if (
             titleLowercase.includes(formatName) &&
@@ -208,10 +202,10 @@ async function loadSpellseekerEvents(
                     .trim()
                     .replace("'", '’')
                     .replace(
-                        /неділя|понеділок|вівторок|середа|четвер|п’ятниця|субота/,
+                        weekdayNameRegex,
                         (day) => daysMap[day]
                     )}, ${date.trim()}, ${time.trim()}`,
-                name: defaultName,
+                name: `Spellseeker ${capitalizeFirstLetter(formatName)}`,
                 id: Math.random(),
                 spaces: 0,
                 usedSpaces: -1,
@@ -231,7 +225,7 @@ async function loadSpellseekerEvents(
                 date: `${day
                     .trim()
                     .replace(
-                        /неділя|понеділок|вівторок|середа|четвер|п’ятниця|субота/,
+                        weekdayNameRegex,
                         (day) => daysMap[day]
                     )}, ${date.trim()}, ${time.trim()}`,
                 name: `${name.trim()}`,
