@@ -1,6 +1,6 @@
 import type { DashboardData, Trace, TraceSearchQuery } from './types';
 
-const API_BASE = '/api';
+const API_BASE = 'bots/api';
 
 export async function fetchDashboardData(): Promise<DashboardData> {
     const response = await fetch(`${API_BASE}/dashboard`);
