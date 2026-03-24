@@ -12,6 +12,7 @@ import {
     startDashboardServer,
     createMonitoringEventHandler
 } from './monitoring';
+import { readFile } from 'fs/promises';
 
 function getEventHandler(botName: string) {
     const monitoringHandler = createMonitoringEventHandler(botName);
@@ -45,7 +46,7 @@ await startDashboardServer();
 if (process.env.NODE_ENV == 'production') {
     const kekruga = await botOrchestrator.startBot({
         name: 'kekruga',
-        tokenFilePath: 'token.prod',
+        tokenProvider: () => readFile('token.prod', 'utf-8'),
         actions: {
             commands: mtgCommands.commands,
             scheduled: mtgCommands.scheduled,
@@ -63,7 +64,7 @@ if (process.env.NODE_ENV == 'production') {
     });
     const botseiju = await botOrchestrator.startBot({
         name: 'botseiju',
-        tokenFilePath: 'token.lviv',
+        tokenProvider: () => readFile('token.lviv', 'utf-8'),
         actions: {
             commands: mtgCommands.commands,
             scheduled: mtgCommands.scheduled,
@@ -77,7 +78,7 @@ if (process.env.NODE_ENV == 'production') {
     });
     const xiao = await botOrchestrator.startBot({
         name: 'xiao',
-        tokenFilePath: 'token.genshit',
+        tokenProvider: () => readFile('token.genshit', 'utf-8'),
         actions: {
             commands: genshinCommands.commands,
             scheduled: genshinCommands.scheduled,
@@ -90,7 +91,7 @@ if (process.env.NODE_ENV == 'production') {
     });
     const zirda = await botOrchestrator.startBot({
         name: 'zirda',
-        tokenFilePath: 'token.zirda',
+        tokenProvider: () => readFile('token.zirda', 'utf-8'),
         actions: {
             commands: [cardSearch],
             scheduled: [],
@@ -106,7 +107,7 @@ if (process.env.NODE_ENV == 'production') {
 } else {
     const bot = await botOrchestrator.startBot({
         name: 'test',
-        tokenFilePath: 'token.test',
+        tokenProvider: () => readFile('token.test', 'utf-8'),
         actions: {
             commands: testCommands.commands,
             scheduled: testCommands.scheduled,

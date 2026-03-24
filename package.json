@@ -3,7 +3,7 @@
     "dependencies": {
         "async-sema": "^3.1.1",
         "cheerio": "^1.2.0",
-        "chz-telegram-bot": "^0.7.9",
+        "chz-telegram-bot": "^0.7.11",
         "markdown-escape": "^2.0.0",
         "moment": "^2.30.1",
         "openai": "^5.23.2"
@@ -18,7 +18,7 @@
         "typescript-eslint": "^8.54.0"
     },
     "scripts": {
-        "lint": "npx eslint && tsc --noEmit",
+        "lint": "npx eslint . && tsc --noEmit",
         "build": "cd monitoring\\\\dashboard && bun run build",
         "start": "bun index.ts"
     }
