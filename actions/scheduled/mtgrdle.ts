@@ -5,7 +5,9 @@ import {
     hoursToMilliseconds,
     IActionState,
     ReplyContext,
-    ScheduledActionBuilder
+    ScheduledActionBuilder,
+    Seconds,
+    secondsToMilliseconds
 } from 'chz-telegram-bot';
 import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
@@ -13,8 +15,12 @@ import { ScryfallService } from '../../services/scryfallService';
 import { potuzhno } from '../commands/potuzhno';
 import { Day } from '../../types/daysOfTheWeek';
 import moment from 'moment';
+import { ScryfallEventMap } from '../../types/scryfallEvents';
+import { ObservabilityHelper } from '../../types/observabilityHelper';
+import { getObservability } from '../../helpers/getObservability';
 
 const WIN_BONUS_POINTS = 5;
+const REQUEST_TIMEOUT = secondsToMilliseconds(30 as Seconds);
 
 type CardInfo = {
     name: string;
@@ -29,6 +35,17 @@ type CardInfo = {
         normal: string;
     };
 };
+
+const ChatQueryMap = {
+    [ChatId.LvivChat]:
+        'game:paper (legal:t2 or legal:pauper) tix>0.1 is:firstprinting -is:dfc',
+    [ChatId.PioneerChat]:
+        'game:paper legal:pioneer tix>0.1 is:firstprinting -is:dfc',
+    [ChatId.CbgChat]:
+        'game:paper legal:edh is:firstprinting -is:dfc is:commander tix>0.02',
+    [ChatId.PauperChat]:
+        'game:paper legal:pauper tix>0.2 is:firstprinting -is:dfc'
+} as Record<number, string>;
 
 function parseColors(manaCost: string): string[] {
     const colors: Set<string> = new Set();
@@ -49,24 +66,20 @@ function parseColors(manaCost: string): string[] {
     return Array.from(colors);
 }
 
-const ChatQueryMap = {
-    [ChatId.LvivChat]:
-        'game:paper (legal:t2 or legal:pauper) tix>0.1 is:firstprinting -is:dfc',
-    [ChatId.PioneerChat]:
-        'game:paper legal:pioneer tix>0.1 is:firstprinting -is:dfc',
-    [ChatId.CbgChat]:
-        'game:paper legal:edh is:firstprinting -is:dfc is:commander tix>0.02',
-    [ChatId.PauperChat]:
-        'game:paper legal:pauper tix>0.2 is:firstprinting -is:dfc'
-} as Record<number, string>;
-
-async function fetchRandomCard(chatInfo: ChatInfo): Promise<CardInfo | null> {
+async function fetchRandomCard(
+    chatInfo: ChatInfo,
+    observability: ObservabilityHelper<ScryfallEventMap>
+): Promise<CardInfo | null> {
     try {
         const query =
             ChatQueryMap[chatInfo.id] ??
             'game:paper tix>1 is:firstprinting -is:dfc';
         // Fetch a random card from a random set
-        const randomCards = await ScryfallService.findWithQuery(query);
+        const randomCards = await ScryfallService.findWithQuery(
+            query,
+            AbortSignal.timeout(REQUEST_TIMEOUT),
+            observability
+        );
 
         if (randomCards.length === 0) return null;
 
@@ -181,7 +194,7 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
             return;
         }
 
-        const card = await fetchRandomCard(ctx.chatInfo);
+        const card = await fetchRandomCard(ctx.chatInfo, getObservability(ctx));
         if (!card) {
             ctx.send.text('Не вдалося отримати карту. Спробуй пізніше.');
             return;
@@ -203,7 +216,9 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
 
             try {
                 const guessedCards = await ScryfallService.findWithQuery(
-                    `${guess} game:paper is:firstprinting`
+                    `${guess} game:paper is:firstprinting`,
+                    AbortSignal.timeout(REQUEST_TIMEOUT),
+                    getObservability(replyCtx)
                 );
 
                 if (guessedCards.length === 0) {

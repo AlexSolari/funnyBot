@@ -1,15 +1,23 @@
-import { InlineQueryActionBuilder } from 'chz-telegram-bot';
+import { InlineQueryActionBuilder, TypedEventEmitter } from 'chz-telegram-bot';
 import { ScryfallService } from '../../services/scryfallService';
 import { MtgCardSearchService } from '../../services/cardSearchService';
+import { ScryfallEventMap } from '../../types/scryfallEvents';
 
 export const inlineCardSearch = new InlineQueryActionBuilder(
     'Inline.CardSearch'
 )
     .do(async (ctx) => {
+        const { eventEmitter, traceId } = ctx.observability;
+        const observability = {
+            emitter: eventEmitter as TypedEventEmitter<ScryfallEventMap>,
+            traceId
+        };
+
         const { cardsWithText, showSetCode } =
             await MtgCardSearchService.findForInlineQuery(
                 ctx.queryText,
-                ctx.abortSignal
+                ctx.abortSignal,
+                observability
             );
 
         for (const cardData of cardsWithText) {

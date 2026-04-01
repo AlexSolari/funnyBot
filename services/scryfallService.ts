@@ -12,6 +12,8 @@ import { setTimeout } from 'timers/promises';
 import { Sema } from 'async-sema';
 import capitalizeFirstLetter from '../helpers/capitalizeFirstLetter';
 import escapeMarkdown from '../helpers/escapeMarkdown';
+import { ScryfallEventMap, ScryfallEventType } from '../types/scryfallEvents';
+import { ObservabilityHelper } from '../types/observabilityHelper';
 
 const SCRYFALL_RATELIMIT_DELAY = 50 as Milliseconds;
 
@@ -37,12 +39,25 @@ class ScryfallSearchService {
         return cards.flatMap((card) => this.getCardFaces(card));
     }
 
-    private async withRatelimit<T>(action: () => Promise<T>) {
+    private async withRatelimit<T>(
+        endpoint: string,
+        action: () => Promise<T>,
+        observability: ObservabilityHelper<ScryfallEventMap>
+    ) {
         await this.semaphore.acquire();
+
+        observability.emitter.emit(ScryfallEventType.requestStart, {
+            traceId: observability.traceId,
+            endpoint
+        });
 
         try {
             return await action();
         } finally {
+            observability.emitter.emit(ScryfallEventType.requestEnd, {
+                traceId: observability.traceId,
+                endpoint
+            });
             await setTimeout(SCRYFALL_RATELIMIT_DELAY);
             this.semaphore.release();
         }
@@ -66,82 +81,108 @@ class ScryfallSearchService {
     async findBySetAndNumber(
         setCode: string,
         number: number,
-        signal?: AbortSignal
+        signal: AbortSignal,
+        observability: ObservabilityHelper<ScryfallEventMap>
     ) {
-        return this.withRatelimit(async () => {
-            const response = await fetch(
-                `https://api.scryfall.com/cards/${setCode}/${number}`,
-                {
-                    signal
-                }
-            );
-            const data = (await response.json()) as IScryfallCard;
+        return this.withRatelimit(
+            `cards/${setCode}/${number}`,
+            async () => {
+                const response = await fetch(
+                    `https://api.scryfall.com/cards/${setCode}/${number}`,
+                    { signal }
+                );
+                const data = (await response.json()) as IScryfallCard;
 
-            return this.unwrapResponse(data, (x) =>
-                this.mapCardsToCardFaces([x])
-            );
-        });
-    }
-
-    async findWithQuery(query: string, signal?: AbortSignal) {
-        return this.withRatelimit(async () => {
-            const response = await fetch(
-                `https://api.scryfall.com/cards/search?q=${query}`,
-                {
-                    signal
-                }
-            );
-            const data = (await response.json()) as IScryfallQueryResponse;
-
-            return this.unwrapResponse(data, (x) =>
-                this.mapCardsToCardFaces(x.data)
-            );
-        });
-    }
-
-    async findExact(name: string, signal?: AbortSignal) {
-        return this.withRatelimit(async () => {
-            const response = await fetch(
-                `https://api.scryfall.com/cards/named?exact=${name}`,
-                {
-                    signal
-                }
-            );
-            const data = (await response.json()) as IScryfallFuzzyResponse;
-
-            return this.unwrapResponse(data, (x) => this.getCardFaces(x));
-        });
-    }
-
-    async getRules(card: IScryfallCardFace, signal?: AbortSignal) {
-        return this.withRatelimit(async () => {
-            const rulesResponse = await fetch(
-                `https://api.scryfall.com/cards/${
-                    card.parentId ?? card.id
-                }/rulings`,
-                {
-                    signal
-                }
-            );
-            const data = (await rulesResponse.json()) as IScryfallRulesResponse;
-
-            return this.unwrapResponse(data, (x) =>
-                x.data.map(
-                    (rule) =>
-                        `${capitalizeFirstLetter(
-                            rule.source == 'wotc' ? 'oracle' : rule.source
-                        )} *${escapeMarkdown(
-                            rule.published_at
-                        )}*\n_${escapeMarkdown(rule.comment)}_`
-                )
-            ).join('\n\n');
-        });
-    }
-
-    async findAllArtworks(name: string, signal?: AbortSignal) {
-        return (await this.findWithQuery(`@@name="${name}"`, signal)).filter(
-            (x) => x.name == name
+                return this.unwrapResponse(data, (x) =>
+                    this.mapCardsToCardFaces([x])
+                );
+            },
+            observability
         );
+    }
+
+    async findWithQuery(
+        query: string,
+        signal: AbortSignal,
+        observability: ObservabilityHelper<ScryfallEventMap>
+    ) {
+        return this.withRatelimit(
+            'cards/search',
+            async () => {
+                const response = await fetch(
+                    `https://api.scryfall.com/cards/search?q=${query}`,
+                    { signal }
+                );
+                const data = (await response.json()) as IScryfallQueryResponse;
+
+                return this.unwrapResponse(data, (x) =>
+                    this.mapCardsToCardFaces(x.data)
+                );
+            },
+            observability
+        );
+    }
+
+    async findExact(
+        name: string,
+        signal: AbortSignal,
+        observability: ObservabilityHelper<ScryfallEventMap>
+    ) {
+        return this.withRatelimit(
+            'cards/named',
+            async () => {
+                const response = await fetch(
+                    `https://api.scryfall.com/cards/named?exact=${name}`,
+                    { signal }
+                );
+                const data = (await response.json()) as IScryfallFuzzyResponse;
+
+                return this.unwrapResponse(data, (x) => this.getCardFaces(x));
+            },
+            observability
+        );
+    }
+
+    async getRules(
+        card: IScryfallCardFace,
+        signal: AbortSignal,
+        observability: ObservabilityHelper<ScryfallEventMap>
+    ) {
+        return this.withRatelimit(
+            `cards/${card.parentId ?? card.id}/rulings`,
+            async () => {
+                const rulesResponse = await fetch(
+                    `https://api.scryfall.com/cards/${
+                        card.parentId ?? card.id
+                    }/rulings`,
+                    { signal }
+                );
+                const data =
+                    (await rulesResponse.json()) as IScryfallRulesResponse;
+
+                return this.unwrapResponse(data, (x) =>
+                    x.data.map(
+                        (rule) =>
+                            `${capitalizeFirstLetter(
+                                rule.source == 'wotc' ? 'oracle' : rule.source
+                            )} *${escapeMarkdown(
+                                rule.published_at
+                            )}*\n_${escapeMarkdown(rule.comment)}_`
+                    )
+                ).join('\n\n');
+            },
+            observability
+        );
+    }
+
+    async findAllArtworks(
+        name: string,
+        signal: AbortSignal,
+        observability: ObservabilityHelper<ScryfallEventMap>
+    ) {
+        return (
+            await this.findWithQuery(`@@name="${name}"`, signal, observability)
+        ).filter((x) => x.name == name);
     }
 }
 

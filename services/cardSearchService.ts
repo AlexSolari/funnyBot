@@ -3,6 +3,8 @@ import escapeMarkdown from '../helpers/escapeMarkdown';
 import stripPunctuation from '../helpers/stripPunctuation';
 import { CardSearchFlags } from '../types/cardSearchFlags';
 import { IScryfallCardFace } from '../types/externalApiDefinitions/scryfall';
+import { ObservabilityHelper } from '../types/observabilityHelper';
+import { ScryfallEventMap } from '../types/scryfallEvents';
 import { ScryfallService } from './scryfallService';
 
 type InlineQueryCardSearchResult = {
@@ -18,13 +20,17 @@ class CardSearchService {
     private readonly rulesCache: Map<string, string> = new Map();
     private readonly flagTransformers: Record<
         keyof typeof CardSearchFlags,
-        (card: IScryfallCardFace, signal?: AbortSignal) => Promise<string>
+        (
+            card: IScryfallCardFace,
+            signal: AbortSignal,
+            observability: ObservabilityHelper<ScryfallEventMap>
+        ) => Promise<string>
     > = {
-        rules: async (card, signal) => {
+        rules: async (card, signal, observability) => {
             if (!this.rulesCache.has(card.name)) {
                 this.rulesCache.set(
                     card.name,
-                    await ScryfallService.getRules(card, signal)
+                    await ScryfallService.getRules(card, signal, observability)
                 );
 
                 setTimeout(
@@ -90,7 +96,11 @@ class CardSearchService {
         flip: async (_) => ''
     };
 
-    async findForAction(matchResult: string, signal?: AbortSignal) {
+    async findForAction(
+        matchResult: string,
+        signal: AbortSignal,
+        observability: ObservabilityHelper<ScryfallEventMap>
+    ) {
         const { flags, query, subquery } =
             this.getFlagsFromActionMatchResult(matchResult);
 
@@ -99,14 +109,17 @@ class CardSearchService {
         if (setAndNumberMatch) {
             const { message, card } = await this.findBySetAndNumber(
                 setAndNumberMatch[1],
-                Number.parseInt(setAndNumberMatch[2])
+                Number.parseInt(setAndNumberMatch[2]),
+                signal,
+                observability
             );
 
             if (message) {
                 const extraText = await this.transfromFlags(
                     flags,
                     card,
-                    signal
+                    signal,
+                    observability
                 );
 
                 return {
@@ -118,7 +131,8 @@ class CardSearchService {
 
         const matchedCards = await ScryfallService.findWithQuery(
             `${query} ${subquery}`,
-            signal
+            signal,
+            observability
         );
         const uniqueCardsCount = Object.keys(
             Object.groupBy(
@@ -146,7 +160,8 @@ class CardSearchService {
             const extraText = await this.transfromFlags(
                 flags,
                 resultCard,
-                signal
+                signal,
+                observability
             );
             return {
                 message: `[\\${escapeMarkdown(resultCard.name)}](${
@@ -166,7 +181,8 @@ class CardSearchService {
             const extraText = await this.transfromFlags(
                 flags,
                 exactMatch,
-                signal
+                signal,
+                observability
             );
 
             return {
@@ -188,7 +204,11 @@ class CardSearchService {
         };
     }
 
-    async findForInlineQuery(inlineQuery: string, signal?: AbortSignal) {
+    async findForInlineQuery(
+        inlineQuery: string,
+        signal: AbortSignal,
+        observability: ObservabilityHelper<ScryfallEventMap>
+    ) {
         const { flags, query } = this.getFlagsFromInlineQuery(inlineQuery);
 
         SET_AND_NUMBER_REGEX.lastIndex = 0;
@@ -196,14 +216,17 @@ class CardSearchService {
         if (setAndNumberMatch) {
             const { message, card } = await this.findBySetAndNumber(
                 setAndNumberMatch[1],
-                Number.parseInt(setAndNumberMatch[2])
+                Number.parseInt(setAndNumberMatch[2]),
+                signal,
+                observability
             );
 
             if (message) {
                 const cardsWithText = await this.buildInlineQueryCardsResult(
                     [card],
                     flags,
-                    signal
+                    signal,
+                    observability
                 );
 
                 return {
@@ -215,13 +238,21 @@ class CardSearchService {
 
         if (query.length == 0) return { cardsWithText: [], showSetCode: false };
 
-        let cards = await ScryfallService.findExact(query, signal);
+        let cards = await ScryfallService.findExact(
+            query,
+            signal,
+            observability
+        );
         cards = cards.filter(
             (x) => x.set_type != 'memorabilia' && x.set_type != 'minigame'
         );
 
         if (cards.length == 0) {
-            cards = await ScryfallService.findWithQuery(query, signal);
+            cards = await ScryfallService.findWithQuery(
+                query,
+                signal,
+                observability
+            );
         }
 
         let wasOneCardFound = false;
@@ -230,7 +261,8 @@ class CardSearchService {
             wasOneCardFound = true;
             results = await ScryfallService.findAllArtworks(
                 cards[0].name,
-                signal
+                signal,
+                observability
             );
         } else {
             results = cards;
@@ -241,7 +273,8 @@ class CardSearchService {
         const cardsWithText = await this.buildInlineQueryCardsResult(
             results,
             flags,
-            signal
+            signal,
+            observability
         );
         return { cardsWithText, showSetCode: wasOneCardFound };
     }
@@ -249,14 +282,15 @@ class CardSearchService {
     private async buildInlineQueryCardsResult(
         cards: IScryfallCardFace[],
         flags: string[],
-        signal: AbortSignal | undefined
+        signal: AbortSignal,
+        observability: ObservabilityHelper<ScryfallEventMap>
     ) {
         const cardsWithText: InlineQueryCardSearchResult[] = [];
 
         for (const card of cards) {
             const responseText = `[\\${escapeMarkdown(card.name)}](${
                 card.image_uris.normal ?? ScryfallService.cardBack
-            })${await this.transfromFlags(flags, card, signal)}`;
+            })${await this.transfromFlags(flags, card, signal, observability)}`;
 
             const usdPrice = card.prices?.usd ? `${card.prices.usd}$` : '';
             const eurPrice = card.prices?.eur ? ` ${card.prices.eur}€` : '';
@@ -308,7 +342,8 @@ class CardSearchService {
     private async transfromFlags(
         flags: string[],
         card: IScryfallCardFace,
-        signal?: AbortSignal
+        signal: AbortSignal,
+        observability: ObservabilityHelper<ScryfallEventMap>
     ) {
         let extraText = '';
         for (const flag of flags) {
@@ -316,7 +351,7 @@ class CardSearchService {
 
             extraText += await this.flagTransformers[
                 flag as keyof typeof CardSearchFlags
-            ](card, signal);
+            ](card, signal, observability);
         }
 
         return extraText;
@@ -325,12 +360,14 @@ class CardSearchService {
     private async findBySetAndNumber(
         setCode: string,
         number: number,
-        signal?: AbortSignal
+        signal: AbortSignal,
+        observability: ObservabilityHelper<ScryfallEventMap>
     ) {
         const matchedCards = await ScryfallService.findBySetAndNumber(
             setCode,
             number,
-            signal
+            signal,
+            observability
         );
 
         const resultCard = matchedCards[0];

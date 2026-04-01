@@ -1,5 +1,6 @@
 import { BotEventType, BotEventArgumentsMap } from 'chz-telegram-bot';
 import { metricsCollector } from './metricsCollector';
+import { ScryfallEventType } from '../types/scryfallEvents';
 
 // Helper type to extract event data with traceId
 type EventData<K extends keyof BotEventArgumentsMap> = {
@@ -381,6 +382,38 @@ export function createMonitoringEventHandler(botName: string) {
                         errData.error.message,
                         errData.error.name,
                         traceId
+                    );
+                    break;
+                }
+
+                case ScryfallEventType.requestStart: {
+                    const scryfallData = data as {
+                        traceId: string;
+                        endpoint: string;
+                    };
+                    metricsCollector.onSpanStart(
+                        traceId,
+                        botName,
+                        'api',
+                        `scryfall.${scryfallData.endpoint}`,
+                        { endpoint: scryfallData.endpoint, phase: 'scryfall' }
+                    );
+                    break;
+                }
+
+                case ScryfallEventType.requestEnd: {
+                    const scryfallData = data as {
+                        traceId: string;
+                        endpoint: string;
+                    };
+                    metricsCollector.onSpanEnd(
+                        traceId,
+                        `scryfall.${scryfallData.endpoint}`,
+                        'success',
+                        {
+                            endpoint: scryfallData.endpoint,
+                            phase: 'scryfall'
+                        }
                     );
                     break;
                 }

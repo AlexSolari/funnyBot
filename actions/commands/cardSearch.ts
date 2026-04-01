@@ -1,9 +1,16 @@
-import { ActionStateBase, MessageContext } from 'chz-telegram-bot';
+import {
+    ActionStateBase,
+    MessageContext,
+    Seconds,
+    secondsToMilliseconds
+} from 'chz-telegram-bot';
 import { MtgCardSearchService } from '../../services/cardSearchService';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { CommandBuilder } from '../../helpers/commandBuilder';
+import { getObservability } from '../../helpers/getObservability';
 
 const TELEGRAM_MAX_MESSAGE_LENGTH = 3000;
+const REQUEST_TIMEOUT = secondsToMilliseconds(30 as Seconds);
 
 function sendInChunks(
     message: string,
@@ -43,7 +50,11 @@ export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
 
             const firstRegexMatch = matchResult[1].replaceAll('|', '#');
             const { message, keyboardData } =
-                await MtgCardSearchService.findForAction(firstRegexMatch);
+                await MtgCardSearchService.findForAction(
+                    firstRegexMatch,
+                    AbortSignal.timeout(REQUEST_TIMEOUT),
+                    getObservability(ctx)
+                );
 
             if (!message) {
                 const querySplitResult =
