@@ -12,7 +12,6 @@ import {
 import { useDashboardData } from './hooks/useDashboardData';
 import { searchTraces, fetchTraceById } from './api';
 import type { Trace, TraceSearchQuery } from './types';
-import { DASHBOARD_SETTINGS } from './utils/constants';
 
 type TabType = 'overview' | 'traces' | 'errors';
 
@@ -24,10 +23,7 @@ export default function App() {
     const [isSearching, setIsSearching] = useState(false);
     const [isLoadingTrace, setIsLoadingTrace] = useState(false);
 
-    const { data, loading, error, refresh } = useDashboardData(
-        autoRefresh,
-        DASHBOARD_SETTINGS.refreshIntervalMs
-    );
+    const { data, loading, error, refresh } = useDashboardData(autoRefresh);
 
     const handleSearch = useCallback(async (query: TraceSearchQuery) => {
         setIsSearching(true);

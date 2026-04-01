@@ -4,6 +4,50 @@ import { metricsCollector } from './metricsCollector';
 import { TraceSearchQuery } from './types';
 
 const DASHBOARD_PORT = 3030;
+const SSE_PUSH_INTERVAL_MS = 2000;
+
+type SseSend = (data: string) => void;
+const sseClients = new Set<SseSend>();
+const encoder = new TextEncoder();
+
+function broadcastDashboardData(): void {
+    if (sseClients.size === 0) return;
+    const data = JSON.stringify(metricsCollector.getDashboardData());
+    for (const send of sseClients) {
+        send(data);
+    }
+}
+
+function handleSSE(): Response {
+    let send: SseSend | null = null;
+    const stream = new ReadableStream({
+        start(controller) {
+            send = (data: string) => {
+                try {
+                    controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+                } catch {
+                    if (send) sseClients.delete(send);
+                }
+            };
+            sseClients.add(send);
+            send(JSON.stringify(metricsCollector.getDashboardData()));
+        },
+        cancel() {
+            if (send) {
+                sseClients.delete(send);
+                send = null;
+            }
+        }
+    });
+    return new Response(stream, {
+        headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
+            ...CORS_HEADERS
+        }
+    });
+}
 
 // MIME types for static files
 const MIME_TYPES: Record<string, string> = {
@@ -175,6 +219,10 @@ export function startDashboardServer(
                     '/index.html': () => serveStaticFile('index.html'),
 
                     // API Routes
+                    '/api/events': {
+                        OPTIONS: handleCorsOptions,
+                        GET: handleSSE
+                    },
                     '/api/dashboard': {
                         OPTIONS: handleCorsOptions,
                         GET: handleDashboard
@@ -227,6 +275,7 @@ export function startDashboardServer(
             });
 
             console.log(`📊 Monitoring dashboard running at ${port}`);
+            setInterval(broadcastDashboardData, SSE_PUSH_INTERVAL_MS);
             resolve();
         } catch (err) {
             console.error('Failed to start dashboard server:', err);

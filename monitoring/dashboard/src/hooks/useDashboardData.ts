@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { DashboardData } from '../types';
 import { fetchDashboardData } from '../api';
 
-export function useDashboardData(autoRefresh: boolean, intervalMs = 5000) {
+export function useDashboardData(autoRefresh: boolean) {
     const [data, setData] = useState<DashboardData | null>(null);
     const [error, setError] = useState<Error | null>(null);
     const [loading, setLoading] = useState(true);
@@ -20,15 +20,31 @@ export function useDashboardData(autoRefresh: boolean, intervalMs = 5000) {
     }, []);
 
     useEffect(() => {
-        refresh();
-    }, [refresh]);
+        if (!autoRefresh) {
+            refresh();
+            return;
+        }
 
-    useEffect(() => {
-        if (!autoRefresh) return;
+        const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+        const es = new EventSource(`${base}/api/events`);
 
-        const interval = setInterval(refresh, intervalMs);
-        return () => clearInterval(interval);
-    }, [autoRefresh, intervalMs, refresh]);
+        es.onmessage = (event: MessageEvent<string>) => {
+            try {
+                const result: DashboardData = JSON.parse(event.data);
+                setData(result);
+                setError(null);
+                setLoading(false);
+            } catch {
+                setError(new Error('Failed to parse dashboard data'));
+            }
+        };
+
+        es.onerror = () => {
+            setError(new Error('Connection error'));
+        };
+
+        return () => es.close();
+    }, [autoRefresh, refresh]);
 
     return { data, error, loading, refresh };
 }
