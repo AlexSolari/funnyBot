@@ -2,10 +2,16 @@ import { MessageType, Seconds, secondsToMilliseconds } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { CommandBuilder } from '../../helpers/commandBuilder';
+import { SpecificUsers } from '../../types/userIds';
 
 export const ternopil = new CommandBuilder('Reaction.Ternopil')
     .on(MessageType.Any)
     .do(async (ctx) => {
+        if (ctx.userInfo.id == SpecificUsers.zohan && randomInt(0, 1) == 0) {
+            ctx.reply.withVideo('dublin');
+            return;
+        }
+
         switch (randomInt(0, 4)) {
             case 0:
                 switch (randomInt(0, 4)) {
