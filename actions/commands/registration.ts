@@ -22,7 +22,7 @@ const daysMap = {
 } as Record<string, string>;
 
 type EventInfo = {
-    date: string;
+    date: string | null;
     name: string;
     id: number;
     spaces: number;
@@ -34,6 +34,7 @@ const timeRegex = /Час початку:\s*(\d\d[.:]\d\d)\s+(\d\d\.\d\d)\s+(\S+
 const weekdayNameRegex =
     /неділя|понеділок|вівторок|середа|четвер|п’ятниця|субота/;
 const SPELLSEEKER_MTG_THREAD_URL_PART = '/2/';
+const SHORT_FORMAT_NAME_REGEX = /.+,.+,.+,.+/;
 
 export const registration = new CommandBuilder('Reaction.Registration')
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
@@ -82,9 +83,9 @@ export const registration = new CommandBuilder('Reaction.Registration')
                     ? ''
                     : ` \\(${event.usedSpaces} уже в резі\\)`;
 
-            text += `[${escapeMarkdown(event.name)}](${
-                event.link
-            })${usedSpacesText} відбудеться у ${escapeMarkdown(event.date)}\n`;
+            text += event.date
+                ? `[${escapeMarkdown(event.name)}](${event.link})${usedSpacesText} відбудеться у ${escapeMarkdown(event.date)}\n`
+                : `[${escapeMarkdown(event.name)}](${event.link})${usedSpacesText}\n`;
         }
 
         if (showRetryLaterMessage) {
@@ -186,8 +187,8 @@ async function loadSpellseekerEvents(formatName: Format): Promise<EventInfo[]> {
         findInDOM = load(html);
 
         const title = findInDOM('.tgme_widget_message_poll_question').text();
-        console.log(title);
         const titleLowercase = title.toLowerCase();
+
         if (
             titleLowercase.includes(formatName) &&
             titleLowercase.includes('анонс')
@@ -211,7 +212,7 @@ async function loadSpellseekerEvents(formatName: Format): Promise<EventInfo[]> {
                 usedSpaces: -1,
                 link: lastLink
             });
-        } else {
+        } else if (SHORT_FORMAT_NAME_REGEX.test(titleLowercase)) {
             const [date, day, name, time] = title.split(',');
 
             const today = Number.parseInt(moment().startOf('day').format('DD'));
@@ -229,6 +230,15 @@ async function loadSpellseekerEvents(formatName: Format): Promise<EventInfo[]> {
                         (day) => daysMap[day]
                     )}, ${date.trim()}, ${time.trim()}`,
                 name: `${name.trim()}`,
+                id: Math.random(),
+                spaces: 0,
+                usedSpaces: -1,
+                link: lastLink
+            });
+        } else {
+            results.push({
+                date: null,
+                name: title.trim().slice(0, 50),
                 id: Math.random(),
                 spaces: 0,
                 usedSpaces: -1,
