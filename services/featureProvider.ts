@@ -5,7 +5,7 @@ import {
     BotFeatureSetsConfiguration,
     ActionFeatureSet
 } from '../types/featureSet';
-import { writeFile, readFile, stat } from 'fs/promises';
+import { writeFile, readFile, stat, mkdir } from 'fs/promises';
 
 class FeatureProvider {
     private readonly filePath: string;
@@ -66,6 +66,8 @@ class FeatureProvider {
     }
 
     async load() {
+        await mkdir(this.storagePath, { recursive: true });
+
         const defaultConfig = await createDefaultBotConfig();
         const fileContent = await readFile(this.filePath, {
             encoding: 'utf-8',
@@ -80,22 +82,25 @@ class FeatureProvider {
 
         this.lastModifiedDate = new Date();
 
-        setInterval(async () => {
-            const stats = await stat(this.filePath);
+        setInterval(
+            async () => {
+                const stats = await stat(this.filePath);
 
-            if (stats.mtime > this.lastModifiedDate) {
-                this.lastModifiedDate = stats.mtime;
+                if (stats.mtime > this.lastModifiedDate) {
+                    this.lastModifiedDate = stats.mtime;
 
-                const fileContent = await readFile(this.filePath, {
-                    encoding: 'utf-8',
-                    flag: 'w+'
-                });
+                    const fileContent = await readFile(this.filePath, {
+                        encoding: 'utf-8',
+                        flag: 'w+'
+                    });
 
-                if (fileContent) {
-                    this.config = JSON.parse(fileContent, reviver);
+                    if (fileContent) {
+                        this.config = JSON.parse(fileContent, reviver);
+                    }
                 }
-            }
-        }, secondsToMilliseconds((5 * 60) as Seconds));
+            },
+            secondsToMilliseconds((5 * 60) as Seconds)
+        );
     }
 
     getFeaturesForAction(botName: string, key: ActionKey) {
