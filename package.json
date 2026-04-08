@@ -3,7 +3,7 @@
     "dependencies": {
         "async-sema": "^3.1.1",
         "cheerio": "^1.2.0",
-        "chz-telegram-bot": "^0.7.17",
+        "chz-telegram-bot": "^0.7.18",
         "markdown-escape": "^2.0.0",
         "moment": "^2.30.1",
         "openai": "^6.33.0"
@@ -15,7 +15,7 @@
         "@types/node": "^25.5.2",
         "eslint": "^9.39.4",
         "typescript": "^6.0.2",
-        "typescript-eslint": "^8.58.0"
+        "typescript-eslint": "^8.58.1"
     },
     "scripts": {
         "lint": "npx eslint . && tsc --noEmit",
