@@ -39,36 +39,16 @@ const SHORT_FORMAT_NAME_REGEX = /.+,.+,.+,.+/;
 export const registration = new CommandBuilder('Reaction.Registration')
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
     .do(async (ctx) => {
-        const serviceName = determineServiceName(ctx.chatInfo);
+        const [serviceName, format] = determineServiceName(ctx.chatInfo);
         if (!serviceName) {
             ctx.skipCooldown();
             return;
         }
 
-        let showRetryLaterMessage = false;
-        const eventInfos: EventInfo[] = [];
-
-        try {
-            eventInfos.push(...(await fetchEventsFromMagicWorld(serviceName)));
-        } catch (error) {
-            console.error(error);
-            showRetryLaterMessage = true;
-        }
-
-        try {
-            if (serviceName == 'Піонер') {
-                const pioneerEvents = await loadSpellseekerEvents(
-                    Format.Pioneer
-                );
-                eventInfos.push(...pioneerEvents);
-            } else if (serviceName == 'Pauper') {
-                const pauperEvents = await loadSpellseekerEvents(Format.Pauper);
-                eventInfos.push(...pauperEvents);
-            }
-        } catch (error) {
-            console.error(error);
-            showRetryLaterMessage = true;
-        }
+        const { eventInfos, showRetryLaterMessage } = await loadEvents(
+            serviceName,
+            format
+        );
 
         if (eventInfos.length == 0 && !showRetryLaterMessage) {
             ctx.reply.withText(`поки нема`);
@@ -97,19 +77,42 @@ export const registration = new CommandBuilder('Reaction.Registration')
     })
     .build();
 
-function determineServiceName(chatInfo: ChatInfo) {
+async function loadEvents(serviceName: string, format: Format) {
+    let showRetryLaterMessage = false;
+    const eventInfos: EventInfo[] = [];
+
+    try {
+        eventInfos.push(...(await fetchEventsFromMagicWorld(serviceName)));
+    } catch (error) {
+        console.error(error);
+        showRetryLaterMessage = true;
+    }
+
+    try {
+        eventInfos.push(...(await loadSpellseekerEvents(format)));
+    } catch (error) {
+        console.error(error);
+        showRetryLaterMessage = true;
+    }
+
+    return { eventInfos, showRetryLaterMessage };
+}
+
+function determineServiceName(
+    chatInfo: ChatInfo
+): [string, Format] | [null, null] {
     switch (chatInfo.id) {
         case ChatId.TestChat:
         case ChatId.PioneerChat:
-            return 'Піонер';
+            return ['Піонер', Format.Pioneer];
         case ChatId.ModernChat:
-            return 'Модерн';
+            return ['Модерн', Format.Modern];
         case ChatId.StandardChat:
-            return 'Стандарт';
+            return ['Стандарт', Format.Standard];
         case ChatId.PauperChat:
-            return 'Pauper';
+            return ['Pauper', Format.Pauper];
         default:
-            return null;
+            return [null, null];
     }
 }
 
@@ -156,6 +159,10 @@ async function fetchEventsFromMagicWorld(serviceName: string) {
 }
 
 async function loadSpellseekerEvents(formatName: Format): Promise<EventInfo[]> {
+    if (formatName != Format.Pioneer && formatName != Format.Pauper) {
+        return [];
+    }
+
     let response = await fetch(
         `https://t.me/s/spellseeker_${formatName}_announces`
     );
