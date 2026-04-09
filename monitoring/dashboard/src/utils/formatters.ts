@@ -40,20 +40,43 @@ export function escapeHtml(str: string): string {
 }
 
 /**
+ * Check if a span should be excluded from trace analysis.
+ * Exported for use in multiple components.
+ */
+export function isExcludedSpan(operationName: string): boolean {
+    return operationName.startsWith('command.capture.');
+}
+
+/**
  * Calculate the actual trace duration from span end times.
  * This ensures consistent duration calculation across all components.
  * For each span, we calculate its end time as:
  * - If span has duration > 0: startTime + duration (most accurate)
  * - Else if endTime > 0: use endTime
  * - Else: use startTime (instant event)
+ * Excludes certain span patterns (e.g., command.capture.*) from duration calculation.
  */
 export function getTraceDuration(trace: {
     startTime: number;
     totalDuration?: number;
-    spans: Array<{ startTime: number; endTime?: number; duration?: number }>;
+    spans: Array<{
+        startTime: number;
+        endTime?: number;
+        duration?: number;
+        operationName?: string;
+    }>;
 }): number {
+    const filteredSpans = trace.spans.filter(
+        (s) => !isExcludedSpan(s.operationName || '')
+    );
+
+    // If all spans are excluded, return 0
+    if (filteredSpans.length === 0) {
+        return 0;
+    }
+
     const maxEndTime = Math.max(
-        ...trace.spans.map((s) => {
+        ...filteredSpans.map((s) => {
             // If span has a duration, use startTime + duration (most reliable)
             if (s.duration && s.duration > 0) {
                 return s.startTime + s.duration;

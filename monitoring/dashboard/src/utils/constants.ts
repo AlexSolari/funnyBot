@@ -45,3 +45,6 @@ export const HISTOGRAM_LABELS = [
 export const UI_CONSTANTS = {
     messagePreviewMaxLength: 50
 } as const;
+
+// Span patterns to exclude from trace analysis
+export const EXCLUDED_SPAN_PATTERNS = ['command.capture.'] as const;

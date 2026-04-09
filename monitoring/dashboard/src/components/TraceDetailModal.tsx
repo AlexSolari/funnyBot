@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import type { Trace } from '../types';
-import { formatDateTime, formatTime, getTraceDuration, getTraceStatus } from '../utils/formatters';
+import { formatDateTime, formatTime, getTraceDuration, getTraceStatus, isExcludedSpan } from '../utils/formatters';
 import { WaterfallDiagram } from './WaterfallDiagram';
 
 interface TraceDetailModalProps {
@@ -107,8 +107,10 @@ export function TraceDetailModal({ trace, onClose }: TraceDetailModalProps) {
                     </div>
 
                     <div className="spans-timeline">
-                        <h3>Span Details ({trace.spans.length})</h3>
-                        {trace.spans.map((span) => (
+                        <h3>Span Details ({trace.spans.filter(s => !isExcludedSpan(s.operationName)).length})</h3>
+                        {trace.spans
+                            .filter((span) => !isExcludedSpan(span.operationName))
+                            .map((span) => (
                             <div
                                 key={span.spanId}
                                 className={`span-item ${span.status === 'error' ? 'error' : ''}`}

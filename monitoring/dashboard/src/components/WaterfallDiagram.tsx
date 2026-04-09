@@ -1,4 +1,5 @@
 import type { TraceSpan } from '../types';
+import { isExcludedSpan } from '../utils/formatters';
 
 interface WaterfallDiagramProps {
     readonly spans: TraceSpan[];
@@ -40,17 +41,20 @@ export function WaterfallDiagram({
     traceStartTime,
     totalDuration
 }: WaterfallDiagramProps) {
-    if (spans.length === 0) {
+    // Filter out excluded spans
+    const filteredSpans = spans.filter((span) => !isExcludedSpan(span.operationName));
+    
+    if (filteredSpans.length === 0) {
         return <div className="waterfall-empty">No events to display</div>;
     }
 
     // Sort spans by start time for chronological display
-    const sortedSpans = [...spans].sort((a, b) => a.startTime - b.startTime);
+    const sortedSpans = [...filteredSpans].sort((a, b) => a.startTime - b.startTime);
 
-    // Calculate the actual duration to use for scaling - use the max of all span end times
+    // Calculate the actual duration to use for scaling - use the max of filtered span end times
     // For each span: if it has duration, use startTime + duration; else use endTime or startTime
     const maxEndTime = Math.max(
-        ...spans.map((s) => {
+        ...sortedSpans.map((s) => {
             if (s.duration && s.duration > 0) {
                 return s.startTime + s.duration;
             }
