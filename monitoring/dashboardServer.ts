@@ -9,10 +9,13 @@ const SSE_PUSH_INTERVAL_MS = 2000;
 type SseSend = (data: string) => void;
 const sseClients = new Set<SseSend>();
 const encoder = new TextEncoder();
+let lastBroadcastedData = '';
 
 function broadcastDashboardData(): void {
     if (sseClients.size === 0) return;
     const data = JSON.stringify(metricsCollector.getDashboardData());
+    if (data === lastBroadcastedData) return;
+    lastBroadcastedData = data;
     for (const send of sseClients) {
         send(data);
     }

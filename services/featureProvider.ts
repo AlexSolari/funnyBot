@@ -91,7 +91,7 @@ class FeatureProvider {
 
                     const fileContent = await readFile(this.filePath, {
                         encoding: 'utf-8',
-                        flag: 'w+'
+                        flag: 'r'
                     });
 
                     if (fileContent) {
