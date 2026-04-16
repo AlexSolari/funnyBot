@@ -16,7 +16,9 @@ export const potuzhno = new CommandBuilderWithState<PotuzhnoState>(
     .on(MessageType.Any)
     .when(
         (ctx) =>
-            Math.random() < 0.01 && ctx.messageInfo.text != 'топ потужності'
+            ctx.userInfo.id != null &&
+            Math.random() < 0.01 &&
+            ctx.messageInfo.text != 'топ потужності'
     )
     .do(async (ctx, state) => {
         const superPotuzhno = Math.random() < 0.01;
@@ -24,9 +26,9 @@ export const potuzhno = new CommandBuilderWithState<PotuzhnoState>(
             ? PotuzhnoState.superChargeMultiplier * state.superCharge
             : 1;
 
-        const scoreFromIdBoard = state.idScoreBoard[ctx.userInfo.id];
+        const scoreFromIdBoard = state.idScoreBoard[ctx.userInfo.id!];
 
-        state.idScoreBoard[ctx.userInfo.id] =
+        state.idScoreBoard[ctx.userInfo.id!] =
             (scoreFromIdBoard ?? 0) + scoredPoints;
 
         ctx.reply.withReaction('🎉');

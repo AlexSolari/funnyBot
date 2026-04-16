@@ -25,7 +25,6 @@ export const ActionNames = {
     vitalii: 'vitalii',
     voice: 'voice',
     discussion: 'discussion',
-    spellcoins: 'spellcoins',
     newsHelicopter: 'newsHelicopter'
 } as const;
 
@@ -72,7 +71,6 @@ export const actionDescriptions: Record<ActionName, string> = {
     [ActionNames.vitalii]: 'Відслідковує коли Віталій згадує "маліфо"',
     [ActionNames.voice]: 'Посилає нахуй за голосовухі',
     [ActionNames.discussion]: 'Слідкує за довгими дискуссіями',
-    [ActionNames.spellcoins]: 'Показує баланс на рахунку',
     [ActionNames.newsHelicopter]:
         'Реагує на згадки mtgstocks.com тематичною картинкою'
 };

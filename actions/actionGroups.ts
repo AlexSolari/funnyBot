@@ -29,7 +29,6 @@ import { gpt } from './commands/gpt';
 import { gptIsTrue } from './commands/gptIsTrue';
 import { sadwhy } from './commands/sadwhy';
 import { discussion } from './commands/discussion';
-import { spellcoins } from './commands/spellcoins';
 import { mtgrdle } from './scheduled/mtgrdle';
 import { newsHelicopter } from './commands/newsHelicopter';
 
@@ -60,7 +59,6 @@ const commands = [
     dvach,
     ru,
     discussion,
-    spellcoins,
     newsHelicopter
 ] as CommandAction<IActionState>[];
 

@@ -47,6 +47,7 @@ export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
     .on(MessageType.Text)
     .when(
         (ctx, state) =>
+            ctx.userInfo.id != null &&
             Math.random() < 0.05 &&
             !chatAdmins.includes(ctx.userInfo.id) &&
             ctx.userInfo.id != state.lastUserId

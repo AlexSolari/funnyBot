@@ -313,6 +313,8 @@ async function rewardPotuzhnoPoints(
     );
 
     await replyCtx.updateStateOf(potuzhno, async (state) => {
+        if (replyCtx.userInfo.id == null) return;
+
         const scoreFromIdBoard = state.idScoreBoard[replyCtx.userInfo.id];
 
         state.idScoreBoard[replyCtx.userInfo.id] =

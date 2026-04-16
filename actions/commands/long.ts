@@ -8,6 +8,7 @@ export const long = new CommandBuilder('Reaction.Long')
         (ctx) =>
             !ctx.messageInfo.text.includes('send.monobank') &&
             ctx.messageInfo.text.length >= 400 &&
+            ctx.userInfo.id != null &&
             !chatAdmins.includes(ctx.userInfo.id)
     )
     .do(async (ctx) => {

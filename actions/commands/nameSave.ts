@@ -8,9 +8,11 @@ export const nameSave = new CommandBuilderWithState(
 )
     .on(MessageType.Any)
     .when(
-        (ctx, state) => state.lastUsername[ctx.userInfo.id] != ctx.userInfo.name
+        (ctx, state) =>
+            ctx.userInfo.id != null &&
+            state.lastUsername[ctx.userInfo.id] != ctx.userInfo.name
     )
     .do(async (ctx, state) => {
-        state.lastUsername[ctx.userInfo.id] = ctx.userInfo.name;
+        state.lastUsername[ctx.userInfo.id!] = ctx.userInfo.name;
     })
     .build();

@@ -9,9 +9,7 @@ type EventData<K extends keyof BotEventArgumentsMap> = {
 
 // Type aliases for cleaner code
 type MessageEventData = EventData<typeof BotEventType.messageRecieved>;
-type BeforeActionsEventData = EventData<
-    typeof BotEventType.beforeActionsExecuting
->;
+
 type CommandEventData = EventData<typeof BotEventType.commandActionExecuting>;
 type InlineQueryEventData = EventData<typeof BotEventType.inlineQueryRecieved>;
 type InlineActionEventData = EventData<
@@ -63,25 +61,6 @@ export function createMonitoringEventHandler(botName: string) {
                         'message',
                         'message.processing',
                         { phase: 'processing' }
-                    );
-                    break;
-                }
-
-                case BotEventType.beforeActionsExecuting: {
-                    const beforeActionsData = data as BeforeActionsEventData;
-                    const commands = beforeActionsData.commands;
-                    const commandsList = [...commands]
-                        .map((c) => c.key)
-                        .join(', ');
-                    metricsCollector.onEvent(
-                        traceId,
-                        botName,
-                        'message',
-                        'message.beforeActionsExecuting',
-                        {
-                            phase: 'processing',
-                            commands: commandsList
-                        }
                     );
                     break;
                 }
