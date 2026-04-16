@@ -31,6 +31,7 @@ import { sadwhy } from './commands/sadwhy';
 import { discussion } from './commands/discussion';
 import { spellcoins } from './commands/spellcoins';
 import { mtgrdle } from './scheduled/mtgrdle';
+import { newsHelicopter } from './commands/newsHelicopter';
 
 const commands = [
     cardSearch,
@@ -59,7 +60,8 @@ const commands = [
     dvach,
     ru,
     discussion,
-    spellcoins
+    spellcoins,
+    newsHelicopter
 ] as CommandAction<IActionState>[];
 
 export const testCommands = {
