@@ -21,6 +21,13 @@ import { getObservability } from '../../helpers/getObservability';
 
 const WIN_BONUS_POINTS = 5;
 const REQUEST_TIMEOUT = secondsToMilliseconds(30 as Seconds);
+const COLOR_NAMES = {
+    W: 'White',
+    U: 'Blue',
+    B: 'Black',
+    R: 'Red',
+    G: 'Green'
+} as Record<string, string>;
 
 type CardInfo = {
     name: string;
@@ -47,25 +54,6 @@ const ChatQueryMap = {
         'game:paper legal:pauper tix>0.2 is:firstprinting -is:dfc'
 } as Record<number, string>;
 
-function parseColors(manaCost: string): string[] {
-    const colors: Set<string> = new Set();
-    const colorMap: Record<string, string> = {
-        W: 'White',
-        U: 'Blue',
-        B: 'Black',
-        R: 'Red',
-        G: 'Green'
-    };
-
-    for (const char of manaCost) {
-        if (char in colorMap) {
-            colors.add(colorMap[char]);
-        }
-    }
-
-    return Array.from(colors);
-}
-
 async function fetchRandomCard(
     chatInfo: ChatInfo,
     observability: ObservabilityHelper<ScryfallEventMap>
@@ -86,14 +74,10 @@ async function fetchRandomCard(
         const randomCard =
             randomCards[Math.floor(Math.random() * randomCards.length)];
 
-        const colors = randomCard.mana_cost
-            ? parseColors(randomCard.mana_cost)
-            : ['Colorless'];
-
         return {
             name: randomCard.name,
             cmc: randomCard.cmc!,
-            colors,
+            colors: randomCard.colors,
             types: randomCard.type_line.replace(' — ', ' ').split(' '),
             setName: randomCard.set_name,
             releasedAt: randomCard.released_at,
@@ -106,8 +90,12 @@ async function fetchRandomCard(
 }
 
 function getColorClue(targetColors: string[], guessColors: string[]): string {
-    const targetColorStr = targetColors.join(', ');
-    const guessColorStr = guessColors.join(', ');
+    const targetColorStr = targetColors
+        .map((x) => COLOR_NAMES[x] ?? x)
+        .join(', ');
+    const guessColorStr = guessColors
+        .map((x) => COLOR_NAMES[x] ?? x)
+        .join(', ');
 
     if (guessColorStr === targetColorStr) {
         return `🟩 Колір: ${targetColorStr}`;
@@ -177,6 +165,24 @@ function generateClues(targetCard: CardInfo, guessCard: CardInfo): string {
     ];
 
     return clues.join('\n');
+}
+
+async function rewardPotuzhnoPoints(
+    replyCtx: ReplyContext<IActionState>,
+    card: CardInfo
+) {
+    replyCtx.reply.withText(
+        `🎉 *Правильно\\!* Ти вгадав карту: [\\${escapeMarkdown(card.name)}](${card.image_uris.normal ?? ScryfallService.cardBack})\n\n 💪 \\+${WIN_BONUS_POINTS} потужності\\! 💪`
+    );
+
+    await replyCtx.updateStateOf(potuzhno, async (state) => {
+        if (replyCtx.userInfo.id == null) return;
+
+        const scoreFromIdBoard = state.idScoreBoard[replyCtx.userInfo.id];
+
+        state.idScoreBoard[replyCtx.userInfo.id] =
+            (scoreFromIdBoard ?? 0) + WIN_BONUS_POINTS;
+    });
 }
 
 export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
@@ -261,9 +267,7 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
                 const guessCard: CardInfo = {
                     name: guessedCardFace.name,
                     cmc: guessedCardCmc,
-                    colors: guessedCardFace.mana_cost
-                        ? parseColors(guessedCardFace.mana_cost)
-                        : ['Colorless'],
+                    colors: guessedCardFace.colors,
                     types: guessedCardFace.type_line
                         .replace(' — ', ' ')
                         .split(' '),
@@ -303,21 +307,3 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
         captureController.captureReplies([/.+/], replyHandler, abortController);
     })
     .build();
-
-async function rewardPotuzhnoPoints(
-    replyCtx: ReplyContext<IActionState>,
-    card: CardInfo
-) {
-    replyCtx.reply.withText(
-        `🎉 *Правильно\\!* Ти вгадав карту: [\\${escapeMarkdown(card.name)}](${card.image_uris.normal ?? ScryfallService.cardBack})\n\n 💪 \\+${WIN_BONUS_POINTS} потужності\\! 💪`
-    );
-
-    await replyCtx.updateStateOf(potuzhno, async (state) => {
-        if (replyCtx.userInfo.id == null) return;
-
-        const scoreFromIdBoard = state.idScoreBoard[replyCtx.userInfo.id];
-
-        state.idScoreBoard[replyCtx.userInfo.id] =
-            (scoreFromIdBoard ?? 0) + WIN_BONUS_POINTS;
-    });
-}

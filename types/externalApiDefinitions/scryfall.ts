@@ -58,4 +58,5 @@ export interface IScryfallCardFace {
         art_crop: string;
         normal: string;
     };
+    colors: string[];
 }
