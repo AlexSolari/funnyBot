@@ -2,10 +2,14 @@ import { useState, useEffect, useCallback } from 'react';
 import type { DashboardData } from '../types';
 import { fetchDashboardData } from '../api';
 
+export type ConnectionStatus = 'connected' | 'reconnecting' | 'disconnected';
+
 export function useDashboardData(autoRefresh: boolean) {
     const [data, setData] = useState<DashboardData | null>(null);
     const [error, setError] = useState<Error | null>(null);
     const [loading, setLoading] = useState(true);
+    const [connectionStatus, setConnectionStatus] =
+        useState<ConnectionStatus>('connected');
 
     const refresh = useCallback(async () => {
         try {
@@ -34,17 +38,24 @@ export function useDashboardData(autoRefresh: boolean) {
                 setData(result);
                 setError(null);
                 setLoading(false);
+                setConnectionStatus('connected');
             } catch {
                 setError(new Error('Failed to parse dashboard data'));
             }
         };
 
         es.onerror = () => {
-            setError(new Error('Connection error'));
+            // Don't replace the dashboard — just signal that we're reconnecting.
+            // The browser will automatically retry the EventSource connection.
+            setConnectionStatus(
+                es.readyState === EventSource.CLOSED
+                    ? 'disconnected'
+                    : 'reconnecting'
+            );
         };
 
         return () => es.close();
     }, [autoRefresh, refresh]);
 
-    return { data, error, loading, refresh };
+    return { data, error, loading, refresh, connectionStatus };
 }

@@ -5,9 +5,12 @@ import { TraceSearchQuery } from './types';
 
 const DASHBOARD_PORT = 3030;
 const SSE_PUSH_INTERVAL_MS = 2000;
+const SSE_HEARTBEAT_INTERVAL_MS = 30000;
 
 type SseSend = (data: string) => void;
+type SseHeartbeat = () => void;
 const sseClients = new Set<SseSend>();
+const sseHeartbeats = new Set<SseHeartbeat>();
 const encoder = new TextEncoder();
 let lastBroadcastedData = '';
 
@@ -21,8 +24,15 @@ function broadcastDashboardData(): void {
     }
 }
 
+function broadcastHeartbeat(): void {
+    for (const heartbeat of sseHeartbeats) {
+        heartbeat();
+    }
+}
+
 function handleSSE(): Response {
     let send: SseSend | null = null;
+    let heartbeat: SseHeartbeat | null = null;
     const stream = new ReadableStream({
         start(controller) {
             send = (data: string) => {
@@ -30,15 +40,29 @@ function handleSSE(): Response {
                     controller.enqueue(encoder.encode(`data: ${data}\n\n`));
                 } catch {
                     if (send) sseClients.delete(send);
+                    if (heartbeat) sseHeartbeats.delete(heartbeat);
+                }
+            };
+            heartbeat = () => {
+                try {
+                    controller.enqueue(encoder.encode(': ping\n\n'));
+                } catch {
+                    if (send) sseClients.delete(send);
+                    if (heartbeat) sseHeartbeats.delete(heartbeat);
                 }
             };
             sseClients.add(send);
+            sseHeartbeats.add(heartbeat);
             send(JSON.stringify(metricsCollector.getDashboardData()));
         },
         cancel() {
             if (send) {
                 sseClients.delete(send);
                 send = null;
+            }
+            if (heartbeat) {
+                sseHeartbeats.delete(heartbeat);
+                heartbeat = null;
             }
         }
     });
@@ -326,6 +350,7 @@ export function startDashboardServer(
 
             console.log(`📊 Monitoring dashboard running at ${port}`);
             setInterval(broadcastDashboardData, SSE_PUSH_INTERVAL_MS);
+            setInterval(broadcastHeartbeat, SSE_HEARTBEAT_INTERVAL_MS);
             resolve();
         } catch (err) {
             console.error('Failed to start dashboard server:', err);

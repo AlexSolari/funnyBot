@@ -20,8 +20,9 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans',
-        Helvetica, Arial, sans-serif;
+    font-family:
+        -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica,
+        Arial, sans-serif;
     background: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.5;
@@ -1010,6 +1011,23 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 16px;
+}
+
+/* Connection status banner */
+.connection-banner {
+    text-align: center;
+    font-size: 13px;
+    padding: 6px 16px;
+}
+
+.connection-banner--reconnecting {
+    background-color: var(--accent-yellow, #f0a500);
+    color: #1a1a1a;
+}
+
+.connection-banner--disconnected {
+    background-color: var(--accent-red);
+    color: #fff;
 }
 
 /* Button disabled state */

@@ -23,7 +23,7 @@ export default function App() {
     const [isSearching, setIsSearching] = useState(false);
     const [isLoadingTrace, setIsLoadingTrace] = useState(false);
 
-    const { data, loading, error, refresh } = useDashboardData(autoRefresh);
+    const { data, loading, error, refresh, connectionStatus } = useDashboardData(autoRefresh);
 
     const handleSearch = useCallback(async (query: TraceSearchQuery) => {
         setIsSearching(true);
@@ -61,11 +61,11 @@ export default function App() {
         setSelectedTrace(null);
     }, []);
 
-    if (error) {
+    if (error && !data) {
         return (
             <div className="loading error-state">
                 <div className="error-message">
-                    Failed to load dashboard data
+                    Failed to load dashboard data{' '}
                     <button
                         type="button"
                         className="btn btn-primary"
@@ -98,6 +98,13 @@ export default function App() {
                 onAutoRefreshChange={setAutoRefresh}
                 onRefresh={refresh}
             />
+            {connectionStatus !== 'connected' && (
+                <div className={`connection-banner connection-banner--${connectionStatus}`}>
+                    {connectionStatus === 'reconnecting'
+                        ? 'Reconnecting to live feed…'
+                        : 'Live feed disconnected. Showing last known data.'}
+                </div>
+            )}
 
             <div className="container">
                 <div className="tabs" role="tablist" aria-label="Dashboard sections">
