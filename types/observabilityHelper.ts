@@ -1,6 +1,7 @@
 import { TraceId, TypedEventEmitter } from 'chz-telegram-bot';
+import { EventMap } from './customEvents';
 
-export type ObservabilityHelper<EventMap extends Record<string, unknown>> = {
+export type ObservabilityHelper = {
     emitter: TypedEventEmitter<EventMap>;
     traceId: TraceId;
 };

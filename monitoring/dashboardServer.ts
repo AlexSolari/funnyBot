@@ -205,7 +205,11 @@ function handleTraceById(req: Request & { params: { id: string } }): Response {
 
 async function handleAssets(req: Request): Promise<Response> {
     const url = new URL(req.url);
-    const assetPath = url.pathname.substring(1); // Remove leading /
+    const routePrefix = process.env.NODE_ENV === 'production' ? '' : '/bots';
+    const normalizedPath = routePrefix
+        ? url.pathname.replace(new RegExp(`^${routePrefix}/`), '/')
+        : url.pathname;
+    const assetPath = normalizedPath.substring(1); // Remove leading /
     return serveStaticFile(assetPath);
 }
 
@@ -214,46 +218,78 @@ export function startDashboardServer(
 ): Promise<void> {
     return new Promise((resolve, reject) => {
         try {
+            const isProduction = process.env.NODE_ENV === 'production';
+
             Bun.serve({
                 port,
-                routes: {
-                    // Dashboard root
-                    '/': () => serveStaticFile('index.html'),
-                    '/index.html': () => serveStaticFile('index.html'),
-
-                    // API Routes
-                    '/api/events': {
-                        OPTIONS: handleCorsOptions,
-                        GET: handleSSE
-                    },
-                    '/api/dashboard': {
-                        OPTIONS: handleCorsOptions,
-                        GET: handleDashboard
-                    },
-                    '/api/stats': {
-                        OPTIONS: handleCorsOptions,
-                        GET: handleStats
-                    },
-                    '/api/throughput': {
-                        OPTIONS: handleCorsOptions,
-                        GET: handleThroughput
-                    },
-                    '/api/latency': {
-                        OPTIONS: handleCorsOptions,
-                        GET: handleLatency
-                    },
-                    '/api/traces': {
-                        OPTIONS: handleCorsOptions,
-                        GET: handleTraces
-                    },
-                    '/api/trace/:id': {
-                        OPTIONS: handleCorsOptions,
-                        GET: handleTraceById
-                    },
-
-                    // Static assets
-                    '/assets/*': handleAssets
-                },
+                routes: (isProduction
+                    ? {
+                          '/': () => serveStaticFile('index.html'),
+                          '/index.html': () => serveStaticFile('index.html'),
+                          '/api/events': {
+                              OPTIONS: handleCorsOptions,
+                              GET: handleSSE
+                          },
+                          '/api/dashboard': {
+                              OPTIONS: handleCorsOptions,
+                              GET: handleDashboard
+                          },
+                          '/api/stats': {
+                              OPTIONS: handleCorsOptions,
+                              GET: handleStats
+                          },
+                          '/api/throughput': {
+                              OPTIONS: handleCorsOptions,
+                              GET: handleThroughput
+                          },
+                          '/api/latency': {
+                              OPTIONS: handleCorsOptions,
+                              GET: handleLatency
+                          },
+                          '/api/traces': {
+                              OPTIONS: handleCorsOptions,
+                              GET: handleTraces
+                          },
+                          '/api/trace/:id': {
+                              OPTIONS: handleCorsOptions,
+                              GET: handleTraceById
+                          },
+                          '/assets/*': handleAssets
+                      }
+                    : {
+                          '/bots': () => serveStaticFile('index.html'),
+                          '/bots/index.html': () =>
+                              serveStaticFile('index.html'),
+                          '/bots/api/events': {
+                              OPTIONS: handleCorsOptions,
+                              GET: handleSSE
+                          },
+                          '/bots/api/dashboard': {
+                              OPTIONS: handleCorsOptions,
+                              GET: handleDashboard
+                          },
+                          '/bots/api/stats': {
+                              OPTIONS: handleCorsOptions,
+                              GET: handleStats
+                          },
+                          '/bots/api/throughput': {
+                              OPTIONS: handleCorsOptions,
+                              GET: handleThroughput
+                          },
+                          '/bots/api/latency': {
+                              OPTIONS: handleCorsOptions,
+                              GET: handleLatency
+                          },
+                          '/bots/api/traces': {
+                              OPTIONS: handleCorsOptions,
+                              GET: handleTraces
+                          },
+                          '/bots/api/trace/:id': {
+                              OPTIONS: handleCorsOptions,
+                              GET: handleTraceById
+                          },
+                          '/bots/assets/*': handleAssets
+                      }) as any,
                 // Fallback for SPA routing and unmatched routes
                 fetch(req) {
                     const url = new URL(req.url);
@@ -263,8 +299,19 @@ export function startDashboardServer(
                         return handleCorsOptions();
                     }
 
+                    const isAssetRoute = isProduction
+                        ? url.pathname.startsWith('/assets/')
+                        : url.pathname.startsWith('/bots/assets/');
+                    if (isAssetRoute) {
+                        return handleAssets(req);
+                    }
+
+                    const isApiRoute = isProduction
+                        ? url.pathname.startsWith('/api/')
+                        : url.pathname.startsWith('/bots/api/');
+
                     // For SPA routing, serve index.html for non-API routes
-                    if (!url.pathname.startsWith('/api/')) {
+                    if (!isApiRoute) {
                         return serveStaticFile('index.html');
                     }
 

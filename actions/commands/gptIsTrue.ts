@@ -4,6 +4,9 @@ import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { ChatId } from '../../types/chatIds';
 import openAiToken from '../../openAiToken.json';
 import { CommandBuilder } from '../../helpers/commandBuilder';
+import { getObservability } from '../../helpers/getObservability';
+import { EventType } from '../../types/customEvents';
+import { ObservabilityHelper } from '../../types/observabilityHelper';
 
 const client = new OpenAI({
     apiKey: openAiToken.token
@@ -22,6 +25,26 @@ function getTextContentsFromReply(messageUpdateObject: TelegramMessage) {
     }
 
     return '';
+}
+
+async function getReplyText(input: string, observability: ObservabilityHelper) {
+    const endpoint = 'openai/responses';
+
+    try {
+        observability.emitter.emit(EventType.requestStart, {
+            traceId: observability.traceId,
+            endpoint
+        });
+        return await client.responses.create({
+            model: 'gpt-5',
+            input
+        });
+    } finally {
+        observability.emitter.emit(EventType.requestEnd, {
+            traceId: observability.traceId,
+            endpoint
+        });
+    }
 }
 
 export const gptIsTrue = new CommandBuilder('Reaction.Gpt_IsTrue')
@@ -48,10 +71,8 @@ export const gptIsTrue = new CommandBuilder('Reaction.Gpt_IsTrue')
                 ', '
             )}]\n\n
             Here's the message you need to reply:\n\n${query}`;
-        const response = await client.responses.create({
-            model: 'gpt-5',
-            input
-        });
+        const response = await getReplyText(input, getObservability(ctx));
+
         ctx.reply.withText(escapeMarkdown(response.output_text));
 
         if (ctx.chatInfo.id == ChatId.LvivChat)

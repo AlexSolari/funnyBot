@@ -1,6 +1,6 @@
 import { BotEventType, BotEventArgumentsMap } from 'chz-telegram-bot';
 import { metricsCollector } from './metricsCollector';
-import { ScryfallEventType } from '../types/scryfallEvents';
+import { EventType } from '../types/customEvents';
 
 // Helper type to extract event data with traceId
 type EventData<K extends keyof BotEventArgumentsMap> = {
@@ -365,8 +365,8 @@ export function createMonitoringEventHandler(botName: string) {
                     break;
                 }
 
-                case ScryfallEventType.requestStart: {
-                    const scryfallData = data as {
+                case EventType.requestStart: {
+                    const apiData = data as {
                         traceId: string;
                         endpoint: string;
                     };
@@ -374,24 +374,24 @@ export function createMonitoringEventHandler(botName: string) {
                         traceId,
                         botName,
                         'api',
-                        `scryfall.${scryfallData.endpoint}`,
-                        { endpoint: scryfallData.endpoint, phase: 'scryfall' }
+                        `api.${apiData.endpoint}`,
+                        { endpoint: apiData.endpoint, phase: 'execution' }
                     );
                     break;
                 }
 
-                case ScryfallEventType.requestEnd: {
-                    const scryfallData = data as {
+                case EventType.requestEnd: {
+                    const apiData = data as {
                         traceId: string;
                         endpoint: string;
                     };
                     metricsCollector.onSpanEnd(
                         traceId,
-                        `scryfall.${scryfallData.endpoint}`,
+                        `api.${apiData.endpoint}`,
                         'success',
                         {
-                            endpoint: scryfallData.endpoint,
-                            phase: 'scryfall'
+                            endpoint: apiData.endpoint,
+                            phase: 'execution'
                         }
                     );
                     break;

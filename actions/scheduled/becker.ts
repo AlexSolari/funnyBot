@@ -4,6 +4,8 @@ import BeckerState from '../../state/beckerState';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { randomInt } from '../../helpers/randomInt';
 import { CmerApiResponse } from '../../types/externalApiDefinitions/cmer';
+import { traceFetch } from '../../helpers/fetchWithObservability';
+import { getObservability } from '../../helpers/getObservability';
 
 export const becker = new ScheduledActionBuilderWithState<BeckerState>(
     'Scheduled.Becker',
@@ -13,8 +15,9 @@ export const becker = new ScheduledActionBuilderWithState<BeckerState>(
     .in([ChatId.GenshinChat])
     .do(async (ctx, _, state) => {
         const offset = randomInt(0, 26) * 50;
-        const contentPage = await fetch(
+        const contentPage = await traceFetch(
             `https://coomer.st/api/v1/onlyfans/user/alina_becker/posts?o=${offset}`,
+            getObservability(ctx),
             { headers: { Accept: 'text/css' } }
         );
         const data = (await contentPage.json()) as CmerApiResponse;

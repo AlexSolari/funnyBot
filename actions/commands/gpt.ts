@@ -16,6 +16,9 @@ import { chatAdmins } from '../../types/userIds';
 import GptState from '../../state/gptState';
 import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
 import { CommandBuilderWithState } from '../../helpers/commandBuilder';
+import { getObservability } from '../../helpers/getObservability';
+import { EventType } from '../../types/customEvents';
+import { ObservabilityHelper } from '../../types/observabilityHelper';
 
 const client = new OpenAI({
     apiKey: openAiToken.token
@@ -25,6 +28,7 @@ async function getReplyText(
     text: string,
     chatInfo: ChatInfo,
     promt: string,
+    observability: ObservabilityHelper,
     messageHistory?: string[]
 ) {
     const index = chatInfo.messageHistory.findIndex((x) => x.text == text);
@@ -32,15 +36,27 @@ async function getReplyText(
         .filter((_, i) => i <= index)
         .map((x) => `${x.from?.username ?? x.from?.first_name}: ${x.text}`);
 
-    const response = await client.responses.create({
-        model: 'gpt-4.1-mini',
-        input: `${promt} 
+    const endpoint = 'openai/responses';
+
+    try {
+        observability.emitter.emit(EventType.requestStart, {
+            traceId: observability.traceId,
+            endpoint
+        });
+        return await client.responses.create({
+            model: 'gpt-4.1-mini',
+            input: `${promt} 
             Here's chat history before the message so you now have a context of a discussion:\n\n[${(
                 messageHistory ?? messagesBeforeTarget
             ).join('\n')}]
             Here's the message you need to reply:\n\n${text}`
-    });
-    return response;
+        });
+    } finally {
+        observability.emitter.emit(EventType.requestEnd, {
+            traceId: observability.traceId,
+            endpoint
+        });
+    }
 }
 
 export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
@@ -62,7 +78,8 @@ export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
             `Write a response to following message, be edgy and funny. 
             If possible make a MTG reference relevant to the message contents, but be sure to not overdo it.
             MTG reference should make sence in context of reply itself and chat history.
-            Reply language should be Ukraininan. Make sure that reply is short, 50 words max.`
+            Reply language should be Ukraininan. Make sure that reply is short, 50 words max.`,
+            getObservability(ctx)
         );
 
         conversation.push(`You: ${response.output_text}`);
@@ -90,6 +107,7 @@ export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
                 `Write a response to following message.
                 Make sure that reply makes sence in a context of a discussion.
                 Reply language should be Ukraininan. Make sure that reply is short, 50 words max.`,
+                getObservability(replyCtx),
                 conversation
             );
             conversation.push(`You: ${response.output_text}`);

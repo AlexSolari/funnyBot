@@ -38,7 +38,7 @@ function sendInChunks(
 export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
     .on(/\[([^[]+)\]/gi)
     .do(async (ctx) => {
-        for (const matchResult of ctx.matchResults) {
+        const searchRequests = ctx.matchResults.map(async (matchResult) => {
             if (matchResult[1].includes('|')) {
                 ctx.reply.withText(
                     escapeMarkdown(
@@ -79,13 +79,13 @@ export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
                         ]
                     }
                 );
-                continue;
+                return;
             }
 
             if (message.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
                 sendInChunks(message, ctx, firstRegexMatch);
 
-                continue;
+                return;
             }
 
             ctx.reply.andQuote.withText(message, firstRegexMatch, {
@@ -96,7 +96,9 @@ export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
                     }
                 ])
             });
-        }
+        });
+
+        await Promise.allSettled(searchRequests);
     })
     .withHelp(
         (botUsername) =>

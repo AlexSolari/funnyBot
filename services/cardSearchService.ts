@@ -4,7 +4,6 @@ import stripPunctuation from '../helpers/stripPunctuation';
 import { CardSearchFlags } from '../types/cardSearchFlags';
 import { IScryfallCardFace } from '../types/externalApiDefinitions/scryfall';
 import { ObservabilityHelper } from '../types/observabilityHelper';
-import { ScryfallEventMap } from '../types/scryfallEvents';
 import { ScryfallService } from './scryfallService';
 
 type InlineQueryCardSearchResult = {
@@ -23,7 +22,7 @@ class CardSearchService {
         (
             card: IScryfallCardFace,
             signal: AbortSignal,
-            observability: ObservabilityHelper<ScryfallEventMap>
+            observability: ObservabilityHelper
         ) => Promise<string>
     > = {
         rules: async (card, signal, observability) => {
@@ -99,7 +98,7 @@ class CardSearchService {
     async findForAction(
         matchResult: string,
         signal: AbortSignal,
-        observability: ObservabilityHelper<ScryfallEventMap>
+        observability: ObservabilityHelper
     ) {
         const { flags, query, subquery } =
             this.getFlagsFromActionMatchResult(matchResult);
@@ -207,7 +206,7 @@ class CardSearchService {
     async findForInlineQuery(
         inlineQuery: string,
         signal: AbortSignal,
-        observability: ObservabilityHelper<ScryfallEventMap>
+        observability: ObservabilityHelper
     ) {
         const { flags, query } = this.getFlagsFromInlineQuery(inlineQuery);
 
@@ -283,7 +282,7 @@ class CardSearchService {
         cards: IScryfallCardFace[],
         flags: string[],
         signal: AbortSignal,
-        observability: ObservabilityHelper<ScryfallEventMap>
+        observability: ObservabilityHelper
     ) {
         const cardsWithText: InlineQueryCardSearchResult[] = [];
 
@@ -343,7 +342,7 @@ class CardSearchService {
         flags: string[],
         card: IScryfallCardFace,
         signal: AbortSignal,
-        observability: ObservabilityHelper<ScryfallEventMap>
+        observability: ObservabilityHelper
     ) {
         let extraText = '';
         for (const flag of flags) {
@@ -361,7 +360,7 @@ class CardSearchService {
         setCode: string,
         number: number,
         signal: AbortSignal,
-        observability: ObservabilityHelper<ScryfallEventMap>
+        observability: ObservabilityHelper
     ) {
         const matchedCards = await ScryfallService.findBySetAndNumber(
             setCode,

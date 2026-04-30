@@ -15,7 +15,6 @@ import { ScryfallService } from '../../services/scryfallService';
 import { potuzhno } from '../commands/potuzhno';
 import { Day } from '../../types/daysOfTheWeek';
 import moment from 'moment';
-import { ScryfallEventMap } from '../../types/scryfallEvents';
 import { ObservabilityHelper } from '../../types/observabilityHelper';
 import { getObservability } from '../../helpers/getObservability';
 
@@ -56,7 +55,7 @@ const ChatQueryMap = {
 
 async function fetchRandomCard(
     chatInfo: ChatInfo,
-    observability: ObservabilityHelper<ScryfallEventMap>
+    observability: ObservabilityHelper
 ): Promise<CardInfo | null> {
     try {
         const query =

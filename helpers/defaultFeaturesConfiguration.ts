@@ -59,7 +59,6 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
         config(ActionNames.discussion, true, hoursToSeconds(8 as Hours), {
             chatBlacklist: [ChatId.PauperChat]
         }),
-        config(ActionNames.banner, false),
         config(ActionNames.cardSearch, true, 0),
         config(ActionNames.dispute, true, hoursToSeconds(2 as Hours), {
             chatWhitelist: [ChatId.PauperChat]
@@ -125,7 +124,8 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
                 ChatId.StandardChat,
                 ChatId.ModernChat,
                 ChatId.PioneerChat,
-                ChatId.PauperChat
+                ChatId.PauperChat,
+                ChatId.TestChat
             ]
         }),
         config(ActionNames.ru, false),
@@ -165,7 +165,6 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
     ]);
 
     const xiaoFeatures = await Promise.all([
-        config(ActionNames.banner, true, 30),
         config(ActionNames.ru, true, hoursToSeconds(1 as Hours)),
         config(ActionNames.dvach, true, 1),
         config(ActionNames.gptIsTrue, true, 10, {
@@ -189,7 +188,7 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
     ]);
 
     return {
-        version: 5,
+        version: 6,
 
         default: new Map(defaultFeatures),
 

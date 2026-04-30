@@ -1,5 +1,4 @@
 export const ActionNames = {
-    banner: 'banner',
     cardSearch: 'cardSearch',
     dispute: 'dispute',
     dvach: 'dvach',
@@ -31,8 +30,6 @@ export const ActionNames = {
 export type ActionName = (typeof ActionNames)[keyof typeof ActionNames];
 
 export const actionDescriptions: Record<ActionName, string> = {
-    [ActionNames.banner]:
-        'Надає актуальну інформацію про поточні та майбутні банери в Genshin Impact',
     [ActionNames.cardSearch]: 'Пошук карток через Scryfall API',
     [ActionNames.dispute]:
         'Аналізує деклісти з MTGGoldfish та надає гумористичні коментарі',

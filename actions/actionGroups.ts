@@ -1,5 +1,4 @@
 import { CommandAction, IActionState, ScheduledAction } from 'chz-telegram-bot';
-import { banner } from './commands/banner';
 import { cardSearch } from './commands/cardSearch';
 import { dispute } from './commands/dispute';
 import { fang } from './commands/fang';
@@ -54,7 +53,6 @@ const commands = [
     gpt,
     gptIsTrue,
     sadwhy,
-    banner,
     test,
     dvach,
     ru,

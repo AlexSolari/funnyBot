@@ -10,6 +10,9 @@ import { CommandBuilder } from '../../helpers/commandBuilder';
 import { load } from 'cheerio';
 import { Format } from '../../types/mtgFormats';
 import capitalizeFirstLetter from '../../helpers/capitalizeFirstLetter';
+import { traceFetch } from '../../helpers/fetchWithObservability';
+import { getObservability } from '../../helpers/getObservability';
+import { ObservabilityHelper } from '../../types/observabilityHelper';
 
 const daysMap = {
     неділя: 'неділю',
@@ -45,9 +48,11 @@ export const registration = new CommandBuilder('Reaction.Registration')
             return;
         }
 
+        const observability = getObservability(ctx);
         const { eventInfos, showRetryLaterMessage } = await loadEvents(
             serviceName,
-            format
+            format,
+            observability
         );
 
         if (eventInfos.length == 0 && !showRetryLaterMessage) {
@@ -77,21 +82,30 @@ export const registration = new CommandBuilder('Reaction.Registration')
     })
     .build();
 
-async function loadEvents(serviceName: string, format: Format) {
-    let showRetryLaterMessage = false;
-    const eventInfos: EventInfo[] = [];
+async function loadEvents(
+    serviceName: string,
+    format: Format,
+    observability: ObservabilityHelper
+) {
+    const [magicWorldResult, spellseekerResult] = await Promise.allSettled([
+        fetchEventsFromMagicWorld(serviceName, observability),
+        loadSpellseekerEvents(format, observability)
+    ]);
 
-    try {
-        eventInfos.push(...(await fetchEventsFromMagicWorld(serviceName)));
-    } catch (error) {
-        console.error(error);
+    const eventInfos: EventInfo[] = [];
+    let showRetryLaterMessage = false;
+
+    if (magicWorldResult.status === 'fulfilled') {
+        eventInfos.push(...magicWorldResult.value);
+    } else {
+        console.error(magicWorldResult.reason);
         showRetryLaterMessage = true;
     }
 
-    try {
-        eventInfos.push(...(await loadSpellseekerEvents(format)));
-    } catch (error) {
-        console.error(error);
+    if (spellseekerResult.status === 'fulfilled') {
+        eventInfos.push(...spellseekerResult.value);
+    } else {
+        console.error(spellseekerResult.reason);
         showRetryLaterMessage = true;
     }
 
@@ -116,12 +130,16 @@ function determineServiceName(
     }
 }
 
-async function fetchEventsFromMagicWorld(serviceName: string) {
+async function fetchEventsFromMagicWorld(
+    serviceName: string,
+    observability: ObservabilityHelper
+) {
     const today = moment().startOf('day').format('YYYY-MM-DD');
     const month = moment().add(1, 'months').startOf('day').format('YYYY-MM-DD');
 
-    const response = await fetch(
-        `https://api.wlaunch.net/v1/company/7ea091e0-359a-11eb-86df-9f45a44f29bd/branch/7ea10724-359a-11eb-86df-9f45a44f29bd/slot/gt/resource?start=${today}&end=${month}&source=WIDGET&withDiscounts=true&preventBookingEnabled=true`
+    const response = await traceFetch(
+        `https://api.wlaunch.net/v1/company/7ea091e0-359a-11eb-86df-9f45a44f29bd/branch/7ea10724-359a-11eb-86df-9f45a44f29bd/slot/gt/resource?start=${today}&end=${month}&source=WIDGET&withDiscounts=true&preventBookingEnabled=true`,
+        observability
     );
     const data = (await response.json()) as IMWApiResponse;
     const slots = data.slots.flatMap((x) =>
@@ -158,13 +176,17 @@ async function fetchEventsFromMagicWorld(serviceName: string) {
         }));
 }
 
-async function loadSpellseekerEvents(formatName: Format): Promise<EventInfo[]> {
+async function loadSpellseekerEvents(
+    formatName: Format,
+    observability: ObservabilityHelper
+): Promise<EventInfo[]> {
     if (formatName != Format.Pioneer && formatName != Format.Pauper) {
         return [];
     }
 
-    let response = await fetch(
-        `https://t.me/s/spellseeker_${formatName}_announces`
+    let response = await traceFetch(
+        `https://t.me/s/spellseeker_${formatName}_announces`,
+        observability
     );
     let html = await response.text();
     let findInDOM = load(html);
@@ -185,11 +207,15 @@ async function loadSpellseekerEvents(formatName: Format): Promise<EventInfo[]> {
             continue;
         }
 
-        response = await fetch(`${lastLink}?embed=1&mode=tme`, {
-            headers: {
-                referrer: lastLink
+        response = await traceFetch(
+            `${lastLink}?embed=1&mode=tme`,
+            observability,
+            {
+                headers: {
+                    referrer: lastLink
+                }
             }
-        });
+        );
         html = await response.text();
         findInDOM = load(html);
 

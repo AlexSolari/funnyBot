@@ -12,8 +12,8 @@ import { setTimeout } from 'timers/promises';
 import { Sema } from 'async-sema';
 import capitalizeFirstLetter from '../helpers/capitalizeFirstLetter';
 import escapeMarkdown from '../helpers/escapeMarkdown';
-import { ScryfallEventMap, ScryfallEventType } from '../types/scryfallEvents';
 import { ObservabilityHelper } from '../types/observabilityHelper';
+import { EventType } from '../types/customEvents';
 
 const SCRYFALL_RATELIMIT_DELAY = 50 as Milliseconds;
 
@@ -42,22 +42,23 @@ class ScryfallSearchService {
     private async withRatelimit<T>(
         endpoint: string,
         action: () => Promise<T>,
-        observability: ObservabilityHelper<ScryfallEventMap>
+        observability: ObservabilityHelper
     ) {
         await this.semaphore.acquire();
 
-        observability.emitter.emit(ScryfallEventType.requestStart, {
+        observability.emitter.emit(EventType.requestStart, {
             traceId: observability.traceId,
             endpoint
         });
 
         try {
-            return await action();
-        } finally {
-            observability.emitter.emit(ScryfallEventType.requestEnd, {
-                traceId: observability.traceId,
-                endpoint
+            return action().finally(() => {
+                observability.emitter.emit(EventType.requestEnd, {
+                    traceId: observability.traceId,
+                    endpoint
+                });
             });
+        } finally {
             await setTimeout(SCRYFALL_RATELIMIT_DELAY);
             this.semaphore.release();
         }
@@ -82,7 +83,7 @@ class ScryfallSearchService {
         setCode: string,
         number: number,
         signal: AbortSignal,
-        observability: ObservabilityHelper<ScryfallEventMap>
+        observability: ObservabilityHelper
     ) {
         return this.withRatelimit(
             `cards/${setCode}/${number}`,
@@ -104,7 +105,7 @@ class ScryfallSearchService {
     async findWithQuery(
         query: string,
         signal: AbortSignal,
-        observability: ObservabilityHelper<ScryfallEventMap>
+        observability: ObservabilityHelper
     ) {
         return this.withRatelimit(
             'cards/search',
@@ -126,7 +127,7 @@ class ScryfallSearchService {
     async findExact(
         name: string,
         signal: AbortSignal,
-        observability: ObservabilityHelper<ScryfallEventMap>
+        observability: ObservabilityHelper
     ) {
         return this.withRatelimit(
             'cards/named',
@@ -146,7 +147,7 @@ class ScryfallSearchService {
     async getRules(
         card: IScryfallCardFace,
         signal: AbortSignal,
-        observability: ObservabilityHelper<ScryfallEventMap>
+        observability: ObservabilityHelper
     ) {
         return this.withRatelimit(
             `cards/${card.parentId ?? card.id}/rulings`,
@@ -178,7 +179,7 @@ class ScryfallSearchService {
     async findAllArtworks(
         name: string,
         signal: AbortSignal,
-        observability: ObservabilityHelper<ScryfallEventMap>
+        observability: ObservabilityHelper
     ) {
         return (
             await this.findWithQuery(`@@name="${name}"`, signal, observability)
