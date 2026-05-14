@@ -72,10 +72,11 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
         config(ActionNames.gptIsTrue, true, 60, {
             cooldownMessage: escapeMarkdown(
                 `Наразі не можу перевірити, спробуйте пізніше.`
-            )
+            ),
+            chatBlacklist: [ChatId.LvivChat]
         }),
         config(ActionNames.gpt, true, hoursToSeconds(20 as Hours), {
-            chatBlacklist: [ChatId.PauperChat]
+            chatBlacklist: [ChatId.PauperChat, ChatId.LvivChat]
         }),
         config(ActionNames.hello, true, hoursToSeconds(2 as Hours), {
             chatBlacklist: [
@@ -88,7 +89,7 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
             chatWhitelist: [ChatId.PioneerChat]
         }),
         config(ActionNames.long, true, hoursToSeconds(20 as Hours), {
-            chatBlacklist: [ChatId.PauperChat]
+            chatBlacklist: [ChatId.PauperChat, ChatId.LvivChat]
         }),
         config(ActionNames.lotus, true, hoursToSeconds(2 as Hours), {
             chatWhitelist: [ChatId.PioneerChat]
@@ -188,7 +189,7 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
     ]);
 
     return {
-        version: 6,
+        version: 8,
 
         default: new Map(defaultFeatures),
 
