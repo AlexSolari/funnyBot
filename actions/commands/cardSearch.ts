@@ -39,19 +39,9 @@ export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
     .on(/\[([^[]+)\]/gi)
     .do(async (ctx) => {
         const searchRequests = ctx.matchResults.map(async (matchResult) => {
-            if (matchResult[1].includes('|')) {
-                ctx.reply.withText(
-                    escapeMarkdown(
-                        'Використання символу *|* у запиті для пошуку карток скоро не буде підтримуватись.\n\n' +
-                            'Будь ласка, використовуйте символ *#*.'
-                    )
-                );
-            }
-
-            const firstRegexMatch = matchResult[1].replaceAll('|', '#');
             const { message, keyboardData } =
                 await MtgCardSearchService.findForAction(
-                    firstRegexMatch,
+                    matchResult[1],
                     AbortSignal.timeout(REQUEST_TIMEOUT),
                     getObservability(ctx)
                 );
@@ -59,7 +49,7 @@ export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
             if (!message) {
                 const querySplitResult =
                     MtgCardSearchService.getFlagsFromActionMatchResult(
-                        firstRegexMatch
+                        matchResult[1]
                     );
 
                 ctx.reply.andQuote.withText(
@@ -83,12 +73,12 @@ export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
             }
 
             if (message.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
-                sendInChunks(message, ctx, firstRegexMatch);
+                sendInChunks(message, ctx, matchResult[1]);
 
                 return;
             }
 
-            ctx.reply.andQuote.withText(message, firstRegexMatch, {
+            ctx.reply.andQuote.withText(message, matchResult[1], {
                 keyboard: keyboardData.map((x) => [
                     {
                         text: x,

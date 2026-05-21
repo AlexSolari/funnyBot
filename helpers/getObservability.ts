@@ -1,12 +1,10 @@
 import {
     ActionStateBase,
-    TypedEventEmitter,
     ChatContext,
     ReplyContext,
     InlineQueryContext
 } from 'chz-telegram-bot';
 import { ObservabilityHelper } from '../types/observabilityHelper';
-import { EventMap } from '../types/customEvents';
 
 export function getObservability(
     ctx:
@@ -17,7 +15,7 @@ export function getObservability(
     const { eventEmitter, traceId } = ctx.observability;
 
     return {
-        emitter: eventEmitter as TypedEventEmitter<EventMap>,
+        emitter: eventEmitter,
         traceId
     };
 }

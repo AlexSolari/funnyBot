@@ -7,8 +7,8 @@ import { CommandBuilder } from '../../helpers/commandBuilder';
 export const potuzhnoStats = new CommandBuilder('Reaction.PotuzhnoStats')
     .on('топ потужності')
     .do(async (ctx) => {
-        const potuzhnoState = await ctx.loadStateOf(potuzhno);
-        const namesState = await ctx.loadStateOf(nameSave);
+        const potuzhnoState = ctx.loadStateOf(potuzhno);
+        const namesState = ctx.loadStateOf(nameSave);
 
         const idScoreBoard = potuzhnoState.idScoreBoard ?? {};
         const superChargeCount = potuzhnoState.superCharge ?? 1;

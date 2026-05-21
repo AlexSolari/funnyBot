@@ -4,7 +4,7 @@ import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { CommandBuilder } from '../../helpers/commandBuilder';
 
 export const sadwhy = new CommandBuilder('Reaction.SadWhy')
-    .on(/железяка/i)
+    .on(/железяка|залізяка/i)
     .do(async (ctx) => {
         const isDerogatory =
             ctx.messageInfo.text.includes('хуй') ||

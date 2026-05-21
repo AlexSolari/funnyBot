@@ -14,6 +14,7 @@ type InlineQueryCardSearchResult = {
 
 const FLAGS_DELIMITER = '#';
 const SET_AND_NUMBER_REGEX = /^(\w{3,5})\s(\d+)/gi;
+const TELEGRAM_INLINEQUERY_RESPONSE_COUNT_LIMIT = 50;
 
 class CardSearchService {
     private readonly rulesCache: Map<string, string> = new Map();
@@ -267,7 +268,11 @@ class CardSearchService {
             results = cards;
         }
 
-        if (results.length > 50) results = results.slice(0, 49);
+        if (results.length > TELEGRAM_INLINEQUERY_RESPONSE_COUNT_LIMIT)
+            results = results.slice(
+                0,
+                TELEGRAM_INLINEQUERY_RESPONSE_COUNT_LIMIT - 1
+            );
 
         const cardsWithText = await this.buildInlineQueryCardsResult(
             results,
