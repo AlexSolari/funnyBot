@@ -51,6 +51,7 @@ class FeatureProvider {
         if (configFromFile.version < defaultConfig.version) {
             configFromFile.version = defaultConfig.version;
             configFromFile.default = defaultConfig.default;
+            configFromFile.chats = defaultConfig.chats;
 
             await writeFile(
                 this.filePath,

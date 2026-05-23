@@ -24,7 +24,9 @@ export const ActionNames = {
     vitalii: 'vitalii',
     voice: 'voice',
     discussion: 'discussion',
-    newsHelicopter: 'newsHelicopter'
+    newsHelicopter: 'newsHelicopter',
+    randomizer: 'randomizer',
+    who: 'who'
 } as const;
 
 export type ActionName = (typeof ActionNames)[keyof typeof ActionNames];
@@ -69,5 +71,7 @@ export const actionDescriptions: Record<ActionName, string> = {
     [ActionNames.voice]: 'Посилає нахуй за голосовухі',
     [ActionNames.discussion]: 'Слідкує за довгими дискуссіями',
     [ActionNames.newsHelicopter]:
-        'Реагує на згадки mtgstocks.com тематичною картинкою'
+        'Реагує на згадки mtgstocks.com тематичною картинкою',
+    [ActionNames.randomizer]: 'Генерує випадкове число від 1 до X',
+    [ActionNames.who]: 'Вибирає випадкового користувача чату'
 };

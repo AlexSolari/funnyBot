@@ -144,7 +144,9 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
         config(ActionNames.ternopil, false),
         config(ActionNames.test, false),
         config(ActionNames.vitalii, false),
-        config(ActionNames.voice, false)
+        config(ActionNames.voice, false),
+        config(ActionNames.randomizer, false),
+        config(ActionNames.who, false)
     ]);
 
     const botseijuFeatures = await Promise.all([
@@ -179,17 +181,21 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
         config(ActionNames.potuzhno, true, hoursToSeconds(4 as Hours)),
         config(ActionNames.potuzhnoStats, true, 30),
         config(ActionNames.rating, true, hoursToSeconds(2 as Hours)),
-        config(ActionNames.voice, true, hoursToSeconds(1 as Hours))
+        config(ActionNames.voice, true, hoursToSeconds(1 as Hours)),
+        config(ActionNames.randomizer, true, 0),
+        config(ActionNames.who, true, 0)
     ]);
 
     const testFeatures = await Promise.all([
         config(ActionNames.test, true, 1, {
             extraFeatures: new Map([['test', true]])
-        })
+        }),
+        config(ActionNames.randomizer, true, 0),
+        config(ActionNames.who, true, 0)
     ]);
 
     return {
-        version: 8,
+        version: 9,
 
         default: new Map(defaultFeatures),
 

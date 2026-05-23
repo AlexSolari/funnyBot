@@ -30,6 +30,8 @@ import { sadwhy } from './commands/sadwhy';
 import { discussion } from './commands/discussion';
 import { mtgrdle } from './scheduled/mtgrdle';
 import { newsHelicopter } from './commands/newsHelicopter';
+import { randomizer } from './commands/randomizer';
+import { who } from './commands/who';
 
 const commands = [
     cardSearch,
@@ -57,7 +59,9 @@ const commands = [
     dvach,
     ru,
     discussion,
-    newsHelicopter
+    newsHelicopter,
+    randomizer,
+    who
 ] as CommandAction<IActionState>[];
 
 export const testCommands = {
