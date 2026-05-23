@@ -2,7 +2,7 @@ import { CommandBuilder } from '../../helpers/commandBuilder';
 import { nameSave } from './nameSave';
 
 export const who = new CommandBuilder('Reaction.Who')
-    .on(/^(?:who|кто) (.+)$/i)
+    .on(/^\/(?:who|кто) (.+)$/i)
     .do(async (ctx) => {
         const text = ctx.matchResults[0][1];
 

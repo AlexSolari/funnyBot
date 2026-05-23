@@ -1,7 +1,7 @@
 import { CommandBuilder } from '../../helpers/commandBuilder';
 
 export const randomizer = new CommandBuilder('Reaction.Randomizer')
-    .on(/^r (\d+)$/i)
+    .on(/^\/r (\d+)$/i)
     .do(async (ctx) => {
         const max = Number.parseInt(ctx.matchResults[0][1], 10);
         if (max < 1) {
