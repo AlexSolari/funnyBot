@@ -5,7 +5,8 @@ import { nameSave } from './nameSave';
 export const who = new CommandBuilder('Reaction.Who')
     .on(/^\/(?:who|кто) (.+)$/i)
     .do(async (ctx) => {
-        const text = ctx.matchResults[0][1];
+        const question = ctx.matchResults[0][1].trim();
+        const text = question.at(-1) == '?' ? question.slice(0, -1) : question;
 
         const namesState = ctx.loadStateOf(nameSave);
         const users = Object.values(namesState.lastUsername);
