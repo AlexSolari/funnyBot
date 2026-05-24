@@ -1,4 +1,5 @@
 import { CommandBuilder } from '../../helpers/commandBuilder';
+import { randomInt } from '../../helpers/randomInt';
 import { nameSave } from './nameSave';
 
 export const who = new CommandBuilder('Reaction.Who')
@@ -14,7 +15,7 @@ export const who = new CommandBuilder('Reaction.Who')
             return;
         }
 
-        const randomUser = users[Math.floor(Math.random() * users.length)];
-        ctx.reply.withText(`${randomUser} сьогодні ${text}`);
+        const randomUser = users[randomInt(0, users.length - 1)];
+        ctx.reply.withText(`${randomUser} ${text}`);
     })
     .build();
