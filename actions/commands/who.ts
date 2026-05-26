@@ -1,4 +1,5 @@
 import { CommandBuilder } from '../../helpers/commandBuilder';
+import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { randomInt } from '../../helpers/randomInt';
 import { nameSave } from './nameSave';
 
@@ -9,14 +10,20 @@ export const who = new CommandBuilder('Reaction.Who')
         const text = question.at(-1) == '?' ? question.slice(0, -1) : question;
 
         const namesState = ctx.loadStateOf(nameSave);
-        const users = Object.values(namesState.lastUsername);
 
-        if (users.length === 0) {
+        const names = Object.values(namesState.lastUsername);
+        const tags = Object.values(namesState.lastUsertag);
+        const tagsWithNameFallback = tags.map(
+            (tag, index) => tag || names[index]
+        );
+
+        if (tagsWithNameFallback.length === 0) {
             ctx.reply.withText('Не можу знайти нікого у чаті');
             return;
         }
 
-        const randomUser = users[randomInt(0, users.length - 1)];
-        ctx.reply.withText(`${randomUser} ${text}`);
+        const randomUser =
+            tagsWithNameFallback[randomInt(0, tagsWithNameFallback.length - 1)];
+        ctx.reply.withText(`${randomUser} ${escapeMarkdown(text)}`);
     })
     .build();
