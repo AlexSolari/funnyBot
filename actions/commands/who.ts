@@ -13,9 +13,11 @@ export const who = new CommandBuilder('Reaction.Who')
 
         const names = Object.values(namesState.lastUsername);
         const tags = Object.values(namesState.lastUsertag);
-        const tagsWithNameFallback = tags.map(
-            (tag, index) => tag || names[index]
-        );
+        const tagsWithNameFallback = tags.map((tag, index) => {
+            if (tag && tag != 'Unknown user') return tag;
+
+            return names[index];
+        });
 
         if (tagsWithNameFallback.length === 0) {
             ctx.reply.withText('Не можу знайти нікого у чаті');
