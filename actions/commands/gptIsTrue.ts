@@ -63,14 +63,19 @@ export const gptIsTrue = new CommandBuilder('Reaction.Gpt_IsTrue')
         );
         const messagesBeforeTarget = ctx.chatInfo.messageHistory
             .filter((_, i) => i <= index)
-            .map((x) => `${x.from?.username ?? x.from?.first_name}: ${x.text}`);
+            .map(
+                (x) =>
+                    `{ user: "${x.from?.username ?? x.from?.first_name}", message: "${x.text}" }`
+            );
 
         const input = `Analyze following message, is it factual and/or truthful, write a response to it. 
             If needed, cite sources. Be professional. Reply language should be Ukraininan and shoud not containt Markdown syntax, but can contain links. 
+            If the message is not a question, but rather a statement, analyze if the statement is true or false, and explain why.
+            If the message is vague and cannot be clearly identified as true or false, explain the cases when it can be true.
             Here's chat history before the message so you now have a context of a discussion:\n\n[${messagesBeforeTarget.join(
-                ', '
+                '\n'
             )}]\n\n
-            Here's the message you need to reply:\n\n${query}`;
+            Here's the message you need to reply:\n${query}`;
         const response = await getReplyText(input, getObservability(ctx));
 
         ctx.reply.withText(escapeMarkdown(response.output_text));
