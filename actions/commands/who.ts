@@ -26,6 +26,6 @@ export const who = new CommandBuilder('Reaction.Who')
 
         const randomUser =
             tagsWithNameFallback[randomInt(0, tagsWithNameFallback.length - 1)];
-        ctx.reply.withText(`${randomUser} ${escapeMarkdown(text)}`);
+        ctx.reply.withText(escapeMarkdown(`${randomUser} ${text}`));
     })
     .build();
