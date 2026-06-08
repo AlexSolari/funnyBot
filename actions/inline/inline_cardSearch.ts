@@ -17,7 +17,7 @@ export const inlineCardSearch = new InlineQueryActionBuilder(
         for (const cardData of cardsWithText) {
             ctx.showInlineQueryResult({
                 type: 'article',
-                id: ctx.queryText,
+                id: `${ctx.queryText}-${Math.random()}`,
                 title: showSetCode
                     ? `${cardData.card.name} - ${
                           cardData.card.set_name ?? 'Unknown'
