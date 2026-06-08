@@ -33,13 +33,10 @@ async function getReplyText(
     observability: ObservabilityHelper,
     messageHistory?: { from: string; message: string }[]
 ) {
-    const index = chatInfo.messageHistory.findIndex((x) => x.text == text);
-    const messagesBeforeTarget = chatInfo.messageHistory
-        .filter((_, i) => i <= index)
-        .map((x) => ({
-            from: x.from?.username ?? x.from?.first_name,
-            message: x.text
-        }));
+    const historyFromChatInfo = chatInfo.messageHistory.map((x) => ({
+        from: x.from?.username ?? x.from?.first_name,
+        message: x.text
+    }));
 
     const endpoint = 'openai/responses';
 
@@ -49,9 +46,7 @@ async function getReplyText(
             endpoint
         });
 
-        const messages = messageHistory
-            ? messageHistory.filter((_, i) => i <= index)
-            : messagesBeforeTarget;
+        const messages = messageHistory ?? historyFromChatInfo;
         const discussion = messages.map(
             (x) => `{ user: "${x.from}", message: "${x.message}" }`
         );
