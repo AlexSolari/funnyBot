@@ -52,7 +52,7 @@ class ScryfallSearchService {
         });
 
         try {
-            return action().finally(() => {
+            return await action().finally(() => {
                 observability.emitter.emit(EventType.requestEnd, {
                     traceId: observability.traceId,
                     endpoint
