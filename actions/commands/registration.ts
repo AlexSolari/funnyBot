@@ -7,12 +7,13 @@ import { ChatId } from '../../types/chatIds';
 import { ChatInfo, secondsToMilliseconds } from 'chz-telegram-bot';
 import moment from 'moment';
 import { CommandBuilder } from '../../helpers/commandBuilder';
-import { load } from 'cheerio';
 import { Format } from '../../types/mtgFormats';
-import capitalizeFirstLetter from '../../helpers/capitalizeFirstLetter';
 import { traceFetch } from '../../helpers/fetchWithObservability';
 import { getObservability } from '../../helpers/getObservability';
 import { ObservabilityHelper } from '../../types/observabilityHelper';
+import { EventDto } from '../../types/externalApiDefinitions/event';
+import Papa from 'papaparse';
+import { gid, sheetId } from '../../spellseekerDataIds.json';
 
 const daysMap = {
     неділя: 'неділю',
@@ -33,11 +34,8 @@ type EventInfo = {
     link: string;
 };
 
-const timeRegex = /Час початку:\s*(\d\d[.:]\d\d)\s+(\d\d\.\d\d)\s+(\S+)\s*💰/gm;
 const weekdayNameRegex =
     /неділя|понеділок|вівторок|середа|четвер|п’ятниця|субота/;
-const SPELLSEEKER_MTG_THREAD_URL_PART = '/2/';
-const SHORT_FORMAT_NAME_REGEX = /.+,.+,.+,.+/;
 
 export const registration = new CommandBuilder('Reaction.Registration')
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
@@ -168,7 +166,9 @@ async function fetchEventsFromMagicWorld(
         .filter((x) => x.gt.service?.name?.includes(serviceName))
         .map<EventInfo>((x) => ({
             date: x.date,
-            name: x.gt.name ?? x.gt.service?.name ?? serviceName,
+            name:
+                '[Magic World] ' +
+                (x.gt.name ?? x.gt.service?.name ?? serviceName),
             id: x.id,
             spaces: x.gt.space,
             usedSpaces: x.gt.used_space,
@@ -184,101 +184,43 @@ async function loadSpellseekerEvents(
         return [];
     }
 
-    let response = await traceFetch(
-        `https://t.me/s/spellseeker_${formatName}_announces`,
-        observability
-    );
-    let html = await response.text();
-    let findInDOM = load(html);
-    const results = [];
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+    const response = await traceFetch(url, observability);
 
-    const links = [
-        ...findInDOM(
-            '.tgme_widget_message_wrap:last-of-type .tgme_widget_message_text a'
-        )
-    ];
-
-    for (const linkElem of links) {
-        const lastLink = load(linkElem)
-            .text()
-            .replaceAll(SPELLSEEKER_MTG_THREAD_URL_PART, '/');
-
-        if (!lastLink.includes('https:')) {
-            continue;
-        }
-
-        response = await traceFetch(
-            `${lastLink}?embed=1&mode=tme`,
-            observability,
-            {
-                headers: {
-                    referrer: lastLink
-                }
-            }
-        );
-        html = await response.text();
-        findInDOM = load(html);
-
-        const title = findInDOM('.tgme_widget_message_poll_question').text();
-        const titleLowercase = title.toLowerCase();
-
-        if (
-            titleLowercase.includes(formatName) &&
-            titleLowercase.includes('анонс')
-        ) {
-            timeRegex.lastIndex = 0;
-            const match = [...title.matchAll(timeRegex)][0];
-            const [_, time, date, day] = match;
-
-            results.push({
-                date: `${day
-                    .toLowerCase()
-                    .trim()
-                    .replace("'", '’')
-                    .replace(
-                        weekdayNameRegex,
-                        (day) => daysMap[day]
-                    )}, ${date.trim()}, ${time.trim()}`,
-                name: `Spellseeker ${capitalizeFirstLetter(formatName)}`,
-                id: Math.random(),
-                spaces: 0,
-                usedSpaces: -1,
-                link: lastLink
-            });
-        } else if (SHORT_FORMAT_NAME_REGEX.test(titleLowercase)) {
-            const [date, day, name, time] = title.split(',');
-
-            const today = Number.parseInt(moment().startOf('day').format('DD'));
-            const eventDay = Number.parseInt(date.split(' ')[0]);
-
-            if (today > eventDay && Math.abs(today - eventDay) <= 7) {
-                continue;
-            }
-
-            results.push({
-                date: `${day
-                    .trim()
-                    .replace(
-                        weekdayNameRegex,
-                        (day) => daysMap[day]
-                    )}, ${date.trim()}, ${time.trim()}`,
-                name: `${name.trim()}`,
-                id: Math.random(),
-                spaces: 0,
-                usedSpaces: -1,
-                link: lastLink
-            });
-        } else {
-            results.push({
-                date: null,
-                name: title.trim().slice(0, 50),
-                id: Math.random(),
-                spaces: 0,
-                usedSpaces: -1,
-                link: lastLink
-            });
-        }
+    if (!response.ok) {
+        throw new Error(`Failed to fetch sheet: ${response.status}`);
     }
 
-    return results;
+    const csv = await response.text();
+
+    const { data, errors } = Papa.parse<EventDto>(csv, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: true
+    });
+
+    if (errors.length > 0) {
+        console.warn('Parse warnings:', errors);
+    }
+
+    return data
+        .filter(
+            (x) =>
+                x.category == 'mtg' &&
+                x.status == 'open' &&
+                x.title.toLowerCase().includes(formatName)
+        )
+        .map<EventInfo>((x) => ({
+            date: moment(x.start_datetime)
+                .locale('uk')
+                .format('dddd, DD MMMM, HH:mm')
+                .replace(weekdayNameRegex, (day) => daysMap[day]),
+            name: '[SpellSeeker] ' + x.title,
+            id: Number.parseInt(
+                x.event_id.replaceAll('-', '').replaceAll('EVT', '')
+            ),
+            spaces: 0,
+            usedSpaces: -1,
+            link: x.message_link
+        }));
 }

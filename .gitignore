@@ -12,3 +12,4 @@ types/userIds.ts
 openAiToken.json
 content/spellcoins.json
 monitoring/dashboard/dist/
+spellseekerDataIds.json
