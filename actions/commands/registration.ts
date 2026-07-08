@@ -221,6 +221,6 @@ async function loadSpellseekerEvents(
             ),
             spaces: 0,
             usedSpaces: -1,
-            link: x.message_link
+            link: x.message_link.replace('c/3151970401', 'skyhobbyshop/2')
         }));
 }
