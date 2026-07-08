@@ -52,23 +52,25 @@ export const cardSearch = new CommandBuilder('Reaction.CardSearch_Small')
                         matchResult[1]
                     );
 
-                ctx.reply.andQuote.withText(
-                    `Карток по запиту "${escapeMarkdown(
-                        querySplitResult.query
-                    )}" не знайдено, будь ласка уточніть назву:`,
-                    querySplitResult.query,
-                    {
-                        keyboard: [
-                            [
-                                {
-                                    text: querySplitResult.query,
-                                    switch_inline_query_current_chat:
-                                        querySplitResult.query
-                                }
+                ctx.reply.andQuote
+                    .withText(
+                        `Карток по запиту "${escapeMarkdown(
+                            querySplitResult.query
+                        )}" не знайдено, будь ласка уточніть назву:`,
+                        querySplitResult.query,
+                        {
+                            keyboard: [
+                                [
+                                    {
+                                        text: querySplitResult.query,
+                                        switch_inline_query_current_chat:
+                                            querySplitResult.query
+                                    }
+                                ]
                             ]
-                        ]
-                    }
-                );
+                        }
+                    )
+                    .deleteAfter(secondsToMilliseconds(15 as Seconds));
                 return;
             }
 

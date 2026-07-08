@@ -93,7 +93,7 @@ export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
 
         conversation.push({ from: YOU, message: response.output_text });
 
-        const captureController = ctx.reply.withText(
+        const postSendOperationController = ctx.reply.withText(
             escapeMarkdown(response.output_text)
         );
 
@@ -122,10 +122,10 @@ export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
             );
             conversation.push({ from: YOU, message: response.output_text });
 
-            const captureController = replyCtx.reply.withText(
+            const postSendOperationController = replyCtx.reply.withText(
                 escapeMarkdown(response.output_text)
             );
-            captureController.captureReplies(
+            postSendOperationController.captureReplies(
                 [MessageType.Text],
                 replyHandler,
                 controller
@@ -133,7 +133,7 @@ export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
             timer.refresh();
         };
 
-        captureController.captureReplies(
+        postSendOperationController.captureReplies(
             [MessageType.Text],
             replyHandler,
             controller

@@ -1,6 +1,6 @@
 import PotuzhnoState from '../../state/potuzhnoState';
 import {
-    ICaptureController,
+    MessageContext,
     MessageType,
     Seconds,
     secondsToMilliseconds
@@ -8,6 +8,24 @@ import {
 import { randomInt } from '../../helpers/randomInt';
 import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
 import { CommandBuilderWithState } from '../../helpers/commandBuilder';
+
+function sendMessage(
+    superPotuzhno: boolean,
+    ctx: MessageContext<PotuzhnoState>,
+    scoredPoints: number,
+    state: PotuzhnoState
+) {
+    if (superPotuzhno) {
+        state.superCharge += 1;
+        return ctx.reply.withText(
+            `🎉😳😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО \\+${scoredPoints} 💪\n🎉😳😳😳😳😳😳😳🎉`
+        );
+    } else if (Math.random() < 0.2) {
+        return ctx.reply.withVideo('potuzhno');
+    } else {
+        return ctx.reply.withText('Потужно 💪');
+    }
+}
 
 export const potuzhno = new CommandBuilderWithState<PotuzhnoState>(
     'Reaction.Potuzhno',
@@ -33,19 +51,7 @@ export const potuzhno = new CommandBuilderWithState<PotuzhnoState>(
 
         ctx.reply.withReaction('🎉');
 
-        let captureController: ICaptureController;
-        if (superPotuzhno) {
-            captureController = ctx.reply.withText(
-                `🎉😳😳😳😳😳😳😳🎉\n💪 СУПЕР ПОТУЖНО \\+${scoredPoints} 💪\n🎉😳😳😳😳😳😳😳🎉`
-            );
-            state.superCharge += 1;
-        } else if (Math.random() < 0.2) {
-            captureController = ctx.reply.withVideo('potuzhno');
-        } else {
-            captureController = ctx.reply.withText('Потужно 💪');
-        }
-
-        captureController.captureReplies(
+        sendMessage(superPotuzhno, ctx, scoredPoints, state).captureReplies(
             [/дякую/gi],
             async (replyCtx) => {
                 switch (randomInt(0, 4)) {

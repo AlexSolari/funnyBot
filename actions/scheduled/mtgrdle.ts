@@ -18,6 +18,7 @@ import moment from 'moment';
 import { ObservabilityHelper } from '../../types/observabilityHelper';
 import { getObservability } from '../../helpers/getObservability';
 
+const DELETE_DELAY = secondsToMilliseconds(25 as Seconds);
 const WIN_BONUS_POINTS = 5;
 const REQUEST_TIMEOUT = secondsToMilliseconds(30 as Seconds);
 const COLOR_NAMES = {
@@ -50,7 +51,7 @@ const ChatQueryMap = {
     [ChatId.CbgChat]:
         'game:paper legal:edh is:firstprinting -is:dfc is:commander tix>0.02',
     [ChatId.PauperChat]:
-        'game:paper legal:pauper tix>0.2 is:firstprinting -is:dfc'
+        'game:paper legal:pauper tix>0.1 is:firstprinting -is:dfc (-set:clb or tix>0.75)'
 } as Record<number, string>;
 
 async function fetchRandomCard(
@@ -61,7 +62,7 @@ async function fetchRandomCard(
         const query =
             ChatQueryMap[chatInfo.id] ??
             'game:paper tix>1 is:firstprinting -is:dfc';
-        // Fetch a random card from a random set
+
         const randomCards = await ScryfallService.findWithQuery(
             query,
             AbortSignal.timeout(REQUEST_TIMEOUT),
@@ -97,7 +98,11 @@ function getColorClue(targetColors: string[], guessColors: string[]): string {
         .join(', ');
 
     if (guessColorStr === targetColorStr) {
-        return `🟩 Колір: ${targetColorStr}`;
+        return `🟩 Колір: ${targetColorStr || 'Colorless'}`;
+    }
+
+    if (guessColors.length == 5) {
+        return `🟥 Колір: ❔ Ви шото дуже розумні стали, тому 5ц картки не дають підказку щодо кольорів!`;
     }
 
     const commonColors = guessColors.filter((c) => targetColors.includes(c));
@@ -205,7 +210,7 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
             return;
         }
 
-        const captureController = ctx.send.text(
+        const postSendOperationController = ctx.send.text(
             `🃏 *Гра в вгадування MTG картки\\!* 🃏\n\n` +
                 `Нова карта вибрана: ${card.name.replaceAll(/./g, '?')}\n\n` +
                 `Напишіть назву карти англійською у відповідь на це повідомлення, щоб спробувати вгадати та отримати \\+${WIN_BONUS_POINTS} потужності\\!\n`
@@ -227,11 +232,13 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
                 );
 
                 if (guessedCards.length === 0) {
-                    replyCtx.reply.withText(
-                        escapeMarkdown(
-                            `Карта "${escapeMarkdown(guess)}" не знайдена. Спробуй іншу карту!`
+                    replyCtx.reply
+                        .withText(
+                            escapeMarkdown(
+                                `Карта "${escapeMarkdown(guess)}" не знайдена. Спробуй іншу карту!`
+                            )
                         )
-                    );
+                        .deleteAfter(DELETE_DELAY);
                     return;
                 }
 
@@ -245,11 +252,13 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
                         : guessedCards[0];
 
                 if (!guessedCardFace) {
-                    replyCtx.reply.withText(
-                        escapeMarkdown(
-                            `Карта "${escapeMarkdown(guess)}" не знайдена. Спробуй іншу карту!`
+                    replyCtx.reply
+                        .withText(
+                            escapeMarkdown(
+                                `Карта "${escapeMarkdown(guess)}" не знайдена. Спробуй іншу карту!`
+                            )
                         )
-                    );
+                        .deleteAfter(DELETE_DELAY);
                     return;
                 }
 
@@ -298,11 +307,17 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
                         .captureReplies([/.+/], replyHandler, abortController);
                 }
             } catch (e) {
-                replyCtx.reply.withText('Помилка перевірки карти');
+                replyCtx.reply
+                    .withText('Помилка перевірки карти')
+                    .deleteAfter(DELETE_DELAY);
                 console.error(e);
             }
         };
 
-        captureController.captureReplies([/.+/], replyHandler, abortController);
+        postSendOperationController.captureReplies(
+            [/.+/],
+            replyHandler,
+            abortController
+        );
     })
     .build();
