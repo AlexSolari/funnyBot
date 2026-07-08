@@ -12,10 +12,19 @@ export function traceFetch(
         endpoint
     });
 
-    return fetch(url, options).finally(() => {
-        observability.emitter.emit(EventType.requestEnd, {
-            traceId: observability.traceId,
-            endpoint
+    return fetch(url, options)
+        .catch((error) => {
+            observability.emitter.emit('error.generic', {
+                traceId: observability.traceId,
+                error: new Error(`Failed to fetch ${url}: ${error.message}`)
+            });
+
+            throw error;
+        })
+        .finally(() => {
+            observability.emitter.emit(EventType.requestEnd, {
+                traceId: observability.traceId,
+                endpoint
+            });
         });
-    });
 }

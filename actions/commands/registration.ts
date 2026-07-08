@@ -186,11 +186,6 @@ async function loadSpellseekerEvents(
 
     const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
     const response = await traceFetch(url, observability);
-
-    if (!response.ok) {
-        throw new Error(`Failed to fetch sheet: ${response.status}`);
-    }
-
     const csv = await response.text();
 
     const { data, errors } = Papa.parse<EventDto>(csv, {
@@ -200,7 +195,12 @@ async function loadSpellseekerEvents(
     });
 
     if (errors.length > 0) {
-        console.warn('Parse warnings:', errors);
+        observability.emitter.emit('error.generic', {
+            traceId: observability.traceId,
+            error: new Error(
+                `Failed to parse CSV from Google Sheets: ${errors.map((e) => e.message).join('; ')}`
+            )
+        });
     }
 
     return data
