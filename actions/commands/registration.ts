@@ -1,11 +1,12 @@
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import {
     IMWApiResponse,
-    IMwApiResponseDateSlot
+    IMwApiResponseDateSlot,
+    IMWEventDetail
 } from '../../types/externalApiDefinitions/mw';
 import { ChatId } from '../../types/chatIds';
 import { ChatInfo, secondsToMilliseconds } from 'chz-telegram-bot';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { CommandBuilder } from '../../helpers/commandBuilder';
 import { Format } from '../../types/mtgFormats';
 import { traceFetch } from '../../helpers/fetchWithObservability';
@@ -26,7 +27,8 @@ const daysMap = {
 } as Record<string, string>;
 
 type EventInfo = {
-    date: string | null;
+    date: Moment;
+    dateString: string | null;
     name: string;
     id: number;
     spaces: number;
@@ -66,8 +68,8 @@ export const registration = new CommandBuilder('Reaction.Registration')
                     ? ''
                     : ` \\(${event.usedSpaces} уже в резі\\)`;
 
-            text += event.date
-                ? `[${escapeMarkdown(event.name)}](${event.link})${usedSpacesText} відбудеться у ${escapeMarkdown(event.date)}\n`
+            text += event.dateString
+                ? `[${escapeMarkdown(event.name)}](${event.link})${usedSpacesText} відбудеться у ${escapeMarkdown(event.dateString)}\n`
                 : `[${escapeMarkdown(event.name)}](${event.link})${usedSpacesText}\n`;
         }
 
@@ -106,6 +108,8 @@ async function loadEvents(
         console.error(spellseekerResult.reason);
         showRetryLaterMessage = true;
     }
+
+    eventInfos.sort((a, b) => a.date.valueOf() - b.date.valueOf());
 
     return { eventInfos, showRetryLaterMessage };
 }
@@ -152,20 +156,22 @@ async function fetchEventsFromMagicWorld(
         .sort((a, b) => a.date.valueOf() - b.date.valueOf())
         .flatMap(({ date, slots }) =>
             slots.map((x) => {
-                x.date = moment
-                    .utc(
-                        date.valueOf() +
-                            secondsToMilliseconds(x.time.start_time)
-                    )
+                const result = x as IMWEventDetail & { dateObject: Moment };
+
+                result.dateObject = moment.utc(
+                    date.valueOf() + secondsToMilliseconds(x.time.start_time)
+                );
+                result.date = result.dateObject
                     .locale('uk')
                     .format('dddd, DD MMMM, HH:mm')
                     .replace(weekdayNameRegex, (day) => daysMap[day]);
-                return x;
+                return result;
             })
         )
         .filter((x) => x.gt.service?.name?.includes(serviceName))
         .map<EventInfo>((x) => ({
-            date: x.date,
+            date: x.dateObject,
+            dateString: x.date,
             name:
                 '[Magic World] ' +
                 (x.gt.name ?? x.gt.service?.name ?? serviceName),
@@ -210,17 +216,22 @@ async function loadSpellseekerEvents(
                 x.status == 'open' &&
                 x.title.toLowerCase().includes(formatName)
         )
-        .map<EventInfo>((x) => ({
-            date: moment(x.start_datetime)
-                .locale('uk')
-                .format('dddd, DD MMMM, HH:mm')
-                .replace(weekdayNameRegex, (day) => daysMap[day]),
-            name: '[SpellSeeker] ' + x.title,
-            id: Number.parseInt(
-                x.event_id.replaceAll('-', '').replaceAll('EVT', '')
-            ),
-            spaces: 0,
-            usedSpaces: -1,
-            link: x.message_link.replace('c/3151970401', 'skyhobbyshop/2')
-        }));
+        .map<EventInfo>((x) => {
+            const date = moment(x.start_datetime);
+
+            return {
+                date: date,
+                dateString: date
+                    .locale('uk')
+                    .format('dddd, DD MMMM, HH:mm')
+                    .replace(weekdayNameRegex, (day) => daysMap[day]),
+                name: '[SpellSeeker] ' + x.title,
+                id: Number.parseInt(
+                    x.event_id.replaceAll('-', '').replaceAll('EVT', '')
+                ),
+                spaces: 0,
+                usedSpaces: -1,
+                link: x.message_link.replace('c/3151970401', 'skyhobbyshop/2')
+            };
+        });
 }
