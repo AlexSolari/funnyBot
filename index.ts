@@ -130,3 +130,22 @@ process.once('SIGTERM', async () => {
     await botOrchestrator.stopBots();
     process.exit(0);
 });
+
+process.on('uncaughtException', (error: Error, origin: string) => {
+    console.error('[uncaughtException]');
+    console.error('  origin :', origin);
+    console.error('  name   :', error.name);
+    console.error('  message:', error.message);
+    console.error('  → Exiting with code 1\n');
+    process.exit(1);
+});
+
+process.on(
+    'unhandledRejection',
+    (reason: unknown, promise: Promise<unknown>) => {
+        console.error('[unhandledRejection]');
+        console.error('  promise:', promise);
+        console.error('  reason :', reason);
+        console.error('  → Continuing after unhandledRejection\n');
+    }
+);
