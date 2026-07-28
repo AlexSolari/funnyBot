@@ -26,7 +26,8 @@ export const ActionNames = {
     discussion: 'discussion',
     newsHelicopter: 'newsHelicopter',
     randomizer: 'randomizer',
-    who: 'who'
+    who: 'who',
+    newGame: 'newGame'
 } as const;
 
 export type ActionName = (typeof ActionNames)[keyof typeof ActionNames];
@@ -73,5 +74,6 @@ export const actionDescriptions: Record<ActionName, string> = {
     [ActionNames.newsHelicopter]:
         'Реагує на згадки mtgstocks.com тематичною картинкою',
     [ActionNames.randomizer]: 'Генерує випадкове число від 1 до X',
-    [ActionNames.who]: 'Вибирає випадкового користувача чату'
+    [ActionNames.who]: 'Вибирає випадкового користувача чату',
+    [ActionNames.newGame]: 'Починає нову гру в ПП'
 };

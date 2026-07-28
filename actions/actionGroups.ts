@@ -32,6 +32,7 @@ import { mtgrdle } from './scheduled/mtgrdle';
 import { newsHelicopter } from './commands/newsHelicopter';
 import { randomizer } from './commands/randomizer';
 import { who } from './commands/who';
+import { newGame } from './commands/newGame';
 
 const commands = [
     cardSearch,
@@ -61,7 +62,8 @@ const commands = [
     discussion,
     newsHelicopter,
     randomizer,
-    who
+    who,
+    newGame
 ] as CommandAction<IActionState>[];
 
 export const testCommands = {

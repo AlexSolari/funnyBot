@@ -53,6 +53,7 @@ async function config(
 
 export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfiguration> {
     const defaultFeatures = await Promise.all([
+        config(ActionNames.newGame, true, 30),
         config(ActionNames.newsHelicopter, true, hoursToSeconds(10 as Hours), {
             chatWhitelist: [ChatId.CbgChat]
         }),
@@ -195,7 +196,7 @@ export async function createDefaultBotConfig(): Promise<BotFeatureSetsConfigurat
     ]);
 
     return {
-        version: 9,
+        version: 11,
 
         default: new Map(defaultFeatures),
 
