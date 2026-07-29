@@ -95,7 +95,9 @@ if (process.env.NODE_ENV == 'production') {
         actions: {
             commands: [cardSearch],
             scheduled: [],
-            inlineQueries: [inlineCardSearch]
+            inlineQueries: [inlineCardSearch],
+
+            messageFilter: (message) => message.text.includes('[')
         },
         chats: {},
         scheduledPeriod: (60 * 5) as Seconds
