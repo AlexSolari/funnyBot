@@ -1,4 +1,11 @@
-import { botOrchestrator, Seconds } from 'chz-telegram-bot';
+import {
+    botOrchestrator,
+    CommandAction,
+    InlineQueryAction,
+    IActionState,
+    ScheduledAction,
+    Seconds
+} from 'chz-telegram-bot';
 import {
     genshinCommands,
     mtgCommands,
@@ -44,68 +51,63 @@ await featureProvider.load();
 await startDashboardServer();
 
 if (process.env.NODE_ENV == 'production') {
-    const kekruga = await botOrchestrator.startBot({
-        name: 'kekruga',
-        tokenProvider: () => readFile('token.prod', 'utf-8'),
-        actions: {
-            commands: mtgCommands.commands,
-            scheduled: mtgCommands.scheduled,
-            inlineQueries: mtgCommands.inline
-        },
-        chats: {
-            ModernChat: ChatId.ModernChat,
-            PioneerChat: ChatId.PioneerChat,
-            SpellSeeker: ChatId.SpellSeeker,
-            StandardChat: ChatId.StandardChat,
-            PauperChat: ChatId.PauperChat,
-            CbgChant: ChatId.CbgChat
-        },
-        scheduledPeriod: (60 * 5) as Seconds
-    });
-    const botseiju = await botOrchestrator.startBot({
-        name: 'botseiju',
-        tokenProvider: () => readFile('token.lviv', 'utf-8'),
-        actions: {
-            commands: mtgCommands.commands,
-            scheduled: mtgCommands.scheduled,
-            inlineQueries: mtgCommands.inline
-        },
-        chats: {
-            LvivChat: ChatId.LvivChat,
-            FrankivskChat: ChatId.FrankivskChat
-        },
-        scheduledPeriod: (60 * 5) as Seconds
-    });
-    const xiao = await botOrchestrator.startBot({
-        name: 'xiao',
-        tokenProvider: () => readFile('token.genshit', 'utf-8'),
-        actions: {
-            commands: genshinCommands.commands,
-            scheduled: genshinCommands.scheduled,
-            inlineQueries: []
-        },
-        chats: {
-            GenshinChat: ChatId.GenshinChat
-        },
-        scheduledPeriod: (60 * 5) as Seconds
-    });
-    const zirda = await botOrchestrator.startBot({
-        name: 'zirda',
-        tokenProvider: () => readFile('token.zirda', 'utf-8'),
-        actions: {
-            commands: [cardSearch],
-            scheduled: [],
-            inlineQueries: [inlineCardSearch],
-
-            messageFilter: (message) => message.text.includes('[')
-        },
-        chats: {},
-        scheduledPeriod: (60 * 5) as Seconds
+    const fromGroup = (group: {
+        commands: CommandAction<IActionState>[];
+        scheduled: ScheduledAction<IActionState>[];
+        inline?: InlineQueryAction[];
+    }) => ({
+        commands: group.commands,
+        scheduled: group.scheduled,
+        inlineQueries: group.inline ?? []
     });
 
-    [botseiju, kekruga, zirda, xiao].forEach((bot) => {
-        bot.eventEmitter.onEach(getEventHandler(bot.name));
-    });
+    const bots = await Promise.all([
+        botOrchestrator.startBot({
+            name: 'kekruga',
+            tokenProvider: () => readFile('token.prod', 'utf-8'),
+            actions: fromGroup(mtgCommands),
+            chats: {
+                ModernChat: ChatId.ModernChat,
+                PioneerChat: ChatId.PioneerChat,
+                SpellSeeker: ChatId.SpellSeeker,
+                StandardChat: ChatId.StandardChat,
+                PauperChat: ChatId.PauperChat,
+                CbgChant: ChatId.CbgChat
+            },
+            scheduledPeriod: (60 * 5) as Seconds
+        }),
+        botOrchestrator.startBot({
+            name: 'botseiju',
+            tokenProvider: () => readFile('token.lviv', 'utf-8'),
+            actions: fromGroup(mtgCommands),
+            chats: {
+                LvivChat: ChatId.LvivChat,
+                FrankivskChat: ChatId.FrankivskChat
+            },
+            scheduledPeriod: (60 * 5) as Seconds
+        }),
+        botOrchestrator.startBot({
+            name: 'xiao',
+            tokenProvider: () => readFile('token.genshit', 'utf-8'),
+            actions: fromGroup(genshinCommands),
+            chats: { GenshinChat: ChatId.GenshinChat },
+            scheduledPeriod: (60 * 5) as Seconds
+        }),
+        botOrchestrator.startBot({
+            name: 'zirda',
+            tokenProvider: () => readFile('token.zirda', 'utf-8'),
+            actions: {
+                commands: [cardSearch],
+                scheduled: [],
+                inlineQueries: [inlineCardSearch],
+                messageFilter: (message) => message.text.includes('[')
+            },
+            chats: {},
+            scheduledPeriod: (60 * 5) as Seconds
+        })
+    ]);
+
+    bots.forEach((bot) => bot.eventEmitter.onEach(getEventHandler(bot.name)));
 } else {
     const bot = await botOrchestrator.startBot({
         name: 'test',
