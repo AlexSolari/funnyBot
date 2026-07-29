@@ -164,7 +164,7 @@ class CardSearchService {
                 observability
             );
             return {
-                message: `[\\${escapeMarkdown(resultCard.name)}](${
+                message: `[${escapeMarkdown(resultCard.name)}](${
                     resultCard.image_uris.normal ?? ScryfallService.cardBack
                 })${extraText}`,
                 keyboardData: keyboardData
@@ -186,7 +186,7 @@ class CardSearchService {
             );
 
             return {
-                message: `[\\${escapeMarkdown(exactMatch.name)}](${
+                message: `[${escapeMarkdown(exactMatch.name)}](${
                     exactMatch.image_uris.normal ?? ScryfallService.cardBack
                 })${extraText}`,
                 keyboardData: [query]
@@ -292,7 +292,7 @@ class CardSearchService {
         const cardsWithText: InlineQueryCardSearchResult[] = [];
 
         for (const card of cards) {
-            const responseText = `[\\${escapeMarkdown(card.name)}](${
+            const responseText = `[${escapeMarkdown(card.name)}](${
                 card.image_uris.normal ?? ScryfallService.cardBack
             })${await this.transfromFlags(flags, card, signal, observability)}`;
 
@@ -378,7 +378,7 @@ class CardSearchService {
         if (!resultCard) return { message: null, card: null };
 
         return {
-            message: `[\\${escapeMarkdown(resultCard.name)}](${
+            message: `[${escapeMarkdown(resultCard.name)}](${
                 resultCard.image_uris.normal ?? ScryfallService.cardBack
             })`,
             card: resultCard

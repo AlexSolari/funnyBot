@@ -58,7 +58,7 @@ async function rewardPotuzhnoPoints(
     card: CardInfo
 ) {
     replyCtx.reply.withText(
-        `🎉 *Правильно\\!* Ти вгадав карту: [\\${escapeMarkdown(card.name)}](${card.image_uris.normal ?? ScryfallService.cardBack})\n\n 💪 \\+${WIN_BONUS_POINTS} потужності\\! 💪`
+        `🎉 *Правильно\\!* Ти вгадав карту: [${escapeMarkdown(card.name)}](${card.image_uris.normal ?? ScryfallService.cardBack})\n\n 💪 \\+${WIN_BONUS_POINTS} потужності\\! 💪`
     );
 
     await replyCtx.updateStateOf(potuzhno, async (state) => {
@@ -165,7 +165,7 @@ class MtgrdleService {
                 if (guessCard.name === card.name) {
                     if (replyCtx.chatInfo.id == ChatId.PauperChat) {
                         replyCtx.reply.withText(
-                            `🎉 *Правильно\\!* Ти вгадав карту: [\\${escapeMarkdown(card.name)}](${card.image_uris.normal ?? ScryfallService.cardBack})`
+                            `🎉 *Правильно\\!* Ти вгадав карту: [${escapeMarkdown(card.name)}](${card.image_uris.normal ?? ScryfallService.cardBack})`
                         );
                     } else await rewardPotuzhnoPoints(replyCtx, card);
 
