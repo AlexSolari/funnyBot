@@ -111,7 +111,7 @@ class ScryfallSearchService {
             'cards/search',
             async () => {
                 const response = await fetch(
-                    `https://api.scryfall.com/cards/search?q=${query}`,
+                    `https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}`,
                     { signal }
                 );
                 const data = (await response.json()) as IScryfallQueryResponse;
@@ -133,7 +133,7 @@ class ScryfallSearchService {
             'cards/named',
             async () => {
                 const response = await fetch(
-                    `https://api.scryfall.com/cards/named?exact=${name}`,
+                    `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(name)}`,
                     { signal }
                 );
                 const data = (await response.json()) as IScryfallFuzzyResponse;

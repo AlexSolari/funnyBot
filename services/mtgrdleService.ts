@@ -109,7 +109,7 @@ class MtgrdleService {
                     replyCtx.reply
                         .withText(
                             escapeMarkdown(
-                                `Карта "${escapeMarkdown(guess)}" не знайдена. Спробуй іншу карту!`
+                                `Карта "${guess}" не знайдена. Спробуй іншу карту!`
                             )
                         )
                         .deleteAfter(DELETE_DELAY);
@@ -129,7 +129,7 @@ class MtgrdleService {
                     replyCtx.reply
                         .withText(
                             escapeMarkdown(
-                                `Карта "${escapeMarkdown(guess)}" не знайдена. Спробуй іншу карту!`
+                                `Карта "${guess}" не знайдена. Спробуй іншу карту!`
                             )
                         )
                         .deleteAfter(DELETE_DELAY);
