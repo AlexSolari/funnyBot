@@ -36,7 +36,7 @@ async function getReplyText(input: string, observability: ObservabilityHelper) {
             endpoint
         });
         return await client.responses.create({
-            model: 'gpt-5',
+            model: 'gpt-5-mini',
             input
         });
     } finally {

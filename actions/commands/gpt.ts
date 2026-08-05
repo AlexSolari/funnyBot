@@ -52,7 +52,7 @@ async function getReplyText(
         );
 
         return await client.responses.create({
-            model: 'gpt-5',
+            model: 'gpt-5-mini',
             input: `${promt}\nHere's chat history before the message so you now have a context of a discussion:\n\n[${discussion.join(
                 '\n'
             )}]\n\n
