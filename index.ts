@@ -150,6 +150,7 @@ process.on(
         console.error('[unhandledRejection]');
         console.error('  promise:', promise);
         console.error('  reason :', reason);
-        console.error('  → Continuing after unhandledRejection\n');
+        console.error('  → Exiting with code 1\n');
+        process.exit(1);
     }
 );
