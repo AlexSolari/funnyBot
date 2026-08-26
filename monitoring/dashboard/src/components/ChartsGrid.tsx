@@ -20,6 +20,7 @@ import type {
     CurrentStats
 } from '../types';
 import { formatTime } from '../utils/formatters';
+import { CHART_COLORS, CHART_STYLES } from '../utils/constants';
 
 ChartJS.register(
     CategoryScale,
@@ -34,22 +35,31 @@ ChartJS.register(
     Legend
 );
 
+// Shared styling so all charts stay visually consistent
+const tickStyle = { color: CHART_STYLES.labelColor };
+const gridStyle = { color: CHART_STYLES.gridColor };
+const legendStyle = { labels: { color: CHART_STYLES.labelColor } };
+const xScale = { ticks: tickStyle, grid: gridStyle };
+
+function formatLogTickLabel(
+    value: string | number,
+    formatMs: (v: number) => string
+): string {
+    const v = Number(value);
+    const log = Math.log10(v);
+    if (!Number.isInteger(log)) return '';
+    return formatMs(v);
+}
+
 const chartDefaults: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: {
-        legend: {
-            labels: { color: '#8b949e' }
-        }
-    },
+    plugins: { legend: legendStyle },
     scales: {
-        x: {
-            ticks: { color: '#8b949e' },
-            grid: { color: '#30363d' }
-        },
+        x: xScale,
         y: {
-            ticks: { color: '#8b949e' },
-            grid: { color: '#30363d' },
+            ticks: tickStyle,
+            grid: gridStyle,
             beginAtZero: true
         }
     }
@@ -58,30 +68,20 @@ const chartDefaults: ChartOptions<'line'> = {
 const logLatencyChartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: {
-        legend: {
-            labels: { color: '#8b949e' }
-        }
-    },
+    plugins: { legend: legendStyle },
     scales: {
-        x: {
-            ticks: { color: '#8b949e' },
-            grid: { color: '#30363d' }
-        },
+        x: xScale,
         y: {
             type: 'logarithmic',
             ticks: {
-                color: '#8b949e',
+                ...tickStyle,
                 autoSkip: false,
-                callback: (value) => {
-                    const v = Number(value);
-                    const log = Math.log10(v);
-                    if (!Number.isInteger(log)) return '';
-                    if (v >= 1000) return `${v / 1000}s`;
-                    return `${v}ms`;
-                }
+                callback: (value) =>
+                    formatLogTickLabel(value, (v) =>
+                        v >= 1000 ? `${v / 1000}s` : `${v}ms`
+                    )
             },
-            grid: { color: '#30363d' },
+            grid: gridStyle,
             min: 1
         }
     }
@@ -90,27 +90,18 @@ const logLatencyChartOptions: ChartOptions<'line'> = {
 const logBarChartOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: {
-        legend: { display: false }
-    },
+    plugins: { legend: { display: false } },
     scales: {
-        x: {
-            ticks: { color: '#8b949e' },
-            grid: { color: '#30363d' }
-        },
+        x: xScale,
         y: {
             type: 'logarithmic',
             ticks: {
-                color: '#8b949e',
+                ...tickStyle,
                 autoSkip: false,
-                callback: (value) => {
-                    const v = Number(value);
-                    const log = Math.log10(v);
-                    if (!Number.isInteger(log)) return '';
-                    return v.toLocaleString();
-                }
+                callback: (value) =>
+                    formatLogTickLabel(value, (v) => v.toLocaleString())
             },
-            grid: { color: '#30363d' },
+            grid: gridStyle,
             min: 1
         }
     }
@@ -135,23 +126,23 @@ export function ChartsGrid({
             {
                 label: 'Messages',
                 data: throughput.messagesReceived.map((p) => p.value),
-                borderColor: '#58a6ff',
+                borderColor: CHART_COLORS.messages,
                 fill: false,
-                tension: 0.3
+                tension: CHART_STYLES.tension
             },
             {
                 label: 'Commands',
                 data: throughput.commandsExecuted.map((p) => p.value),
-                borderColor: '#3fb950',
+                borderColor: CHART_COLORS.commands,
                 fill: false,
-                tension: 0.3
+                tension: CHART_STYLES.tension
             },
             {
                 label: 'Inline',
                 data: throughput.inlineQueriesProcessed.map((p) => p.value),
-                borderColor: '#a371f7',
+                borderColor: CHART_COLORS.inline,
                 fill: false,
-                tension: 0.3
+                tension: CHART_STYLES.tension
             }
         ]
     };
@@ -162,10 +153,10 @@ export function ChartsGrid({
             {
                 label: 'Errors',
                 data: throughput.errors.map((p) => p.value),
-                borderColor: '#f85149',
+                borderColor: CHART_COLORS.errors,
                 backgroundColor: 'rgba(248,81,73,0.1)',
                 fill: true,
-                tension: 0.3
+                tension: CHART_STYLES.tension
             }
         ]
     };
@@ -176,10 +167,10 @@ export function ChartsGrid({
             {
                 label: 'Avg Latency (ms)',
                 data: throughput.avgLatency?.map((p) => p.value) || [],
-                borderColor: '#d29922',
+                borderColor: CHART_COLORS.latency,
                 backgroundColor: 'rgba(210,153,34,0.1)',
                 fill: true,
-                tension: 0.3
+                tension: CHART_STYLES.tension
             }
         ]
     };
@@ -205,7 +196,7 @@ export function ChartsGrid({
                     const prev = i > 0 ? latencyHistogram[i - 1].count : 0;
                     return h.count - prev;
                 }),
-                backgroundColor: '#58a6ff'
+                backgroundColor: CHART_COLORS.messages
             }
         ]
     };
@@ -222,11 +213,11 @@ export function ChartsGrid({
                     stats.totalApiRequests
                 ],
                 backgroundColor: [
-                    '#58a6ff',
-                    '#3fb950',
-                    '#a371f7',
-                    '#f0883e',
-                    '#d29922'
+                    CHART_COLORS.messages,
+                    CHART_COLORS.commands,
+                    CHART_COLORS.inline,
+                    CHART_COLORS.scheduled,
+                    CHART_COLORS.latency
                 ]
             }
         ]
@@ -292,7 +283,7 @@ export function ChartsGrid({
                             plugins: {
                                 legend: {
                                     position: 'right',
-                                    labels: { color: '#8b949e' }
+                                    labels: { color: CHART_STYLES.labelColor }
                                 }
                             }
                         }}

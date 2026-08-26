@@ -1,6 +1,7 @@
 import type { DashboardData, Trace, TraceSearchQuery } from './types';
 
-const API_BASE = 'bots/api';
+// Derived the same way as the SSE hook so both stay in sync with the deployed base path
+const API_BASE = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/api`;
 
 export async function fetchDashboardData(): Promise<DashboardData> {
     const response = await fetch(`${API_BASE}/dashboard`);

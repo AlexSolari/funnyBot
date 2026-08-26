@@ -1,35 +1,133 @@
-import { memo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import type { Trace } from '../types';
-import { formatDateTime, getTraceDuration, getTraceStatus } from '../utils/formatters';
+import {
+    formatDateTime,
+    getLatencyClass,
+    getTraceDuration,
+    getTraceStatus
+} from '../utils/formatters';
+import { UI_CONSTANTS } from '../utils/constants';
 
 interface TracesTableProps {
     readonly traces: Trace[];
     readonly onTraceClick: (traceId: string) => void;
 }
 
+type SortColumn = 'preview' | 'botName' | 'operationType' | 'duration' | 'status' | 'time';
+type SortDirection = 'asc' | 'desc';
+
+// Numeric columns are most useful sorted highest-first by default
+const DEFAULT_DIRECTION: Record<SortColumn, SortDirection> = {
+    preview: 'asc',
+    botName: 'asc',
+    operationType: 'asc',
+    duration: 'desc',
+    status: 'asc',
+    time: 'desc'
+};
+
 function getTracePreview(trace: Trace): string {
     // Show message preview if available, otherwise show operation name
     if (trace.messagePreview) {
-        return trace.messagePreview.length > 50 
-            ? trace.messagePreview.substring(0, 50) + '...' 
+        const maxLength = UI_CONSTANTS.messagePreviewMaxLength;
+        return trace.messagePreview.length > maxLength
+            ? trace.messagePreview.substring(0, maxLength) + '...'
             : trace.messagePreview;
     }
     return trace.rootSpan.operationName;
 }
 
+function getSortValue(trace: Trace, column: SortColumn): string | number {
+    switch (column) {
+        case 'preview':
+            return getTracePreview(trace).toLowerCase();
+        case 'botName':
+            return trace.botName.toLowerCase();
+        case 'operationType':
+            return trace.operationType;
+        case 'duration':
+            return getTraceDuration(trace);
+        case 'status':
+            return getTraceStatus(trace);
+        case 'time':
+            return trace.startTime;
+    }
+}
+
+interface SortableHeaderProps {
+    readonly column: SortColumn;
+    readonly label: string;
+    readonly sortColumn: SortColumn | null;
+    readonly sortDirection: SortDirection;
+    readonly onSort: (column: SortColumn) => void;
+}
+
+function SortableHeader({
+    column,
+    label,
+    sortColumn,
+    sortDirection,
+    onSort
+}: SortableHeaderProps) {
+    const isActive = sortColumn === column;
+    let indicator = '';
+    if (isActive) {
+        indicator = sortDirection === 'asc' ? '▲' : '▼';
+    }
+    return (
+        <th>
+            <button
+                type="button"
+                className="sortable-header"
+                onClick={() => onSort(column)}
+                aria-label={`Sort by ${label}`}
+            >
+                {label}
+                <span className="sort-indicator">{indicator}</span>
+            </button>
+        </th>
+    );
+}
+
 function TracesTableComponent({ traces, onTraceClick }: TracesTableProps) {
+    const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
+    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
+    const handleSort = (column: SortColumn) => {
+        if (sortColumn === column) {
+            setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+        } else {
+            setSortColumn(column);
+            setSortDirection(DEFAULT_DIRECTION[column]);
+        }
+    };
+
+    const sortedTraces = useMemo(() => {
+        if (!sortColumn) return traces;
+        const factor = sortDirection === 'asc' ? 1 : -1;
+        return [...traces].sort((a, b) => {
+            const va = getSortValue(a, sortColumn);
+            const vb = getSortValue(b, sortColumn);
+            if (va < vb) return -1 * factor;
+            if (va > vb) return 1 * factor;
+            return 0;
+        });
+    }, [traces, sortColumn, sortDirection]);
+
+    const headerProps = { sortColumn, sortDirection, onSort: handleSort };
+
     if (traces.length === 0) {
         return (
             <div className="chart-card">
                 <table className="traces-table">
                     <thead>
                         <tr>
-                            <th>Message / Operation</th>
-                            <th>Bot</th>
-                            <th>Type</th>
-                            <th>Duration</th>
-                            <th>Status</th>
-                            <th>Time</th>
+                            <SortableHeader column="preview" label="Message / Operation" {...headerProps} />
+                            <SortableHeader column="botName" label="Bot" {...headerProps} />
+                            <SortableHeader column="operationType" label="Type" {...headerProps} />
+                            <SortableHeader column="duration" label="Duration" {...headerProps} />
+                            <SortableHeader column="status" label="Status" {...headerProps} />
+                            <SortableHeader column="time" label="Time" {...headerProps} />
                         </tr>
                     </thead>
                     <tbody>
@@ -55,16 +153,16 @@ function TracesTableComponent({ traces, onTraceClick }: TracesTableProps) {
             <table className="traces-table">
                 <thead>
                     <tr>
-                        <th>Message / Operation</th>
-                        <th>Bot</th>
-                        <th>Type</th>
-                        <th>Duration</th>
-                        <th>Status</th>
-                        <th>Time</th>
+                        <SortableHeader column="preview" label="Message / Operation" {...headerProps} />
+                        <SortableHeader column="botName" label="Bot" {...headerProps} />
+                        <SortableHeader column="operationType" label="Type" {...headerProps} />
+                        <SortableHeader column="duration" label="Duration" {...headerProps} />
+                        <SortableHeader column="status" label="Status" {...headerProps} />
+                        <SortableHeader column="time" label="Time" {...headerProps} />
                     </tr>
                 </thead>
                 <tbody>
-                    {traces.map((trace) => {
+                    {sortedTraces.map((trace) => {
                         const status = getTraceStatus(trace);
                         const duration = getTraceDuration(trace);
                         return (
@@ -84,7 +182,9 @@ function TracesTableComponent({ traces, onTraceClick }: TracesTableProps) {
                                         {trace.operationType}
                                     </span>
                                 </td>
-                                <td>{`${duration}ms`}</td>
+                                <td className={getLatencyClass(duration)}>
+                                    <span className="latency-value">{`${duration}ms`}</span>
+                                </td>
                                 <td>
                                     <span
                                         className={`status-badge-table status-${status}`}

@@ -69,6 +69,7 @@ export function TraceSearchForm({ botNames, onSearch, isSearching = false }: Tra
                         <option value="command">Command</option>
                         <option value="inline">Inline</option>
                         <option value="scheduled">Scheduled</option>
+                        <option value="api">API</option>
                     </select>
                 </div>
                 <div className="form-group">
@@ -99,7 +100,7 @@ export function TraceSearchForm({ botNames, onSearch, isSearching = false }: Tra
                     <input
                         type="number"
                         id="searchMaxDuration"
-                        placeholder="10000"
+                        placeholder={String(SEARCH_DEFAULTS.maxDurationPlaceholder)}
                         value={maxDuration}
                         onChange={(e) => setMaxDuration(e.target.value)}
                     />

@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { formatNumber } from '../utils/formatters';
+import { DASHBOARD_SETTINGS } from '../utils/constants';
 import type { CurrentStats, ThroughputMetrics } from '../types';
 
 interface StatsGridProps {
@@ -8,7 +9,9 @@ interface StatsGridProps {
 }
 
 function StatsGridComponent({ stats, throughput }: StatsGridProps) {
-    const recentMessages = throughput.messagesReceived.slice(-5);
+    const recentMessages = throughput.messagesReceived.slice(
+        -DASHBOARD_SETTINGS.recentMessagesCount
+    );
     const avgRate =
         recentMessages.length > 0
             ? recentMessages.reduce((sum, p) => sum + p.value, 0) /
@@ -48,7 +51,7 @@ function StatsGridComponent({ stats, throughput }: StatsGridProps) {
                     {formatNumber(stats.totalApiRequests)}
                 </div>
             </div>
-            <div className="stat-card error">
+            <div className={`stat-card${stats.totalErrors > 0 ? ' error' : ''}`}>
                 <div className="label">Errors</div>
                 <div className="value">{formatNumber(stats.totalErrors)}</div>
             </div>

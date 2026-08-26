@@ -23,7 +23,7 @@ export function Header({
                         checked={autoRefresh}
                         onChange={(e) => onAutoRefreshChange(e.target.checked)}
                     />
-                    Auto-refresh (5s)
+                    Auto-refresh (live)
                 </label>
                 <button className="btn btn-secondary" onClick={onRefresh}>
                     Refresh Now

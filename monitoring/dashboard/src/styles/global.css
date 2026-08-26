@@ -263,7 +263,7 @@ body {
 
 .traces-table th {
     text-align: left;
-    padding: 12px;
+    padding: 0;
     background: var(--bg-tertiary);
     color: var(--text-secondary);
     font-weight: 600;
@@ -271,6 +271,30 @@ body {
     font-size: 11px;
     letter-spacing: 0.5px;
     border-bottom: 1px solid var(--border-color);
+}
+
+.sortable-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 12px;
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+}
+
+.sortable-header:hover {
+    color: var(--text-primary);
+}
+
+.sort-indicator {
+    font-size: 9px;
+    color: var(--accent-blue);
 }
 
 .traces-table td {

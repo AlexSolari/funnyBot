@@ -24,22 +24,8 @@ export const SEARCH_DEFAULTS = {
 
 // Dashboard refresh
 export const DASHBOARD_SETTINGS = {
-    refreshIntervalMs: 5000,
     recentMessagesCount: 5
 } as const;
-
-// Latency histogram bucket labels
-export const HISTOGRAM_LABELS = [
-    '<10ms',
-    '<25ms',
-    '<50ms',
-    '<100ms',
-    '<250ms',
-    '<500ms',
-    '<1s',
-    '<2.5s',
-    '>2.5s'
-] as const;
 
 // Message preview max length
 export const UI_CONSTANTS = {

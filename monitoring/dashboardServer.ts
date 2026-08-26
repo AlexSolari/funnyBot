@@ -100,17 +100,16 @@ const NO_CACHE_HEADERS = {
     Expires: '0'
 };
 
+// Vite content-hashes these filenames, so they're safe to cache forever
+const IMMUTABLE_CACHE_HEADERS = {
+    'Cache-Control': 'public, max-age=31536000, immutable'
+};
+
 function parseQueryString(url: string): Record<string, string> {
-    const queryString = url.split('?')[1] || '';
     const params: Record<string, string> = {};
-
-    for (const pair of queryString.split('&')) {
-        const [key, value] = pair.split('=');
-        if (key) {
-            params[decodeURIComponent(key)] = decodeURIComponent(value || '');
-        }
+    for (const [key, value] of new URL(url).searchParams) {
+        params[key] = value;
     }
-
     return params;
 }
 
@@ -133,6 +132,9 @@ async function serveStaticFile(filePath: string): Promise<Response> {
     const fullPath = join(distPath, filePath);
     const ext = extname(filePath);
     const mimeType = MIME_TYPES[ext] || 'application/octet-stream';
+    // The SPA entry point must always be revalidated; hashed assets can be cached forever
+    const cacheHeaders =
+        filePath === 'index.html' ? NO_CACHE_HEADERS : IMMUTABLE_CACHE_HEADERS;
 
     try {
         const content = await readFile(fullPath);
@@ -140,35 +142,12 @@ async function serveStaticFile(filePath: string): Promise<Response> {
             status: 200,
             headers: {
                 'Content-Type': mimeType,
-                ...NO_CACHE_HEADERS
+                ...cacheHeaders
             }
         });
     } catch {
-        // Fallback to legacy dashboard.html if React build not found
-        if (filePath === 'index.html') {
-            try {
-                const legacyPath = join(import.meta.dirname, 'dashboard.html');
-                const html = await readFile(legacyPath, 'utf-8');
-                return new Response(html, {
-                    status: 200,
-                    headers: { 'Content-Type': 'text/html; charset=utf-8' }
-                });
-            } catch {
-                return new Response(getInlineDashboard(), {
-                    status: 200,
-                    headers: { 'Content-Type': 'text/html; charset=utf-8' }
-                });
-            }
-        }
         return errorResponse('Not found', 404);
     }
-}
-
-function getInlineDashboard(): string {
-    return `<!DOCTYPE html>
-<html><head><title>Bot Monitoring</title></head>
-<body><h1>Dashboard Loading Error</h1><p>Please ensure dashboard.html exists in the monitoring folder.</p></body>
-</html>`;
 }
 
 function handleCorsOptions(): Response {
@@ -227,14 +206,53 @@ function handleTraceById(req: Request & { params: { id: string } }): Response {
     return errorResponse('Trace not found', 404);
 }
 
-async function handleAssets(req: Request): Promise<Response> {
+async function handleAssets(
+    req: Request,
+    routePrefix: string
+): Promise<Response> {
     const url = new URL(req.url);
-    const routePrefix = process.env.NODE_ENV === 'production' ? '' : '/bots';
     const normalizedPath = routePrefix
         ? url.pathname.replace(new RegExp(`^${routePrefix}/`), '/')
         : url.pathname;
     const assetPath = normalizedPath.substring(1); // Remove leading /
     return serveStaticFile(assetPath);
+}
+
+// Single source of truth for routes; prefixed with '' in production or '/bots' behind the dev proxy
+function buildRoutes(prefix: string) {
+    return {
+        [prefix || '/']: () => serveStaticFile('index.html'),
+        [`${prefix}/index.html`]: () => serveStaticFile('index.html'),
+        [`${prefix}/api/events`]: {
+            OPTIONS: handleCorsOptions,
+            GET: handleSSE
+        },
+        [`${prefix}/api/dashboard`]: {
+            OPTIONS: handleCorsOptions,
+            GET: handleDashboard
+        },
+        [`${prefix}/api/stats`]: {
+            OPTIONS: handleCorsOptions,
+            GET: handleStats
+        },
+        [`${prefix}/api/throughput`]: {
+            OPTIONS: handleCorsOptions,
+            GET: handleThroughput
+        },
+        [`${prefix}/api/latency`]: {
+            OPTIONS: handleCorsOptions,
+            GET: handleLatency
+        },
+        [`${prefix}/api/traces`]: {
+            OPTIONS: handleCorsOptions,
+            GET: handleTraces
+        },
+        [`${prefix}/api/trace/:id`]: {
+            OPTIONS: handleCorsOptions,
+            GET: handleTraceById
+        },
+        [`${prefix}/assets/*`]: (req: Request) => handleAssets(req, prefix)
+    };
 }
 
 export function startDashboardServer(
@@ -243,77 +261,11 @@ export function startDashboardServer(
     return new Promise((resolve, reject) => {
         try {
             const isProduction = process.env.NODE_ENV === 'production';
+            const routePrefix = isProduction ? '' : '/bots';
 
             Bun.serve({
                 port,
-                routes: (isProduction
-                    ? {
-                          '/': () => serveStaticFile('index.html'),
-                          '/index.html': () => serveStaticFile('index.html'),
-                          '/api/events': {
-                              OPTIONS: handleCorsOptions,
-                              GET: handleSSE
-                          },
-                          '/api/dashboard': {
-                              OPTIONS: handleCorsOptions,
-                              GET: handleDashboard
-                          },
-                          '/api/stats': {
-                              OPTIONS: handleCorsOptions,
-                              GET: handleStats
-                          },
-                          '/api/throughput': {
-                              OPTIONS: handleCorsOptions,
-                              GET: handleThroughput
-                          },
-                          '/api/latency': {
-                              OPTIONS: handleCorsOptions,
-                              GET: handleLatency
-                          },
-                          '/api/traces': {
-                              OPTIONS: handleCorsOptions,
-                              GET: handleTraces
-                          },
-                          '/api/trace/:id': {
-                              OPTIONS: handleCorsOptions,
-                              GET: handleTraceById
-                          },
-                          '/assets/*': handleAssets
-                      }
-                    : {
-                          '/bots': () => serveStaticFile('index.html'),
-                          '/bots/index.html': () =>
-                              serveStaticFile('index.html'),
-                          '/bots/api/events': {
-                              OPTIONS: handleCorsOptions,
-                              GET: handleSSE
-                          },
-                          '/bots/api/dashboard': {
-                              OPTIONS: handleCorsOptions,
-                              GET: handleDashboard
-                          },
-                          '/bots/api/stats': {
-                              OPTIONS: handleCorsOptions,
-                              GET: handleStats
-                          },
-                          '/bots/api/throughput': {
-                              OPTIONS: handleCorsOptions,
-                              GET: handleThroughput
-                          },
-                          '/bots/api/latency': {
-                              OPTIONS: handleCorsOptions,
-                              GET: handleLatency
-                          },
-                          '/bots/api/traces': {
-                              OPTIONS: handleCorsOptions,
-                              GET: handleTraces
-                          },
-                          '/bots/api/trace/:id': {
-                              OPTIONS: handleCorsOptions,
-                              GET: handleTraceById
-                          },
-                          '/bots/assets/*': handleAssets
-                      }) as any,
+                routes: buildRoutes(routePrefix) as any,
                 // Fallback for SPA routing and unmatched routes
                 fetch(req) {
                     const url = new URL(req.url);
@@ -323,16 +275,13 @@ export function startDashboardServer(
                         return handleCorsOptions();
                     }
 
-                    const isAssetRoute = isProduction
-                        ? url.pathname.startsWith('/assets/')
-                        : url.pathname.startsWith('/bots/assets/');
-                    if (isAssetRoute) {
-                        return handleAssets(req);
+                    const assetPrefix = `${routePrefix}/assets/`;
+                    if (url.pathname.startsWith(assetPrefix)) {
+                        return handleAssets(req, routePrefix);
                     }
 
-                    const isApiRoute = isProduction
-                        ? url.pathname.startsWith('/api/')
-                        : url.pathname.startsWith('/bots/api/');
+                    const apiPrefix = `${routePrefix}/api/`;
+                    const isApiRoute = url.pathname.startsWith(apiPrefix);
 
                     // For SPA routing, serve index.html for non-API routes
                     if (!isApiRoute) {

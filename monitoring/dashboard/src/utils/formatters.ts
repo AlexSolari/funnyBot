@@ -1,3 +1,5 @@
+import { EXCLUDED_SPAN_PATTERNS } from './constants';
+
 export function formatNumber(num: number): string {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
     if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
@@ -33,10 +35,21 @@ export function formatDateTime(timestamp: number): string {
     });
 }
 
-export function escapeHtml(str: string): string {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+export function formatLatency(ms: number): string {
+    if (ms >= 1000) {
+        return `${(ms / 1000).toFixed(2)}s`;
+    }
+    return `${ms}ms`;
+}
+
+/**
+ * Severity bucket for a latency value, used to color-code duration/latency cells.
+ */
+export function getLatencyClass(ms: number): string {
+    if (ms >= 5000) return 'latency-critical';
+    if (ms >= 1000) return 'latency-high';
+    if (ms >= 500) return 'latency-medium';
+    return 'latency-low';
 }
 
 /**
@@ -44,7 +57,9 @@ export function escapeHtml(str: string): string {
  * Exported for use in multiple components.
  */
 export function isExcludedSpan(operationName: string): boolean {
-    return operationName.startsWith('command.capture.');
+    return EXCLUDED_SPAN_PATTERNS.some((pattern) =>
+        operationName.startsWith(pattern)
+    );
 }
 
 /**

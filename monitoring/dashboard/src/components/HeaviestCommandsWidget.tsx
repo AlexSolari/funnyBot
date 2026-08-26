@@ -1,4 +1,5 @@
 import type { HeaviestCommand } from '../types';
+import { formatLatency, getLatencyClass } from '../utils/formatters';
 
 interface HeaviestCommandsWidgetProps {
     commands: HeaviestCommand[];
@@ -72,18 +73,4 @@ export function HeaviestCommandsWidget({ commands, onTraceClick }: Readonly<Heav
             </div>
         </div>
     );
-}
-
-function formatLatency(ms: number): string {
-    if (ms >= 1000) {
-        return `${(ms / 1000).toFixed(2)}s`;
-    }
-    return `${ms}ms`;
-}
-
-function getLatencyClass(ms: number): string {
-    if (ms >= 5000) return 'latency-critical';
-    if (ms >= 1000) return 'latency-high';
-    if (ms >= 500) return 'latency-medium';
-    return 'latency-low';
 }
