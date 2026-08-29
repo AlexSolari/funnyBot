@@ -1,13 +1,5 @@
-import escape from 'markdown-escape';
+const MARKDOWN_V2_SPECIAL_CHARS = /[_*[\]()~`>#+=|{}.!-]/g;
 
 export default function escapeMarkdown(text: string) {
-    return escape(text)
-        .replaceAll('.', `\\.`)
-        .replaceAll('-', `\\-`)
-        .replaceAll('+', `\\+`)
-        .replaceAll('=', `\\=`)
-        .replaceAll('{', `\\{`)
-        .replaceAll('!', `\\!`)
-        .replaceAll('|', `\\|`)
-        .replaceAll('}', `\\}`);
+    return text.replaceAll(MARKDOWN_V2_SPECIAL_CHARS, '\\$&');
 }

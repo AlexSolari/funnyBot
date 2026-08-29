@@ -138,7 +138,7 @@ class MtgrdleService {
 
                 const guessedCardCmc = guessedCardFace.cmc
                     ? guessedCardFace.cmc
-                    : guessedCardFace.mana_cost
+                    : (guessedCardFace.mana_cost ?? '')
                           .replaceAll(/[{}]/g, ' ')
                           .split(' ')
                           .filter(Boolean)

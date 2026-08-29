@@ -33,7 +33,7 @@ export const becker = new ScheduledActionBuilderWithState<BeckerState>(
 
             const data = (await contentPage.json()) as CmerApiResponse;
             const images = data.filter((x) => x.file.path.endsWith('.jpg'));
-            const imageContainer = images[randomInt(0, images.length)];
+            const imageContainer = images[randomInt(0, images.length - 1)];
 
             if (imageContainer.id != state.id) {
                 state.id = imageContainer.id;
