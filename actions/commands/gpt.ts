@@ -25,6 +25,7 @@ const client = new OpenAI({
 });
 
 const YOU = 'You (ChatGPT)';
+const MAX_CONVERSATION_MESSAGES = 50;
 
 async function getReplyText(
     text: string,
@@ -125,12 +126,17 @@ export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
             const postSendOperationController = replyCtx.reply.withText(
                 escapeMarkdown(response.output_text)
             );
-            postSendOperationController.captureReplies(
-                [MessageType.Text],
-                replyHandler,
-                controller
-            );
-            timer.refresh();
+
+            if (conversation.length < MAX_CONVERSATION_MESSAGES) {
+                postSendOperationController.captureReplies(
+                    [MessageType.Text],
+                    replyHandler,
+                    controller
+                );
+                timer.refresh();
+            } else {
+                clearTimeout(timer);
+            }
         };
 
         postSendOperationController.captureReplies(

@@ -4,7 +4,8 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig(
     {
-        ignores: ['build/**', 'monitoring/**']
+        // monitoring/dashboard is a separate Vite/React project with its own tooling
+        ignores: ['build/**', 'monitoring/dashboard/**']
     },
     eslint.configs.recommended,
     ...tseslint.configs.recommended,

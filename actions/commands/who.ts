@@ -11,12 +11,12 @@ export const who = new CommandBuilder('Reaction.Who')
 
         const namesState = ctx.loadStateOf(nameSave);
 
-        const names = Object.values(namesState.lastUsername);
-        const tags = Object.values(namesState.lastUsertag);
-        const tagsWithNameFallback = tags.map((tag, index) => {
-            if (tag && tag != 'Unknown user') return tag;
+        const tagsWithNameFallback = Object.entries(
+            namesState.lastUsername
+        ).map(([userId, name]) => {
+            const tag = namesState.lastUsertag[Number.parseInt(userId)];
 
-            return names[index];
+            return tag && tag != 'Unknown user' ? tag : name;
         });
 
         if (tagsWithNameFallback.length === 0) {

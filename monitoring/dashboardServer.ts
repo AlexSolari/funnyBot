@@ -265,6 +265,8 @@ export function startDashboardServer(
 
             Bun.serve({
                 port,
+                // Bun's Routes<> type requires literal path keys; ours are built dynamically
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 routes: buildRoutes(routePrefix) as any,
                 // Fallback for SPA routing and unmatched routes
                 fetch(req) {
