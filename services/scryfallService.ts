@@ -4,8 +4,8 @@ import {
     IScryfallCard,
     IScryfallCardFace,
     IScryfallError,
-    IScryfallFuzzyResponse,
-    IScryfallQueryResponse,
+    IScryfallCardResponse,
+    IScryfallCardArrayResponse,
     IScryfallRulesResponse
 } from '../types/externalApiDefinitions/scryfall';
 import { setTimeout } from 'timers/promises';
@@ -114,7 +114,8 @@ class ScryfallSearchService {
                     `https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}`,
                     { signal }
                 );
-                const data = (await response.json()) as IScryfallQueryResponse;
+                const data =
+                    (await response.json()) as IScryfallCardArrayResponse;
 
                 return this.unwrapResponse(data, (x) =>
                     this.mapCardsToCardFaces(x.data)
@@ -136,7 +137,7 @@ class ScryfallSearchService {
                     `https://api.scryfall.com/cards/random?q=${encodeURIComponent(query)}`,
                     { signal }
                 );
-                const data = (await response.json()) as IScryfallFuzzyResponse;
+                const data = (await response.json()) as IScryfallCardResponse;
 
                 return this.unwrapResponse(data, (x) => this.getCardFaces(x));
             },
@@ -156,7 +157,7 @@ class ScryfallSearchService {
                     `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(name)}`,
                     { signal }
                 );
-                const data = (await response.json()) as IScryfallFuzzyResponse;
+                const data = (await response.json()) as IScryfallCardResponse;
 
                 return this.unwrapResponse(data, (x) => this.getCardFaces(x));
             },
