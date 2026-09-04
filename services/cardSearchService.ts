@@ -93,7 +93,8 @@ class CardSearchService {
 
             return '';
         },
-        flip: async (_) => ''
+        flip: async (_) => '',
+        random: async (_) => ''
     };
 
     async findForAction(
@@ -129,11 +130,14 @@ class CardSearchService {
             }
         }
 
-        const matchedCards = await ScryfallService.findWithQuery(
-            `${query} ${subquery}`,
-            signal,
-            observability
-        );
+        const matchedCards = flags.includes(CardSearchFlags.random)
+            ? await ScryfallService.random(query, signal, observability)
+            : await ScryfallService.findWithQuery(
+                  `${query} ${subquery}`,
+                  signal,
+                  observability
+              );
+
         const uniqueCardsCount = Object.keys(
             Object.groupBy(
                 matchedCards.map((x) => ({
@@ -238,11 +242,10 @@ class CardSearchService {
 
         if (query.length == 0) return { cardsWithText: [], showSetCode: false };
 
-        let cards = await ScryfallService.findExact(
-            query,
-            signal,
-            observability
-        );
+        let cards = flags.includes(CardSearchFlags.random)
+            ? await ScryfallService.random(query, signal, observability)
+            : await ScryfallService.findWithQuery(query, signal, observability);
+
         cards = cards.filter(
             (x) => x.set_type != 'memorabilia' && x.set_type != 'minigame'
         );
@@ -329,9 +332,9 @@ class CardSearchService {
             return { flags: [], query: matchResult, subquery: '' };
 
         const flags: string[] = [];
-        const [query, subquery] = matchResult.split(FLAGS_DELIMITER);
+        const [query, ...subqueryParts] = matchResult.split(FLAGS_DELIMITER);
 
-        let sanitizedSubquery = subquery.trim();
+        let sanitizedSubquery = subqueryParts.join(' ').trim();
         for (const flag of Object.values(CardSearchFlags)) {
             if (sanitizedSubquery.includes(flag)) {
                 flags.push(flag);

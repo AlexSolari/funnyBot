@@ -204,16 +204,15 @@ class MtgrdleService {
                 ChatQueryMap[chatInfo.id] ??
                 'game:paper tix>1 is:firstprinting -is:dfc';
 
-            const randomCards = await ScryfallService.findWithQuery(
+            const randomCardFaces = await ScryfallService.random(
                 query,
                 AbortSignal.timeout(REQUEST_TIMEOUT),
                 observability
             );
 
-            if (randomCards.length === 0) return null;
+            if (randomCardFaces.length === 0) return null;
 
-            const randomCard =
-                randomCards[Math.floor(Math.random() * randomCards.length)];
+            const randomCard = randomCardFaces[0];
 
             return {
                 name: randomCard.name,

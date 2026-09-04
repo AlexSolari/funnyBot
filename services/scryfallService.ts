@@ -124,6 +124,26 @@ class ScryfallSearchService {
         );
     }
 
+    async random(
+        query: string,
+        signal: AbortSignal,
+        observability: ObservabilityHelper
+    ) {
+        return this.withRatelimit(
+            'cards/random',
+            async () => {
+                const response = await fetch(
+                    `https://api.scryfall.com/cards/random?q=${encodeURIComponent(query)}`,
+                    { signal }
+                );
+                const data = (await response.json()) as IScryfallFuzzyResponse;
+
+                return this.unwrapResponse(data, (x) => this.getCardFaces(x));
+            },
+            observability
+        );
+    }
+
     async findExact(
         name: string,
         signal: AbortSignal,
