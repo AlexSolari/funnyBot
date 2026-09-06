@@ -215,6 +215,8 @@ class CardSearchService {
     ) {
         const { flags, query } = this.getFlagsFromInlineQuery(inlineQuery);
 
+        if (query.length == 0) return { cardsWithText: [], showSetCode: false };
+
         SET_AND_NUMBER_REGEX.lastIndex = 0;
         const setAndNumberMatch = SET_AND_NUMBER_REGEX.exec(query);
         if (setAndNumberMatch) {
@@ -240,11 +242,9 @@ class CardSearchService {
             }
         }
 
-        if (query.length == 0) return { cardsWithText: [], showSetCode: false };
-
         let cards = flags.includes(CardSearchFlags.random)
             ? await ScryfallService.random(query, signal, observability)
-            : await ScryfallService.findWithQuery(query, signal, observability);
+            : await ScryfallService.findExact(query, signal, observability);
 
         cards = cards.filter(
             (x) => x.set_type != 'memorabilia' && x.set_type != 'minigame'
@@ -258,10 +258,8 @@ class CardSearchService {
             );
         }
 
-        let wasOneCardFound = false;
         let results: IScryfallCardFace[] = [];
         if (cards.length == 1) {
-            wasOneCardFound = true;
             results = await ScryfallService.findAllArtworks(
                 cards[0].name,
                 signal,
@@ -283,7 +281,7 @@ class CardSearchService {
             signal,
             observability
         );
-        return { cardsWithText, showSetCode: wasOneCardFound };
+        return { cardsWithText, showSetCode: cards.length == 1 };
     }
 
     private async buildInlineQueryCardsResult(
