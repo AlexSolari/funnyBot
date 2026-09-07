@@ -4,9 +4,8 @@ import {
     IScryfallCard,
     IScryfallCardFace,
     IScryfallError,
-    IScryfallCardResponse,
-    IScryfallCardArrayResponse,
-    IScryfallRulesResponse
+    IScryfallRules,
+    IScryfallCardArray
 } from '../types/externalApiDefinitions/scryfall';
 import { setTimeout } from 'timers/promises';
 import { Sema } from 'async-sema';
@@ -17,31 +16,42 @@ import { EventType } from '../types/customEvents';
 
 const SCRYFALL_RATELIMIT_DELAY = 50 as Milliseconds;
 
+function getCardFaces(card: IScryfallCard) {
+    return card.card_faces && 'image_uris' in card.card_faces[0]
+        ? card.card_faces.map((x) => {
+              x.parentId = card.id;
+              x.prices ??= card.prices;
+              x.legalities ??= card.legalities;
+              x.released_at ??= card.released_at;
+              x.cmc ??= card.cmc;
+              return x;
+          })
+        : [card];
+}
+
+function mapCardsToCardFaces(cards: IScryfallCardArray) {
+    return cards.data.flatMap((card) => getCardFaces(card));
+}
+
+function formatRules(rules: IScryfallRules) {
+    return rules.data.map(
+        (rule) =>
+            `${capitalizeFirstLetter(
+                rule.source == 'wotc' ? 'oracle' : rule.source
+            )} *${escapeMarkdown(
+                rule.published_at
+            )}*\n_${escapeMarkdown(rule.comment)}_`
+    );
+}
+
 class ScryfallSearchService {
     private readonly ratelimitSemaphore = new Sema(1);
     readonly cardBack =
         'https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg';
 
-    private getCardFaces(card: IScryfallCard) {
-        return card.card_faces && 'image_uris' in card.card_faces[0]
-            ? card.card_faces.map((x) => {
-                  x.parentId = card.id;
-                  x.prices ??= card.prices;
-                  x.legalities ??= card.legalities;
-                  x.released_at ??= card.released_at;
-                  x.cmc ??= card.cmc;
-                  return x;
-              })
-            : [card];
-    }
-
-    private mapCardsToCardFaces(cards: IScryfallCard[]) {
-        return cards.flatMap((card) => this.getCardFaces(card));
-    }
-
     private async doRequest<TResponse extends IScryfallApiResponse, TResult>(
         endpoint: string,
-        transformer: (data: Exclude<TResponse, IScryfallError>) => TResult,
+        transformer: (data: Exclude<TResponse, IScryfallError>) => TResult[],
         signal: AbortSignal,
         observability: ObservabilityHelper
     ) {
@@ -58,7 +68,7 @@ class ScryfallSearchService {
             const data = (await response.json()) as TResponse;
 
             if ('status' in data) {
-                if (data.status == 404) return null;
+                if (data.status == 404) return [];
 
                 throw new Error(
                     `Scryfall API error: ${data.code} ${data.status}\n${data.details}`
@@ -78,14 +88,12 @@ class ScryfallSearchService {
         signal: AbortSignal,
         observability: ObservabilityHelper
     ) {
-        const result = await this.doRequest<IScryfallCard, IScryfallCardFace[]>(
+        return await this.doRequest(
             `https://api.scryfall.com/cards/${setCode}/${number}`,
-            (x) => this.mapCardsToCardFaces([x]),
+            getCardFaces,
             signal,
             observability
         );
-
-        return result ?? [];
     }
 
     async findWithQuery(
@@ -93,17 +101,12 @@ class ScryfallSearchService {
         signal: AbortSignal,
         observability: ObservabilityHelper
     ) {
-        const result = await this.doRequest<
-            IScryfallCardArrayResponse,
-            IScryfallCardFace[]
-        >(
+        return await this.doRequest(
             `https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}`,
-            (x) => this.mapCardsToCardFaces(x.data),
+            mapCardsToCardFaces,
             signal,
             observability
         );
-
-        return result ?? [];
     }
 
     async random(
@@ -111,17 +114,12 @@ class ScryfallSearchService {
         signal: AbortSignal,
         observability: ObservabilityHelper
     ) {
-        const result = await this.doRequest<
-            IScryfallCardResponse,
-            IScryfallCardFace[]
-        >(
+        return await this.doRequest(
             `https://api.scryfall.com/cards/random?q=${encodeURIComponent(query)}`,
-            (x) => this.getCardFaces(x),
+            getCardFaces,
             signal,
             observability
         );
-
-        return result ?? [];
     }
 
     async findExact(
@@ -129,17 +127,12 @@ class ScryfallSearchService {
         signal: AbortSignal,
         observability: ObservabilityHelper
     ) {
-        const result = await this.doRequest<
-            IScryfallCardResponse,
-            IScryfallCardFace[]
-        >(
+        return await this.doRequest(
             `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(name)}`,
-            (x) => this.getCardFaces(x),
+            getCardFaces,
             signal,
             observability
         );
-
-        return result ?? [];
     }
 
     async getRules(
@@ -147,24 +140,16 @@ class ScryfallSearchService {
         signal: AbortSignal,
         observability: ObservabilityHelper
     ) {
-        const result = await this.doRequest<IScryfallRulesResponse, string[]>(
-            `https://api.scryfall.com/cards/${
-                card.parentId ?? card.id
-            }/rulings`,
-            (x) =>
-                x.data.map(
-                    (rule) =>
-                        `${capitalizeFirstLetter(
-                            rule.source == 'wotc' ? 'oracle' : rule.source
-                        )} *${escapeMarkdown(
-                            rule.published_at
-                        )}*\n_${escapeMarkdown(rule.comment)}_`
-                ),
-            signal,
-            observability
-        );
-
-        return (result ?? []).join('\n\n');
+        return (
+            await this.doRequest(
+                `https://api.scryfall.com/cards/${
+                    card.parentId ?? card.id
+                }/rulings`,
+                formatRules,
+                signal,
+                observability
+            )
+        ).join('\n\n');
     }
 
     async findAllArtworks(
