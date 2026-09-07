@@ -45,6 +45,7 @@ function formatRules(rules: IScryfallRules) {
 }
 
 class ScryfallSearchService {
+    private readonly baseUrl = 'https://api.scryfall.com/cards/';
     private readonly ratelimitSemaphore = new Sema(1);
     readonly cardBack =
         'https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg';
@@ -63,7 +64,9 @@ class ScryfallSearchService {
         });
 
         try {
-            const response = await fetch(endpoint, { signal });
+            const response = await fetch(`${this.baseUrl}${endpoint}`, {
+                signal
+            });
 
             const data = (await response.json()) as TResponse;
 
@@ -89,7 +92,7 @@ class ScryfallSearchService {
         observability: ObservabilityHelper
     ) {
         return await this.doRequest(
-            `https://api.scryfall.com/cards/${setCode}/${number}`,
+            `${setCode}/${number}`,
             getCardFaces,
             signal,
             observability
@@ -102,7 +105,7 @@ class ScryfallSearchService {
         observability: ObservabilityHelper
     ) {
         return await this.doRequest(
-            `https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}`,
+            `search?q=${encodeURIComponent(query)}`,
             mapCardsToCardFaces,
             signal,
             observability
@@ -115,7 +118,7 @@ class ScryfallSearchService {
         observability: ObservabilityHelper
     ) {
         return await this.doRequest(
-            `https://api.scryfall.com/cards/random?q=${encodeURIComponent(query)}`,
+            `random?q=${encodeURIComponent(query)}`,
             getCardFaces,
             signal,
             observability
@@ -128,7 +131,7 @@ class ScryfallSearchService {
         observability: ObservabilityHelper
     ) {
         return await this.doRequest(
-            `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(name)}`,
+            `named?exact=${encodeURIComponent(name)}`,
             getCardFaces,
             signal,
             observability
@@ -142,9 +145,7 @@ class ScryfallSearchService {
     ) {
         return (
             await this.doRequest(
-                `https://api.scryfall.com/cards/${
-                    card.parentId ?? card.id
-                }/rulings`,
+                `${card.parentId ?? card.id}/rulings`,
                 formatRules,
                 signal,
                 observability
