@@ -2,8 +2,10 @@ import { readFile } from 'fs/promises';
 import { join, extname } from 'path';
 import { metricsCollector } from './metricsCollector';
 import { TraceSearchQuery } from './types';
+import { dashboardPassword } from './../dashboardPassword.json';
 
 const DASHBOARD_PORT = 3030;
+const DASHBOARD_PASSWORD = dashboardPassword;
 const SSE_PUSH_INTERVAL_MS = 2000;
 const SSE_HEARTBEAT_INTERVAL_MS = 30000;
 
@@ -91,7 +93,7 @@ const MIME_TYPES: Record<string, string> = {
 const CORS_HEADERS = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type'
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
 const NO_CACHE_HEADERS = {
@@ -155,6 +157,39 @@ function handleCorsOptions(): Response {
         status: 204,
         headers: CORS_HEADERS
     });
+}
+
+function unauthorizedResponse(): Response {
+    return new Response('Unauthorized', {
+        status: 401,
+        headers: {
+            'WWW-Authenticate': 'Basic realm="Monitoring"',
+            ...CORS_HEADERS
+        }
+    });
+}
+
+function isAuthorized(req: Request): boolean {
+    const authorization = req.headers.get('Authorization');
+    if (!authorization?.startsWith('Basic ')) return false;
+
+    try {
+        const credentials = atob(authorization.slice('Basic '.length));
+        const separatorIndex = credentials.indexOf(':');
+        return (
+            separatorIndex >= 0 &&
+            credentials.slice(0, separatorIndex) === '' &&
+            credentials.slice(separatorIndex + 1) === DASHBOARD_PASSWORD
+        );
+    } catch {
+        return false;
+    }
+}
+
+function withBasicAuth<T extends Request>(
+    handler: (req: T) => Response | Promise<Response>
+): (req: T) => Response | Promise<Response> {
+    return (req) => (isAuthorized(req) ? handler(req) : unauthorizedResponse());
 }
 
 function handleDashboard(): Response {
@@ -221,37 +256,41 @@ async function handleAssets(
 // Single source of truth for routes; prefixed with '' in production or '/bots' behind the dev proxy
 function buildRoutes(prefix: string) {
     return {
-        [prefix || '/']: () => serveStaticFile('index.html'),
-        [`${prefix}/index.html`]: () => serveStaticFile('index.html'),
+        [prefix || '/']: withBasicAuth(() => serveStaticFile('index.html')),
+        [`${prefix}/index.html`]: withBasicAuth(() =>
+            serveStaticFile('index.html')
+        ),
         [`${prefix}/api/events`]: {
             OPTIONS: handleCorsOptions,
-            GET: handleSSE
+            GET: withBasicAuth(() => handleSSE())
         },
         [`${prefix}/api/dashboard`]: {
             OPTIONS: handleCorsOptions,
-            GET: handleDashboard
+            GET: withBasicAuth(() => handleDashboard())
         },
         [`${prefix}/api/stats`]: {
             OPTIONS: handleCorsOptions,
-            GET: handleStats
+            GET: withBasicAuth(() => handleStats())
         },
         [`${prefix}/api/throughput`]: {
             OPTIONS: handleCorsOptions,
-            GET: handleThroughput
+            GET: withBasicAuth(() => handleThroughput())
         },
         [`${prefix}/api/latency`]: {
             OPTIONS: handleCorsOptions,
-            GET: handleLatency
+            GET: withBasicAuth(() => handleLatency())
         },
         [`${prefix}/api/traces`]: {
             OPTIONS: handleCorsOptions,
-            GET: handleTraces
+            GET: withBasicAuth(handleTraces)
         },
         [`${prefix}/api/trace/:id`]: {
             OPTIONS: handleCorsOptions,
-            GET: handleTraceById
+            GET: withBasicAuth(handleTraceById)
         },
-        [`${prefix}/assets/*`]: (req: Request) => handleAssets(req, prefix)
+        [`${prefix}/assets/*`]: withBasicAuth((req) =>
+            handleAssets(req, prefix)
+        )
     };
 }
 
@@ -275,6 +314,10 @@ export function startDashboardServer(
                     // Handle CORS preflight for any route
                     if (req.method === 'OPTIONS') {
                         return handleCorsOptions();
+                    }
+
+                    if (!isAuthorized(req)) {
+                        return unauthorizedResponse();
                     }
 
                     const assetPrefix = `${routePrefix}/assets/`;

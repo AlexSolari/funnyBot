@@ -12,3 +12,4 @@ types/userIds.ts
 openAiToken.json
 monitoring/dashboard/dist/
 spellseekerDataIds.json
+dashboardPassword.json
