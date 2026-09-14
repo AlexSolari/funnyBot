@@ -82,6 +82,10 @@ class ScryfallSearchService {
         } finally {
             await setTimeout(SCRYFALL_RATELIMIT_DELAY);
             this.ratelimitSemaphore.release();
+            observability.emitter.emit(EventType.requestEnd, {
+                traceId: observability.traceId,
+                endpoint
+            });
         }
     }
 
