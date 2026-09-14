@@ -95,11 +95,34 @@ export function WaterfallDiagram({
                 {sortedSpans.map((span, index) => {
                     const spanStart = span.startTime - traceStartTime;
                     const spanDuration = span.duration ?? 0;
+                    const spanEnd = span.startTime + spanDuration;
                     const leftPercent = Math.min((spanStart / effectiveDuration) * 100, 100);
                     const widthPercent = Math.min(
                         Math.max((spanDuration / effectiveDuration) * 100, 0.5),
                         100 - leftPercent
                     );
+                    const nextSpan = sortedSpans[index + 1];
+                    const hasOverlap = Boolean(
+                        nextSpan &&
+                        spanDuration > 0 &&
+                        (nextSpan.duration ?? 0) > 0 &&
+                        nextSpan.startTime < spanEnd
+                    );
+                    const overlapStart = hasOverlap && nextSpan
+                        ? Math.max(nextSpan.startTime, span.startTime)
+                        : spanEnd;
+                    const overlapWidthPercent = Math.max(
+                        Math.min(
+                            spanDuration > 0
+                                ? ((spanEnd - overlapStart) / spanDuration) * 100
+                                : 0,
+                            100
+                        ),
+                        0
+                    );
+                    const overlapLeftPercent = spanDuration > 0
+                        ? ((overlapStart - span.startTime) / spanDuration) * 100
+                        : 0;
                     const phase = span.tags.phase as string | undefined;
                     const barColor = getPhaseColor(phase);
 
@@ -132,6 +155,15 @@ export function WaterfallDiagram({
                                         }}
                                         title={`${span.operationName}: +${Math.round(spanStart)}ms${spanDuration > 0 ? ` (${spanDuration}ms)` : ''}`}
                                     >
+                                        {overlapWidthPercent > 0 && (
+                                            <span
+                                                className="waterfall-bar-overlap"
+                                                style={{
+                                                    left: `${overlapLeftPercent}%`,
+                                                    width: `${overlapWidthPercent}%`
+                                                }}
+                                            />
+                                        )}
                                         {widthPercent > 8 && spanDuration > 0 && (
                                             <span className="waterfall-bar-label">
                                                 {spanDuration}ms

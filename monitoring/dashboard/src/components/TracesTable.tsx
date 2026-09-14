@@ -3,8 +3,8 @@ import type { Trace } from '../types';
 import {
     formatDateTime,
     getLatencyClass,
-    getTraceDuration,
-    getTraceStatus
+    getOwnDuration,
+    getTraceDuration
 } from '../utils/formatters';
 import { UI_CONSTANTS } from '../utils/constants';
 
@@ -13,7 +13,7 @@ interface TracesTableProps {
     readonly onTraceClick: (traceId: string) => void;
 }
 
-type SortColumn = 'preview' | 'botName' | 'operationType' | 'duration' | 'status' | 'time';
+type SortColumn = 'preview' | 'botName' | 'operationType' | 'duration' | 'ownDuration' | 'time';
 type SortDirection = 'asc' | 'desc';
 
 // Numeric columns are most useful sorted highest-first by default
@@ -22,7 +22,7 @@ const DEFAULT_DIRECTION: Record<SortColumn, SortDirection> = {
     botName: 'asc',
     operationType: 'asc',
     duration: 'desc',
-    status: 'asc',
+    ownDuration: 'desc',
     time: 'desc'
 };
 
@@ -47,8 +47,8 @@ function getSortValue(trace: Trace, column: SortColumn): string | number {
             return trace.operationType;
         case 'duration':
             return getTraceDuration(trace);
-        case 'status':
-            return getTraceStatus(trace);
+        case 'ownDuration':
+            return getOwnDuration(trace);
         case 'time':
             return trace.startTime;
     }
@@ -126,7 +126,7 @@ function TracesTableComponent({ traces, onTraceClick }: TracesTableProps) {
                             <SortableHeader column="botName" label="Bot" {...headerProps} />
                             <SortableHeader column="operationType" label="Type" {...headerProps} />
                             <SortableHeader column="duration" label="Duration" {...headerProps} />
-                            <SortableHeader column="status" label="Status" {...headerProps} />
+                            <SortableHeader column="ownDuration" label="Own duration" {...headerProps} />
                             <SortableHeader column="time" label="Time" {...headerProps} />
                         </tr>
                     </thead>
@@ -157,14 +157,14 @@ function TracesTableComponent({ traces, onTraceClick }: TracesTableProps) {
                         <SortableHeader column="botName" label="Bot" {...headerProps} />
                         <SortableHeader column="operationType" label="Type" {...headerProps} />
                         <SortableHeader column="duration" label="Duration" {...headerProps} />
-                        <SortableHeader column="status" label="Status" {...headerProps} />
+                        <SortableHeader column="ownDuration" label="Own duration" {...headerProps} />
                         <SortableHeader column="time" label="Time" {...headerProps} />
                     </tr>
                 </thead>
                 <tbody>
                     {sortedTraces.map((trace) => {
-                        const status = getTraceStatus(trace);
                         const duration = getTraceDuration(trace);
+                        const ownDuration = getOwnDuration(trace);
                         return (
                             <tr key={trace.traceId}>
                                 <td>
@@ -185,12 +185,8 @@ function TracesTableComponent({ traces, onTraceClick }: TracesTableProps) {
                                 <td className={getLatencyClass(duration)}>
                                     <span className="latency-value">{`${duration}ms`}</span>
                                 </td>
-                                <td>
-                                    <span
-                                        className={`status-badge-table status-${status}`}
-                                    >
-                                        {status}
-                                    </span>
+                                <td className={getLatencyClass(ownDuration)}>
+                                    <span className="latency-value">{`${ownDuration}ms`}</span>
                                 </td>
                                 <td>{formatDateTime(trace.startTime)}</td>
                             </tr>

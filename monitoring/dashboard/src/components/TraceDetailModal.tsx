@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import type { Trace } from '../types';
-import { formatDateTime, formatTime, getTraceDuration, getTraceStatus, isExcludedSpan } from '../utils/formatters';
+import { formatDateTime, formatTime, getOwnDuration, getTraceDuration, isExcludedSpan } from '../utils/formatters';
 import { WaterfallDiagram } from './WaterfallDiagram';
 
 interface TraceDetailModalProps {
@@ -22,6 +22,11 @@ export function TraceDetailModal({ trace, onClose }: TraceDetailModalProps) {
         if (!trace) return undefined;
         return getTraceDuration(trace);
     }, [trace]);
+
+    const ownDuration = useMemo(() => {
+        if (!trace || actualDuration === undefined) return undefined;
+        return getOwnDuration(trace);
+    }, [actualDuration, trace]);
 
     if (!trace) return null;
 
@@ -80,13 +85,11 @@ export function TraceDetailModal({ trace, onClose }: TraceDetailModalProps) {
                             </div>
                         </div>
                         <div className="trace-detail-item">
-                            <div className="label">Status</div>
+                            <div className="label">Own duration</div>
                             <div className="value">
-                                <span
-                                    className={`status-badge-table status-${getTraceStatus(trace)}`}
-                                >
-                                    {getTraceStatus(trace)}
-                                </span>
+                                {ownDuration === undefined
+                                    ? 'In progress'
+                                    : `${ownDuration}ms`}
                             </div>
                         </div>
                         <div className="trace-detail-item">

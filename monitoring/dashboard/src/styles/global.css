@@ -764,6 +764,14 @@ body {
     opacity: 0.85;
 }
 
+.waterfall-bar-overlap {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: rgba(20, 25, 31, 0.55);
+    pointer-events: none;
+}
+
 .waterfall-bar-label {
     font-size: 10px;
     color: white;

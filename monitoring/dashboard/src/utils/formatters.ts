@@ -106,6 +106,27 @@ export function getTraceDuration(trace: {
 }
 
 /**
+ * Calculate trace duration excluding time spent in api.* spans.
+ */
+export function getOwnDuration(trace: {
+    startTime: number;
+    totalDuration?: number;
+    spans: Array<{
+        startTime: number;
+        endTime?: number;
+        duration?: number;
+        operationName?: string;
+    }>;
+}): number {
+    const totalDuration = getTraceDuration(trace);
+    const apiDuration = trace.spans
+        .filter((span) => span.operationName?.startsWith('api.'))
+        .reduce((total, span) => total + (span.duration ?? 0), 0);
+
+    return Math.max(totalDuration - apiDuration, 0);
+}
+
+/**
  * Get the effective status of a trace.
  * If any spans are pending, the trace status is 'pending'.
  * Otherwise, use the root span status.
