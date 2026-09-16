@@ -1,8 +1,10 @@
 import { CommandBuilder } from '../../helpers/commandBuilder';
+import { randomInt } from '../../helpers/randomInt';
 
 export const ru = new CommandBuilder('Reaction.IdiNahui')
-    .on(/р+у+с+к+и+й+/gi)
+    .on(/(рус+ский)/gi)
     .do(async (ctx) => {
-        ctx.reply.andQuote.withText('военный корабль іді нахуй');
+        if (randomInt(0, 1) == 0) ctx.reply.andQuote.withText('іді нахуй');
+        else ctx.reply.andQuote.withImage('rashuyarim');
     })
     .build();
