@@ -5,6 +5,7 @@ export const CHART_COLORS = {
     inline: '#a371f7',
     errors: '#f85149',
     latency: '#d29922',
+    ownLatency: '#3fb950',
     scheduled: '#f0883e',
     api: '#8b949e'
 } as const;

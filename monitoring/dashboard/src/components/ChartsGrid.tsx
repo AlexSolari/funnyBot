@@ -110,12 +110,14 @@ const logBarChartOptions: ChartOptions<'bar'> = {
 interface ChartsGridProps {
     readonly throughput: ThroughputMetrics;
     readonly latencyHistogram: LatencyHistogramBucket[];
+    readonly ownLatencyHistogram: LatencyHistogramBucket[];
     readonly stats: CurrentStats;
 }
 
 export function ChartsGrid({
     throughput,
     latencyHistogram,
+    ownLatencyHistogram,
     stats
 }: ChartsGridProps) {
     const labels = throughput.messagesReceived.map((p) => formatTime(p.timestamp));
@@ -197,6 +199,14 @@ export function ChartsGrid({
                     return h.count - prev;
                 }),
                 backgroundColor: CHART_COLORS.messages
+            },
+            {
+                label: 'Own time',
+                data: ownLatencyHistogram.map((h, i) => {
+                    const prev = i > 0 ? ownLatencyHistogram[i - 1].count : 0;
+                    return h.count - prev;
+                }),
+                backgroundColor: CHART_COLORS.ownLatency
             }
         ]
     };

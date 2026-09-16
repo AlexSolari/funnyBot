@@ -836,6 +836,14 @@ export class MetricsCollector {
         return Math.max(trace.totalDuration ?? calculated, calculated);
     }
 
+    private getOwnTraceDuration(trace: Trace): number {
+        const apiDuration = trace.spans
+            .filter((span) => span.operationName.startsWith('api.'))
+            .reduce((total, span) => total + this.getSpanDuration(span), 0);
+
+        return Math.max(this.getTraceDuration(trace) - apiDuration, 0);
+    }
+
     private buildLatencyHistogram(values: number[]): LatencyHistogramBucket[] {
         const buckets = [
             10,
@@ -1215,14 +1223,41 @@ export class MetricsCollector {
         return latencies;
     }
 
+    private getTraceBasedOwnLatencies(): number[] {
+        const latencies: number[] = [];
+
+        for (const trace of this.traceRing.toArray()) {
+            const duration = this.getOwnTraceDuration(trace);
+            if (duration > 0) latencies.push(duration);
+        }
+
+        for (const trace of this.traces.values()) {
+            const hasPendingNonCaptureSpans = trace.spans.some(
+                (s) => s.status === 'pending' && !this.isCaptureSpan(s)
+            );
+            if (
+                !hasPendingNonCaptureSpans &&
+                trace.totalDuration &&
+                trace.totalDuration > 0
+            ) {
+                const duration = this.getOwnTraceDuration(trace);
+                if (duration > 0) latencies.push(duration);
+            }
+        }
+
+        return latencies;
+    }
+
     getDashboardData(): DashboardData {
         // Use trace-based latencies for histogram (consistent with frontend)
         const traceLatencies = this.getTraceBasedLatencies();
+        const ownTraceLatencies = this.getTraceBasedOwnLatencies();
 
         return {
             currentStats: this.getCurrentStats(),
             throughput: this.getThroughputMetrics(),
             latencyHistogram: this.buildLatencyHistogram(traceLatencies),
+            ownLatencyHistogram: this.buildLatencyHistogram(ownTraceLatencies),
             recentTraces: this.searchTraces({ limit: 50 }),
             recentErrors: this.recentErrors.toArray().reverse(),
             botNames: [...this.botNames],

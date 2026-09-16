@@ -64,6 +64,7 @@ export interface DashboardData {
     currentStats: CurrentStats;
     throughput: ThroughputMetrics;
     latencyHistogram: LatencyHistogramBucket[];
+    ownLatencyHistogram: LatencyHistogramBucket[];
     recentTraces: Trace[];
     recentErrors: Array<{
         timestamp: number;

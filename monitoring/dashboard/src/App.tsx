@@ -146,6 +146,7 @@ export default function App() {
                         <ChartsGrid
                             throughput={data.throughput}
                             latencyHistogram={data.latencyHistogram}
+                            ownLatencyHistogram={data.ownLatencyHistogram}
                             stats={data.currentStats}
                         />
                         <HeaviestCommandsWidget
