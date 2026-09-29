@@ -12,7 +12,7 @@ import { Format } from '../../types/mtgFormats';
 import { traceFetch } from '../../helpers/fetchWithObservability';
 import { getObservability } from '../../helpers/getObservability';
 import { ObservabilityHelper } from '../../types/observabilityHelper';
-import { EventDto } from '../../types/externalApiDefinitions/event';
+import { SpellseekerEventDto } from '../../types/externalApiDefinitions/event';
 import Papa from 'papaparse';
 import { gid, sheetId } from '../../spellseekerDataIds.json';
 
@@ -38,6 +38,25 @@ type EventInfo = {
 
 const weekdayNameRegex =
     /неділя|понеділок|вівторок|середа|четвер|п’ятниця|субота/;
+
+const spellseekerDateFormatter = new Intl.DateTimeFormat('uk-UA', {
+    timeZone: 'Europe/Kyiv',
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+});
+
+const spellseekerHeaderMap: Record<string, string> = {
+    ID: 'id',
+    Назва: 'title',
+    Початок: 'startDatetime',
+    Реєстрація: 'registration',
+    Теги: 'tags',
+    Посилання: 'link'
+};
 
 export const registration = new CommandBuilder('Reaction.Registration')
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
@@ -194,10 +213,11 @@ async function loadSpellseekerEvents(
     const response = await traceFetch(url, observability);
     const csv = await response.text();
 
-    const { data, errors } = Papa.parse<EventDto>(csv, {
+    const { data, errors } = Papa.parse<SpellseekerEventDto>(csv, {
         header: true,
         skipEmptyLines: true,
-        dynamicTyping: true
+        dynamicTyping: true,
+        transformHeader: (header) => spellseekerHeaderMap[header] ?? header
     });
 
     if (errors.length > 0) {
@@ -212,26 +232,26 @@ async function loadSpellseekerEvents(
     return data
         .filter(
             (x) =>
-                x.category == 'mtg' &&
-                x.status == 'open' &&
-                x.title.toLowerCase().includes(formatName)
+                x.registration == 'open' &&
+                x.tags.toLowerCase().split(/\s+/).includes(`#${formatName}`)
         )
         .map<EventInfo>((x) => {
-            const date = moment(x.start_datetime);
+            const date = moment.utc(x.startDatetime);
+            const dateParts = Object.fromEntries(
+                spellseekerDateFormatter
+                    .formatToParts(date.toDate())
+                    .map(({ type, value }) => [type, value])
+            );
+            const weekday = dateParts.weekday.replace(/[\u2019\u02bc']/g, '’');
 
             return {
                 date: date,
-                dateString: date
-                    .locale('uk')
-                    .format('dddd, DD MMMM, HH:mm')
-                    .replace(weekdayNameRegex, (day) => daysMap[day]),
+                dateString: `${daysMap[weekday] ?? weekday}, ${dateParts.day} ${dateParts.month}, ${dateParts.hour}:${dateParts.minute}`,
                 name: '[SpellSeeker] ' + x.title,
-                id: Number.parseInt(
-                    x.event_id.replaceAll('-', '').replaceAll('EVT', '')
-                ),
+                id: x.id,
                 spaces: 0,
                 usedSpaces: -1,
-                link: x.message_link.replace('c/3151970401', 'skyhobbyshop/2')
+                link: x.link.replace('c/3151970401', 'skyhobbyshop/2')
             };
         });
 }
