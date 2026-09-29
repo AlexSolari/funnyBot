@@ -61,15 +61,14 @@ const spellseekerHeaderMap: Record<string, string> = {
 export const registration = new CommandBuilder('Reaction.Registration')
     .on(['рега', 'Рега', 'рєга', 'Рєга', 'РЕГА', 'РЄГА'])
     .do(async (ctx) => {
-        const [serviceName, format] = determineServiceName(ctx.chatInfo);
-        if (!serviceName) {
+        const format = determineFormat(ctx.chatInfo);
+        if (!format) {
             ctx.skipCooldown();
             return;
         }
 
         const observability = getObservability(ctx);
         const { eventInfos, showRetryLaterMessage } = await loadEvents(
-            serviceName,
             format,
             observability
         );
@@ -101,13 +100,9 @@ export const registration = new CommandBuilder('Reaction.Registration')
     })
     .build();
 
-async function loadEvents(
-    serviceName: string,
-    format: Format,
-    observability: ObservabilityHelper
-) {
+async function loadEvents(format: Format, observability: ObservabilityHelper) {
     const [magicWorldResult, spellseekerResult] = await Promise.allSettled([
-        fetchEventsFromMagicWorld(serviceName, observability),
+        fetchEventsFromMagicWorld(format, observability),
         loadSpellseekerEvents(format, observability)
     ]);
 
@@ -133,28 +128,46 @@ async function loadEvents(
     return { eventInfos, showRetryLaterMessage };
 }
 
-function determineServiceName(
-    chatInfo: ChatInfo
-): [string, Format] | [null, null] {
+function determineMWServiceName(format: Format) {
+    switch (format) {
+        case Format.Pioneer:
+            return 'Піонер';
+        case Format.Modern:
+            return 'Модерн';
+        case Format.Standard:
+            return 'Стандарт';
+        case Format.Pauper:
+            return 'Pauper';
+        default:
+            return null;
+    }
+}
+
+function determineFormat(chatInfo: ChatInfo): Format | null {
     switch (chatInfo.id) {
         case ChatId.TestChat:
         case ChatId.PioneerChat:
-            return ['Піонер', Format.Pioneer];
+            return Format.Pioneer;
         case ChatId.ModernChat:
-            return ['Модерн', Format.Modern];
+            return Format.Modern;
         case ChatId.StandardChat:
-            return ['Стандарт', Format.Standard];
+            return Format.Standard;
         case ChatId.PauperChat:
-            return ['Pauper', Format.Pauper];
+            return Format.Pauper;
         default:
-            return [null, null];
+            return null;
     }
 }
 
 async function fetchEventsFromMagicWorld(
-    serviceName: string,
+    format: Format,
     observability: ObservabilityHelper
 ) {
+    const serviceName = determineMWServiceName(format);
+    if (!serviceName) {
+        return [];
+    }
+
     const today = moment().startOf('day').format('YYYY-MM-DD');
     const month = moment().add(1, 'months').startOf('day').format('YYYY-MM-DD');
 
