@@ -1,4 +1,4 @@
-import { Hours, hoursToSeconds, TelegramMessage } from 'chz-telegram-bot';
+import { BotApi, Hours, hoursToSeconds } from 'chz-telegram-bot';
 import OpenAI from 'openai';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { ChatId } from '../../types/chatIds';
@@ -12,7 +12,7 @@ const client = new OpenAI({
     apiKey: openAiToken.token
 });
 
-function getTextContentsFromReply(messageUpdateObject: TelegramMessage) {
+function getTextContentsFromReply(messageUpdateObject: BotApi.Message) {
     return (
         messageUpdateObject.reply_to_message?.text ??
         messageUpdateObject.reply_to_message?.caption ??
