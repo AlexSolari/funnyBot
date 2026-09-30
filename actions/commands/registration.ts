@@ -15,6 +15,7 @@ import { ObservabilityHelper } from '../../types/observabilityHelper';
 import { SpellseekerEventDto } from '../../types/externalApiDefinitions/event';
 import Papa from 'papaparse';
 import { gid, sheetId } from '../../spellseekerDataIds.json';
+import { getTelegramUserClient } from '../../services/telegramUserClient';
 
 const daysMap = {
     неділя: 'неділю',
@@ -33,6 +34,7 @@ type EventInfo = {
     id: number;
     spaces: number;
     usedSpaces: number;
+    potentialSpaces?: number;
     link: string;
 };
 
@@ -81,10 +83,7 @@ export const registration = new CommandBuilder('Reaction.Registration')
         let text = eventInfos.length > 0 ? 'Реєстрації:\n\n' : '';
 
         for (const event of eventInfos) {
-            const usedSpacesText =
-                event.usedSpaces == -1
-                    ? ''
-                    : ` \\(${event.usedSpaces} уже в резі\\)`;
+            const usedSpacesText = buildUsedSpacesText(event);
 
             text += event.dateString
                 ? `[${escapeMarkdown(event.name)}](${event.link})${usedSpacesText} відбудеться у ${escapeMarkdown(event.dateString)}\n`
@@ -99,6 +98,14 @@ export const registration = new CommandBuilder('Reaction.Registration')
         ctx.reply.withText(text.trim());
     })
     .build();
+
+function buildUsedSpacesText(event: EventInfo): string {
+    if (event.usedSpaces == -1) return '';
+
+    if (!event.potentialSpaces) return ` \\(${event.usedSpaces} уже в резі\\)`;
+
+    return ` \\(${event.usedSpaces} уже в резі, ${event.potentialSpaces} думають\\)`;
+}
 
 async function loadEvents(format: Format, observability: ObservabilityHelper) {
     const [magicWorldResult, spellseekerResult] = await Promise.allSettled([
@@ -242,29 +249,44 @@ async function loadSpellseekerEvents(
         });
     }
 
-    return data
-        .filter(
-            (x) =>
-                x.registration == 'open' &&
-                x.tags.toLowerCase().split(/\s+/).includes(`#${formatName}`)
-        )
-        .map<EventInfo>((x) => {
-            const date = moment.utc(x.startDatetime);
-            const dateParts = Object.fromEntries(
-                spellseekerDateFormatter
-                    .formatToParts(date.toDate())
-                    .map(({ type, value }) => [type, value])
-            );
-            const weekday = dateParts.weekday.replace(/[\u2019\u02bc']/g, '’');
+    return await Promise.all(
+        data
+            .filter(
+                (x) =>
+                    x.registration == 'open' &&
+                    x.tags.toLowerCase().split(/\s+/).includes(`#${formatName}`)
+            )
+            .map<Promise<EventInfo>>(async (x) => {
+                const date = moment.utc(x.startDatetime);
+                const dateParts = Object.fromEntries(
+                    spellseekerDateFormatter
+                        .formatToParts(date.toDate())
+                        .map(({ type, value }) => [type, value])
+                );
+                const weekday = dateParts.weekday.replace(
+                    /[\u2019\u02bc']/g,
+                    '’'
+                );
 
-            return {
-                date: date,
-                dateString: `${daysMap[weekday] ?? weekday}, ${dateParts.day} ${dateParts.month}, ${dateParts.hour}:${dateParts.minute}`,
-                name: '[SpellSeeker] ' + x.title,
-                id: x.id,
-                spaces: 0,
-                usedSpaces: -1,
-                link: x.link.replace('c/3151970401', 'skyhobbyshop/2')
-            };
-        });
+                const client = await getTelegramUserClient();
+                const poll = await client.getPollResults({
+                    chatId: -1003151970401,
+                    message: parseInt(x.link.split('/').pop() ?? '0')
+                });
+
+                return {
+                    date: date,
+                    dateString: `${daysMap[weekday] ?? weekday}, ${dateParts.day} ${dateParts.month}, ${dateParts.hour}:${dateParts.minute}`,
+                    name: '[SpellSeeker] ' + x.title,
+                    id: x.id,
+                    spaces: 0,
+                    usedSpaces: poll.answers.filter((a) => a.text == 'Буду')[0]
+                        .voters,
+                    potentialSpaces: poll.answers.filter(
+                        (a) => a.text == 'Думаю'
+                    )[0].voters,
+                    link: x.link.replace('c/3151970401', 'skyhobbyshop/2')
+                };
+            })
+    );
 }

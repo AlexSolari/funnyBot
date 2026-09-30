@@ -1,9 +1,10 @@
 {
     "type": "module",
     "dependencies": {
+        "@mtcute/bun": "^0.32.3",
         "async-sema": "^3.1.1",
         "cheerio": "^1.2.0",
-        "chz-telegram-bot": "^0.7.36",
+        "chz-telegram-bot": "^0.8.0",
         "moment": "^2.30.1",
         "openai": "^6.49.0",
         "papaparse": "^5.7.0"
@@ -13,7 +14,9 @@
         "@types/bun": "^1.4.0",
         "@types/node": "^25.9.5",
         "@types/papaparse": "^5.5.2",
+        "@types/qrcode-terminal": "^0.12.2",
         "eslint": "^10.9.1",
+        "qrcode-terminal": "^0.12.0",
         "typescript": "^6.0.3",
         "typescript-eslint": "^8.69.0"
     },

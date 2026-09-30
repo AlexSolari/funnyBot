@@ -13,18 +13,11 @@ const client = new OpenAI({
 });
 
 function getTextContentsFromReply(messageUpdateObject: TelegramMessage) {
-    if (
-        'reply_to_message' in messageUpdateObject &&
-        messageUpdateObject.reply_to_message
-    ) {
-        if ('text' in messageUpdateObject.reply_to_message)
-            return messageUpdateObject.reply_to_message.text ?? '';
-
-        if ('caption' in messageUpdateObject.reply_to_message)
-            return messageUpdateObject.reply_to_message.caption ?? '';
-    }
-
-    return '';
+    return (
+        messageUpdateObject.reply_to_message?.text ??
+        messageUpdateObject.reply_to_message?.caption ??
+        ''
+    );
 }
 
 async function getReplyText(input: string, observability: ObservabilityHelper) {

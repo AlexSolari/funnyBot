@@ -13,3 +13,4 @@ openAiToken.json
 monitoring/dashboard/dist/
 spellseekerDataIds.json
 dashboardPassword.json
+telegramApiCredentials.json

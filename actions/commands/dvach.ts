@@ -8,9 +8,8 @@ const DVACH_LIGHTNING_ID = '5359617799515823946';
 
 function isForwarded(messageInfo: MessageInfo) {
     const update = messageInfo.telegramUpdateObject;
-    const isForward = 'forward_origin' in update;
 
-    if (isForward && update.forward_origin?.type == 'channel') {
+    if (update.forward_origin?.type == 'channel') {
         return DVACH_CHATIDS.has(update.forward_origin.chat.id);
     }
 
@@ -20,9 +19,9 @@ function isForwarded(messageInfo: MessageInfo) {
 function hasEmoji(messageInfo: MessageInfo) {
     const update = messageInfo.telegramUpdateObject;
 
-    if ('entities' in update) {
+    if (update.entities) {
         return (
-            update.entities?.find(
+            update.entities.find(
                 (x) =>
                     x.type == 'custom_emoji' &&
                     x.custom_emoji_id == DVACH_LIGHTNING_ID
@@ -36,9 +35,7 @@ function hasEmoji(messageInfo: MessageInfo) {
 function hasVideo(messageInfo: MessageInfo) {
     const update = messageInfo.telegramUpdateObject;
 
-    const hasVideo = 'video' in update && update.video != undefined;
-
-    if (hasVideo && 'file_name' in update.video) {
+    if (update.video) {
         const videoName = update.video.file_name ?? '';
 
         return (

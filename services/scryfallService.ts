@@ -17,7 +17,7 @@ import { EventType } from '../types/customEvents';
 const SCRYFALL_RATELIMIT_DELAY = 50 as Milliseconds;
 
 function getCardFaces(card: IScryfallCard) {
-    return card.card_faces && 'image_uris' in card.card_faces[0]
+    return card.card_faces && card.card_faces[0].image_uris
         ? card.card_faces.map((x) => {
               x.parentId = card.id;
               x.prices ??= card.prices;
