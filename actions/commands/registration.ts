@@ -15,7 +15,7 @@ import { ObservabilityHelper } from '../../types/observabilityHelper';
 import { SpellseekerEventDto } from '../../types/externalApiDefinitions/event';
 import Papa from 'papaparse';
 import { gid, sheetId } from '../../spellseekerDataIds.json';
-import { getTelegramUserClient } from '../../services/telegramUserClient';
+import { traceTelegramUserCall } from '../../services/telegramUserClient';
 
 const daysMap = {
     неділя: 'неділю',
@@ -268,11 +268,15 @@ async function loadSpellseekerEvents(
                     '’'
                 );
 
-                const client = await getTelegramUserClient();
-                const poll = await client.getPollResults({
-                    chatId: -1003151970401,
-                    message: parseInt(x.link.split('/').pop() ?? '0')
-                });
+                const poll = await traceTelegramUserCall(
+                    'getPollResults',
+                    observability,
+                    (client) =>
+                        client.getPollResults({
+                            chatId: -1003151970401,
+                            message: parseInt(x.link.split('/').pop() ?? '0')
+                        })
+                );
 
                 return {
                     date: date,

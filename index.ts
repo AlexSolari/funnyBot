@@ -20,6 +20,7 @@ import {
     createMonitoringEventHandler
 } from './monitoring';
 import { readFile } from 'fs/promises';
+import { warmUpTelegramUserClient } from './services/telegramUserClient';
 
 function getEventHandler(botName: string) {
     const monitoringHandler = createMonitoringEventHandler(botName);
@@ -46,6 +47,11 @@ function getEventHandler(botName: string) {
 }
 
 await featureProvider.load();
+
+// Connect the MTProto user client in the background so the first request doesn't pay for the handshake
+warmUpTelegramUserClient().catch((error) =>
+    console.error('Failed to warm up Telegram user client', error)
+);
 
 // Start the monitoring dashboard
 await startDashboardServer();
@@ -126,14 +132,17 @@ if (process.env.NODE_ENV == 'production') {
     bot.eventEmitter.onEach(getEventHandler(bot.name));
 }
 
-process.once('SIGINT', async () => {
+// Stay subscribed (not `once`) and ignore repeated signals, so a second Ctrl+C doesn't kill the process mid-shutdown
+let isShuttingDown = false;
+async function shutdown() {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
+
     await botOrchestrator.stopBots();
     process.exit(0);
-});
-process.once('SIGTERM', async () => {
-    await botOrchestrator.stopBots();
-    process.exit(0);
-});
+}
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
 
 process.on('uncaughtException', (error: Error, origin: string) => {
     console.error('[uncaughtException]');

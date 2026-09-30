@@ -1,11 +1,12 @@
+import { TelegramClient } from '@mtcute/bun';
 import qrcode from 'qrcode-terminal';
-import { createTelegramUserClient } from '../services/telegramUserClient';
+import { telegramUserClientOptions } from '../services/telegramUserClient';
 import credentials from '../telegramApiCredentials.json';
 
 // One-time interactive login, stores the session in storage/telegramUser.session
 // Pass --qr to log in by scanning a QR code instead of entering a code
 const useQr = process.argv.includes('--qr');
-const client = createTelegramUserClient();
+const client = new TelegramClient(telegramUserClientOptions);
 
 const user = await client.start(
     useQr
