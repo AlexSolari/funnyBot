@@ -28,6 +28,11 @@ type CaptureEventData = EventData<
 >;
 type ErrorEventData = EventData<typeof BotEventType.error>;
 
+// API calls made by post-send operations after a delay (deleteMessage is only
+// sent by deleteAfter, once its timeout elapses). They reuse the originating
+// traceId, so recording them as spans would stretch the trace by the delay.
+const DEFERRED_API_METHODS: ReadonlySet<string> = new Set(['deleteMessage']);
+
 export function createMonitoringEventHandler(botName: string) {
     // Register the bot with metrics collector
     metricsCollector.registerBot(botName);
@@ -327,13 +332,15 @@ export function createMonitoringEventHandler(botName: string) {
                     const apiData = data as ApiEventData;
                     const method = apiData.telegramMethod || 'unknown';
 
-                    metricsCollector.onSpanStart(
-                        traceId,
-                        botName,
-                        'api',
-                        `api.request.${method}`,
-                        { method, phase: 'response' }
-                    );
+                    if (!DEFERRED_API_METHODS.has(method)) {
+                        metricsCollector.onSpanStart(
+                            traceId,
+                            botName,
+                            'api',
+                            `api.request.${method}`,
+                            { method, phase: 'response' }
+                        );
+                    }
                     metricsCollector.onApiRequestSending(traceId);
                     break;
                 }
@@ -342,28 +349,35 @@ export function createMonitoringEventHandler(botName: string) {
                     const apiData = data as ApiEventData;
                     const method = apiData.telegramMethod || 'unknown';
 
-                    metricsCollector.onSpanEnd(
-                        traceId,
-                        `api.request.${method}`,
-                        'success',
-                        { method, phase: 'response' }
-                    );
+                    if (!DEFERRED_API_METHODS.has(method)) {
+                        metricsCollector.onSpanEnd(
+                            traceId,
+                            `api.request.${method}`,
+                            'success',
+                            { method, phase: 'response' }
+                        );
+                    }
                     metricsCollector.onApiRequestSent(traceId);
                     break;
                 }
 
                 case BotEventType.error: {
                     const errData = data as ErrorEventData;
-                    metricsCollector.onEvent(
-                        traceId,
-                        botName,
-                        'message',
-                        'error',
-                        {
-                            errorName: errData.error.name,
-                            errorMessage: errData.error.message
-                        }
-                    );
+                    // Errors after the trace ended (e.g. a failed deleteAfter) are
+                    // still logged on the trace by onError, but not added as spans,
+                    // since a late span would stretch the trace duration
+                    if (!metricsCollector.isTraceEnded(traceId)) {
+                        metricsCollector.onEvent(
+                            traceId,
+                            botName,
+                            'message',
+                            'error',
+                            {
+                                errorName: errData.error.name,
+                                errorMessage: errData.error.message
+                            }
+                        );
+                    }
                     metricsCollector.onError(
                         errData.error.message,
                         errData.error.name,

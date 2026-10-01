@@ -427,6 +427,13 @@ export class MetricsCollector {
         const trace = this.traces.get(traceId);
         if (!trace) return;
 
+        // Already ended (e.g. an error from a deferred post-send operation):
+        // keep the status, but don't stretch the trace to the late event
+        if (trace.endTime !== undefined) {
+            if (status === 'error') trace.rootSpan.status = status;
+            return;
+        }
+
         const now = Date.now();
 
         // Calculate actual end time based on the latest span end time
@@ -454,6 +461,11 @@ export class MetricsCollector {
         setTimeout(() => {
             this.traces.delete(traceId);
         }, 60000);
+    }
+
+    isTraceEnded(traceId: string | undefined): boolean {
+        if (!traceId) return false;
+        return this.traces.get(traceId)?.endTime !== undefined;
     }
 
     logToTrace(traceId: string, message: string): void {
