@@ -74,6 +74,7 @@ export interface DashboardData {
     }>;
     botNames: string[];
     topHeaviestCommands: HeaviestCommand[];
+    captureStats: CaptureStats;
 }
 
 export interface TraceSearchQuery {
@@ -94,4 +95,13 @@ export interface HeaviestCommand {
     maxLatency: number;
     count: number;
     traceIds: string[];
+}
+
+export interface CaptureStats {
+    active: number;
+    completed: number;
+    // Share of completed captures that received at least one reply (0..1)
+    answeredRate: number;
+    avgLifetime: number;
+    avgReplies: number;
 }

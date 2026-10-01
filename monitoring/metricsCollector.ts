@@ -9,6 +9,7 @@ import {
     LatencyHistogramBucket,
     TraceSearchQuery,
     HeaviestCommand,
+    CaptureStats,
     TagValue
 } from './types';
 
@@ -65,6 +66,18 @@ class RingBuffer<T> {
     get length(): number {
         return this.size;
     }
+}
+
+interface ActiveCapture {
+    botName: string;
+    traceId: string;
+    startTime: number;
+    replies: number;
+}
+
+interface CompletedCapture {
+    duration: number;
+    replies: number;
 }
 
 // Time-series bucket for aggregating metrics per minute
@@ -182,8 +195,14 @@ export class MetricsCollector {
     > = new Map();
     private readonly apiRequestStart: Map<string, number> = new Map();
 
+    // Reply captures live for minutes to hours, so they are tracked here
+    // instead of as spans - keeping them in traces inflates trace durations
+    private readonly activeCaptures: Map<string, ActiveCapture> = new Map();
+    private readonly completedCaptures = new RingBuffer<CompletedCapture>(500);
+
     // Cleanup configuration
     private static readonly STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+    private static readonly CAPTURE_STALE_THRESHOLD_MS = 48 * 60 * 60 * 1000; // 48 hours
     private static readonly CLEANUP_INTERVAL_MS = 60 * 1000; // 1 minute
     private cleanupIntervalId: ReturnType<typeof setInterval> | null = null;
 
@@ -243,6 +262,12 @@ export class MetricsCollector {
             (ts) => ts
         );
         this.cleanupStaleTraces(now, threshold);
+        this.cleanupStaleMapEntries(
+            this.activeCaptures,
+            now,
+            MetricsCollector.CAPTURE_STALE_THRESHOLD_MS,
+            (capture) => capture.startTime
+        );
     }
 
     /**
@@ -398,10 +423,6 @@ export class MetricsCollector {
         this.pendingSpans.delete(spanId);
     }
 
-    private isCaptureSpan(span: TraceSpan): boolean {
-        return span.tags.phase === 'capture';
-    }
-
     endTrace(traceId: string, status: 'success' | 'error' = 'success'): void {
         const trace = this.traces.get(traceId);
         if (!trace) return;
@@ -410,14 +431,9 @@ export class MetricsCollector {
 
         // Calculate actual end time based on the latest span end time
         // This ensures we capture async operations that complete after message processing
-        // Exclude capture spans as they represent long-running waits (e.g. 30s timeouts)
-        // that would incorrectly inflate the trace duration
-        const nonCaptureSpans = trace.spans.filter(
-            (s) => !this.isCaptureSpan(s)
-        );
         const latestSpanEndTime = Math.max(
             now,
-            ...nonCaptureSpans.map((s) => {
+            ...trace.spans.map((s) => {
                 if (s.duration && s.duration > 0) {
                     return s.startTime + s.duration;
                 }
@@ -462,10 +478,10 @@ export class MetricsCollector {
         const spanId = randomUUID();
         const now = Date.now();
 
-        // Check if trace exists in active map first, then in ring buffer
-        const existingTrace =
-            this.traces.get(traceId) ??
-            this.traceRing.find((t) => t.traceId === traceId);
+        // Only attach to active traces. Completed traces are never reopened:
+        // scheduled actions reuse the same traceId every run, so reopening
+        // would merge runs a day apart into a single trace
+        const existingTrace = this.traces.get(traceId);
 
         if (existingTrace) {
             // Add a new span to the existing trace (without endTime/duration yet)
@@ -524,16 +540,7 @@ export class MetricsCollector {
     ): void {
         if (!traceId) return;
 
-        // Try to find trace in active map first, then in ring buffer
-        let trace = this.traces.get(traceId);
-        let isCompletedTrace = false;
-
-        if (!trace) {
-            // Look in the ring buffer for completed traces using efficient find
-            trace = this.traceRing.find((t) => t.traceId === traceId);
-            isCompletedTrace = true;
-        }
-
+        const trace = this.traces.get(traceId);
         if (!trace) return;
 
         // Find the most recent span with matching name that hasn't been completed
@@ -547,13 +554,7 @@ export class MetricsCollector {
                 Object.assign(span.tags, additionalTags);
 
                 // If this span ends after the trace's recorded end time, update the trace duration
-                // Skip duration update for capture spans as they inflate trace duration
-                if (
-                    isCompletedTrace &&
-                    trace.endTime &&
-                    now > trace.endTime &&
-                    !this.isCaptureSpan(span)
-                ) {
+                if (trace.endTime && now > trace.endTime) {
                     trace.endTime = now;
                     trace.totalDuration = now - trace.startTime;
                     trace.rootSpan.endTime = now;
@@ -627,6 +628,90 @@ export class MetricsCollector {
 
             this.traces.set(traceId, trace);
         }
+    }
+
+    // Reply capture lifecycle (tracked outside of traces)
+    private getCaptureKey(
+        botName: string,
+        chatId: number,
+        parentMessageId: number
+    ): string {
+        return `${botName}:${chatId}:${parentMessageId}`;
+    }
+
+    onCaptureStarted(
+        traceId: string | undefined,
+        botName: string,
+        chatId: number,
+        parentMessageId: number
+    ): void {
+        if (!traceId) return;
+
+        this.activeCaptures.set(
+            this.getCaptureKey(botName, chatId, parentMessageId),
+            { botName, traceId, startTime: Date.now(), replies: 0 }
+        );
+
+        // Mark the moment in the originating trace without keeping a span open.
+        // Captures are registered while the trace is still being processed,
+        // so a missing trace means there is nothing to annotate.
+        if (this.traces.has(traceId)) {
+            this.onEvent(traceId, botName, 'command', 'command.capture.started', {
+                parentMessageId,
+                phase: 'capture'
+            });
+        }
+    }
+
+    onCaptureEnded(
+        botName: string,
+        chatId: number,
+        parentMessageId: number
+    ): void {
+        const key = this.getCaptureKey(botName, chatId, parentMessageId);
+        const capture = this.activeCaptures.get(key);
+        if (!capture) return;
+
+        this.activeCaptures.delete(key);
+        this.completedCaptures.push({
+            duration: Date.now() - capture.startTime,
+            replies: capture.replies
+        });
+    }
+
+    /**
+     * Registers a reply handled by a capture.
+     * Returns the traceId of the trace that started the capture, for linking.
+     */
+    onCaptureReply(
+        botName: string,
+        chatId: number,
+        parentMessageId: number | undefined
+    ): string | undefined {
+        if (parentMessageId === undefined) return undefined;
+
+        const capture = this.activeCaptures.get(
+            this.getCaptureKey(botName, chatId, parentMessageId)
+        );
+        if (!capture) return undefined;
+
+        capture.replies++;
+        return capture.traceId;
+    }
+
+    getCaptureStats(): CaptureStats {
+        const completed = this.completedCaptures.toArray();
+        const answered = completed.filter((c) => c.replies > 0).length;
+
+        return {
+            active: this.activeCaptures.size,
+            completed: completed.length,
+            answeredRate: completed.length > 0 ? answered / completed.length : 0,
+            avgLifetime: this.calculateAverage(
+                completed.map((c) => c.duration)
+            ),
+            avgReplies: this.calculateAverage(completed.map((c) => c.replies))
+        };
     }
 
     // Event handlers for metrics tracking (separate from span tracking)
@@ -815,14 +900,9 @@ export class MetricsCollector {
      * This ensures consistent duration calculation across all components.
      */
     private getTraceDuration(trace: Trace): number {
-        // Exclude capture spans from duration calculation as they represent
-        // long-running waits that would inflate the trace duration
-        const nonCaptureSpans = trace.spans.filter(
-            (s) => !this.isCaptureSpan(s)
-        );
-        if (nonCaptureSpans.length === 0) return 0;
+        if (trace.spans.length === 0) return 0;
         const maxEndTime = Math.max(
-            ...nonCaptureSpans.map((s) => {
+            ...trace.spans.map((s) => {
                 // If span has a duration, use startTime + duration (most reliable)
                 if (s.duration && s.duration > 0) {
                     return s.startTime + s.duration;
@@ -988,21 +1068,18 @@ export class MetricsCollector {
         };
     }
 
+    /**
+     * All known traces (completed and active), each counted once.
+     * endTrace keeps a trace in this.traces for 60s after pushing it to traceRing,
+     * so deduplication is by object identity - not by traceId, because scheduled
+     * actions reuse the same traceId for every run and each run is its own trace.
+     */
+    private getAllTraces(): Trace[] {
+        return [...new Set([...this.traceRing.toArray(), ...this.traces.values()])];
+    }
+
     searchTraces(query: TraceSearchQuery): Trace[] {
-        let traces = this.traceRing.toArray();
-
-        // Also include active traces
-        traces = [...traces, ...this.traces.values()];
-
-        // Deduplicate by traceId - keep the most complete version (latest)
-        const traceMap = new Map<string, Trace>();
-        for (const trace of traces) {
-            const existing = traceMap.get(trace.traceId);
-            if (!existing || trace.spans.length > existing.spans.length) {
-                traceMap.set(trace.traceId, trace);
-            }
-        }
-        traces = [...traceMap.values()];
+        let traces = this.getAllTraces();
 
         if (query.traceId) {
             traces = traces.filter((t) =>
@@ -1059,22 +1136,17 @@ export class MetricsCollector {
     }
 
     getTraceById(traceId: string): Trace | undefined {
-        // Check active traces first
-        const active = this.traces.get(traceId);
-
-        // Then check completed traces
-        const completed = this.traceRing
-            .toArray()
-            .find((t) => t.traceId === traceId);
-
-        // Return the one with more spans (more complete)
-        if (active && completed) {
-            return active.spans.length >= completed.spans.length
-                ? active
-                : completed;
+        // Scheduled actions reuse traceIds across runs - return the latest run
+        let latest: Trace | undefined;
+        for (const trace of this.getAllTraces()) {
+            if (
+                trace.traceId === traceId &&
+                (!latest || trace.startTime > latest.startTime)
+            ) {
+                latest = trace;
+            }
         }
-
-        return active || completed;
+        return latest;
     }
 
     // Get top 10 heaviest commands by average latency from recent traces
@@ -1087,21 +1159,8 @@ export class MetricsCollector {
             }
         > = new Map();
 
-        // Gather all traces (both active and completed), deduplicated by traceId
-        // (endTrace keeps traces in this.traces for 60s after pushing to traceRing)
-        const traceMap = new Map<string, Trace>();
-        for (const trace of this.traceRing.toArray()) {
-            traceMap.set(trace.traceId, trace);
-        }
-        for (const trace of this.traces.values()) {
-            if (!traceMap.has(trace.traceId)) {
-                traceMap.set(trace.traceId, trace);
-            }
-        }
-        const allTraces = [...traceMap.values()];
-
         // Analyze each trace for command spans
-        for (const trace of allTraces) {
+        for (const trace of this.getAllTraces()) {
             this.collectCommandSpanLatencies(trace, commandStats);
         }
 
@@ -1187,65 +1246,40 @@ export class MetricsCollector {
     }
 
     /**
+     * Completed traces: everything in the ring buffer plus active traces whose
+     * spans are all done, each counted once (see getAllTraces).
+     */
+    private getCompletedTraces(): Trace[] {
+        const completed = new Set(this.traceRing.toArray());
+        for (const trace of this.traces.values()) {
+            const hasPendingSpans = trace.spans.some(
+                (s) => s.status === 'pending'
+            );
+            if (
+                !hasPendingSpans &&
+                trace.totalDuration &&
+                trace.totalDuration > 0
+            ) {
+                completed.add(trace);
+            }
+        }
+        return [...completed];
+    }
+
+    /**
      * Get latencies from completed traces for histogram.
      * Uses the same duration calculation as the frontend.
      */
     private getTraceBasedLatencies(): number[] {
-        const latencies: number[] = [];
-
-        // Get completed traces from ring buffer
-        for (const trace of this.traceRing.toArray()) {
-            const duration = this.getTraceDuration(trace);
-            if (duration > 0) {
-                latencies.push(duration);
-            }
-        }
-
-        // Also include completed active traces (those with all spans done)
-        // Ignore capture spans when checking for pending status, as they represent
-        // long-running waits that shouldn't block trace completion
-        for (const trace of this.traces.values()) {
-            const hasPendingNonCaptureSpans = trace.spans.some(
-                (s) => s.status === 'pending' && !this.isCaptureSpan(s)
-            );
-            if (
-                !hasPendingNonCaptureSpans &&
-                trace.totalDuration &&
-                trace.totalDuration > 0
-            ) {
-                const duration = this.getTraceDuration(trace);
-                if (duration > 0) {
-                    latencies.push(duration);
-                }
-            }
-        }
-
-        return latencies;
+        return this.getCompletedTraces()
+            .map((trace) => this.getTraceDuration(trace))
+            .filter((duration) => duration > 0);
     }
 
     private getTraceBasedOwnLatencies(): number[] {
-        const latencies: number[] = [];
-
-        for (const trace of this.traceRing.toArray()) {
-            const duration = this.getOwnTraceDuration(trace);
-            if (duration > 0) latencies.push(duration);
-        }
-
-        for (const trace of this.traces.values()) {
-            const hasPendingNonCaptureSpans = trace.spans.some(
-                (s) => s.status === 'pending' && !this.isCaptureSpan(s)
-            );
-            if (
-                !hasPendingNonCaptureSpans &&
-                trace.totalDuration &&
-                trace.totalDuration > 0
-            ) {
-                const duration = this.getOwnTraceDuration(trace);
-                if (duration > 0) latencies.push(duration);
-            }
-        }
-
-        return latencies;
+        return this.getCompletedTraces()
+            .map((trace) => this.getOwnTraceDuration(trace))
+            .filter((duration) => duration > 0);
     }
 
     getDashboardData(): DashboardData {
@@ -1261,7 +1295,8 @@ export class MetricsCollector {
             recentTraces: this.searchTraces({ limit: 50 }),
             recentErrors: this.recentErrors.toArray().reverse(),
             botNames: [...this.botNames],
-            topHeaviestCommands: this.getTopHeaviestCommands(10)
+            topHeaviestCommands: this.getTopHeaviestCommands(10),
+            captureStats: this.getCaptureStats()
         };
     }
 }

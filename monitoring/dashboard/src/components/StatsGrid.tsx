@@ -1,14 +1,15 @@
 import { memo } from 'react';
-import { formatNumber } from '../utils/formatters';
+import { formatNumber, formatUptime } from '../utils/formatters';
 import { DASHBOARD_SETTINGS } from '../utils/constants';
-import type { CurrentStats, ThroughputMetrics } from '../types';
+import type { CaptureStats, CurrentStats, ThroughputMetrics } from '../types';
 
 interface StatsGridProps {
     readonly stats: CurrentStats;
     readonly throughput: ThroughputMetrics;
+    readonly captureStats: CaptureStats;
 }
 
-function StatsGridComponent({ stats, throughput }: StatsGridProps) {
+function StatsGridComponent({ stats, throughput, captureStats }: StatsGridProps) {
     const recentMessages = throughput.messagesReceived.slice(
         -DASHBOARD_SETTINGS.recentMessagesCount
     );
@@ -58,6 +59,15 @@ function StatsGridComponent({ stats, throughput }: StatsGridProps) {
             <div className="stat-card">
                 <div className="label">Active Traces</div>
                 <div className="value">{formatNumber(stats.activeTraces)}</div>
+            </div>
+            <div className="stat-card">
+                <div className="label">Active Captures</div>
+                <div className="value">{formatNumber(captureStats.active)}</div>
+                <div className="subvalue">
+                    {captureStats.completed > 0
+                        ? `${Math.round(captureStats.answeredRate * 100)}% answered · avg ${formatUptime(captureStats.avgLifetime)}`
+                        : 'none completed yet'}
+                </div>
             </div>
         </div>
     );

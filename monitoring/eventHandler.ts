@@ -22,6 +22,7 @@ type ScheduledEventData = EventData<
     typeof BotEventType.scheduledActionExecuting
 >;
 type ApiEventData = EventData<typeof BotEventType.apiRequestSending>;
+type ReplyEventData = EventData<typeof BotEventType.replyActionExecuting>;
 type CaptureEventData = EventData<
     typeof BotEventType.commandActionCaptureStarted
 >;
@@ -124,42 +125,48 @@ export function createMonitoringEventHandler(botName: string) {
 
                 case BotEventType.commandActionCaptureStarted: {
                     const captureData = data as CaptureEventData;
-                    const parentMessageId = captureData.parentMessageId;
 
-                    metricsCollector.onSpanStart(
+                    metricsCollector.onCaptureStarted(
                         traceId,
                         botName,
-                        'command',
-                        `command.capture.${parentMessageId}`,
-                        { parentMessageId, phase: 'capture' }
+                        captureData.chatInfo.id,
+                        captureData.parentMessageId
                     );
                     break;
                 }
 
                 case BotEventType.commandActionCaptureAborted: {
                     const captureData = data as CaptureEventData;
-                    const parentMessageId = captureData.parentMessageId;
 
-                    metricsCollector.onSpanEnd(
-                        traceId,
-                        `command.capture.${parentMessageId}`,
-                        'error',
-                        { parentMessageId, phase: 'capture', aborted: true }
+                    metricsCollector.onCaptureEnded(
+                        botName,
+                        captureData.chatInfo.id,
+                        captureData.parentMessageId
                     );
                     break;
                 }
 
                 case BotEventType.replyActionExecuting: {
-                    const cmdData = data as CommandEventData;
-                    const actionName = cmdData.action.key;
-                    const messageId = cmdData.ctx.messageInfo.id;
+                    const replyData = data as ReplyEventData;
+                    const actionName = replyData.action.key;
+                    const messageId = replyData.ctx.messageInfo.id;
+                    const capturedFromTraceId = metricsCollector.onCaptureReply(
+                        botName,
+                        replyData.ctx.chatInfo.id,
+                        replyData.ctx.replyMessageId
+                    );
 
                     metricsCollector.onSpanStart(
                         traceId,
                         botName,
                         'command',
                         `reply.action.${actionName}`,
-                        { actionName, messageId, phase: 'command' }
+                        {
+                            actionName,
+                            messageId,
+                            phase: 'command',
+                            ...(capturedFromTraceId && { capturedFromTraceId })
+                        }
                     );
                     metricsCollector.onCommandExecuting(
                         botName,

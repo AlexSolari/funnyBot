@@ -142,6 +142,7 @@ export default function App() {
                         <StatsGrid
                             stats={data.currentStats}
                             throughput={data.throughput}
+                            captureStats={data.captureStats}
                         />
                         <ChartsGrid
                             throughput={data.throughput}

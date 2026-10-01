@@ -1,5 +1,4 @@
 import type { TraceSpan } from '../types';
-import { isExcludedSpan } from '../utils/formatters';
 
 interface WaterfallDiagramProps {
     readonly spans: TraceSpan[];
@@ -13,7 +12,8 @@ const PHASE_CONFIG: Record<string, { color: string; order: number }> = {
     'processing': { color: '#a371f7', order: 2 },
     'command': { color: '#3fb950', order: 3 },
     'response': { color: '#f0883e', order: 4 },
-    'finalization': { color: '#d29922', order: 5 }
+    'finalization': { color: '#d29922', order: 5 },
+    'capture': { color: '#db61a2', order: 6 }
 };
 
 function getPhaseColor(phase: string | undefined): string {
@@ -41,17 +41,14 @@ export function WaterfallDiagram({
     traceStartTime,
     totalDuration
 }: WaterfallDiagramProps) {
-    // Filter out excluded spans
-    const filteredSpans = spans.filter((span) => !isExcludedSpan(span.operationName));
-    
-    if (filteredSpans.length === 0) {
+    if (spans.length === 0) {
         return <div className="waterfall-empty">No events to display</div>;
     }
 
     // Sort spans by start time for chronological display
-    const sortedSpans = [...filteredSpans].sort((a, b) => a.startTime - b.startTime);
+    const sortedSpans = [...spans].sort((a, b) => a.startTime - b.startTime);
 
-    // Calculate the actual duration to use for scaling - use the max of filtered span end times
+    // Calculate the actual duration to use for scaling - use the max of span end times
     // For each span: if it has duration, use startTime + duration; else use endTime or startTime
     const maxEndTime = Math.max(
         ...sortedSpans.map((s) => {
