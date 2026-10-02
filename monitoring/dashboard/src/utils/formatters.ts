@@ -34,10 +34,16 @@ export function formatDateTime(timestamp: number): string {
 }
 
 export function formatLatency(ms: number): string {
-    if (ms >= 1000) {
-        return `${(ms / 1000).toFixed(2)}s`;
-    }
-    return `${ms}ms`;
+    if (ms >= 1000) return `${(ms / 1000).toFixed(2)}s`;
+    if (ms >= 100) return `${Math.round(ms)}ms`;
+    if (ms >= 10) return `${ms.toFixed(1)}ms`;
+    // Durations are measured with sub-millisecond precision, most messages take under a few ms
+    return `${ms.toFixed(2)}ms`;
+}
+
+/** Compact label for a latency bucket boundary or chart tick: `0.5ms`, `250ms`, `2.5s`. */
+export function formatLatencyLimit(ms: number): string {
+    return ms >= 1000 ? `${ms / 1000}s` : `${ms}ms`;
 }
 
 /**

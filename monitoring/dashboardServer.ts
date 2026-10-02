@@ -215,10 +215,10 @@ function handleTraces(req: Request): Response {
         botName: params.botName || undefined,
         operationType: params.operationType || undefined,
         minDuration: params.minDuration
-            ? Number.parseInt(params.minDuration, 10)
+            ? Number.parseFloat(params.minDuration)
             : undefined,
         maxDuration: params.maxDuration
-            ? Number.parseInt(params.maxDuration, 10)
+            ? Number.parseFloat(params.maxDuration)
             : undefined,
         status: params.status || undefined,
         fromTime: params.fromTime

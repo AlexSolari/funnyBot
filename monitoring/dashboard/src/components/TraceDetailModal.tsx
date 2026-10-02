@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import type { Trace } from '../types';
-import { formatDateTime, formatTime, getOwnDuration, getTraceDuration } from '../utils/formatters';
+import { formatDateTime, formatLatency, formatTime, getOwnDuration, getTraceDuration } from '../utils/formatters';
 import { WaterfallDiagram } from './WaterfallDiagram';
 
 interface TraceDetailModalProps {
@@ -81,7 +81,7 @@ export function TraceDetailModal({ trace, onClose }: TraceDetailModalProps) {
                             <div className="value">
                                 {actualDuration === undefined
                                     ? 'In progress'
-                                    : `${actualDuration}ms`}
+                                    : formatLatency(actualDuration)}
                             </div>
                         </div>
                         <div className="trace-detail-item">
@@ -89,7 +89,7 @@ export function TraceDetailModal({ trace, onClose }: TraceDetailModalProps) {
                             <div className="value">
                                 {ownDuration === undefined
                                     ? 'In progress'
-                                    : `${ownDuration}ms`}
+                                    : formatLatency(ownDuration)}
                             </div>
                         </div>
                         <div className="trace-detail-item">
@@ -123,7 +123,7 @@ export function TraceDetailModal({ trace, onClose }: TraceDetailModalProps) {
                                     <span className="span-duration">
                                         {span.duration === undefined
                                             ? 'pending'
-                                            : `${span.duration}ms`}
+                                            : formatLatency(span.duration)}
                                     </span>
                                 </div>
                                 <div className="span-tags">

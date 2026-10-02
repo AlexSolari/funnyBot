@@ -19,7 +19,11 @@ import type {
     LatencyHistogramBucket,
     CurrentStats
 } from '../types';
-import { formatTime } from '../utils/formatters';
+import {
+    formatLatency,
+    formatLatencyLimit,
+    formatTime
+} from '../utils/formatters';
 import { CHART_COLORS, CHART_STYLES } from '../utils/constants';
 
 ChartJS.register(
@@ -77,12 +81,11 @@ const logLatencyChartOptions: ChartOptions<'line'> = {
                 ...tickStyle,
                 autoSkip: false,
                 callback: (value) =>
-                    formatLogTickLabel(value, (v) =>
-                        v >= 1000 ? `${v / 1000}s` : `${v}ms`
-                    )
+                    formatLogTickLabel(value, formatLatencyLimit)
             },
             grid: gridStyle,
-            min: 1
+            // Sub-millisecond averages are common, so start the scale below 1ms
+            min: 0.1
         }
     }
 };
@@ -178,19 +181,12 @@ export function ChartsGrid({
     };
 
     const histogramData: ChartData<'bar'> = {
-        labels: [
-            '<10ms',
-            '<25ms',
-            '<50ms',
-            '<100ms',
-            '<250ms',
-            '<500ms',
-            '<1s',
-            '<2.5s',
-            '<5s',
-            '<10s',
-            '>10s'
-        ],
+        // Bucket limits come from the server; the last one is Infinity, which JSON turns into null
+        labels: latencyHistogram.map((h, i) =>
+            h.le == null || !Number.isFinite(h.le)
+                ? `>${formatLatencyLimit(latencyHistogram[i - 1]?.le ?? 0)}`
+                : `<${formatLatencyLimit(h.le)}`
+        ),
         datasets: [
             {
                 label: 'Requests',
@@ -265,19 +261,19 @@ export function ChartsGrid({
                     <div className="latency-item">
                         <div className="percentile">P50</div>
                         <div className="ms">
-                            {Math.round(stats.p50MessageLatency)}ms
+                            {formatLatency(stats.p50MessageLatency)}
                         </div>
                     </div>
                     <div className="latency-item">
                         <div className="percentile">P95</div>
                         <div className="ms">
-                            {Math.round(stats.p95MessageLatency)}ms
+                            {formatLatency(stats.p95MessageLatency)}
                         </div>
                     </div>
                     <div className="latency-item">
                         <div className="percentile">P99</div>
                         <div className="ms">
-                            {Math.round(stats.p99MessageLatency)}ms
+                            {formatLatency(stats.p99MessageLatency)}
                         </div>
                     </div>
                 </div>

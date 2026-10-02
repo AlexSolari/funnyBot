@@ -89,6 +89,7 @@ export function TraceSearchForm({ botNames, onSearch, isSearching = false }: Tra
                     <label htmlFor="searchMinDuration">Min Duration (ms)</label>
                     <input
                         type="number"
+                        step="any"
                         id="searchMinDuration"
                         placeholder="0"
                         value={minDuration}
@@ -99,6 +100,7 @@ export function TraceSearchForm({ botNames, onSearch, isSearching = false }: Tra
                     <label htmlFor="searchMaxDuration">Max Duration (ms)</label>
                     <input
                         type="number"
+                        step="any"
                         id="searchMaxDuration"
                         placeholder={String(SEARCH_DEFAULTS.maxDurationPlaceholder)}
                         value={maxDuration}

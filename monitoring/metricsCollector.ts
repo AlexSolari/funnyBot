@@ -14,6 +14,14 @@ import {
 } from './types';
 
 // Ring buffer for efficient fixed-size storage
+/**
+ * Current time as epoch milliseconds with sub-millisecond precision.
+ * `Date.now()` has 1 ms resolution, which rounds most message traces down to 0 ms.
+ */
+function preciseNow(): number {
+    return performance.timeOrigin + performance.now();
+}
+
 class RingBuffer<T> {
     private buffer: T[];
     private head = 0;
@@ -98,7 +106,7 @@ class TimeSeriesCounter {
         this.maxBuckets = maxBuckets;
     }
 
-    increment(timestamp: number = Date.now()): void {
+    increment(timestamp: number = preciseNow()): void {
         const bucketKey =
             Math.floor(timestamp / this.bucketSizeMs) * this.bucketSizeMs;
         this.buckets.set(bucketKey, (this.buckets.get(bucketKey) || 0) + 1);
@@ -114,7 +122,7 @@ class TimeSeriesCounter {
     }
 
     private cleanup(): void {
-        const cutoff = Date.now() - this.bucketSizeMs * this.maxBuckets;
+        const cutoff = preciseNow() - this.bucketSizeMs * this.maxBuckets;
         for (const key of this.buckets.keys()) {
             if (key < cutoff) {
                 this.buckets.delete(key);
@@ -123,7 +131,7 @@ class TimeSeriesCounter {
     }
 
     getPoints(): TimeBucket[] {
-        const now = Date.now();
+        const now = preciseNow();
         const result: TimeBucket[] = [];
 
         for (let i = this.maxBuckets - 1; i >= 0; i--) {
@@ -149,7 +157,7 @@ class TimeSeriesCounter {
 }
 
 export class MetricsCollector {
-    private readonly startTime: number = Date.now();
+    private readonly startTime: number = preciseNow();
     private readonly botNames: Set<string> = new Set();
 
     // Trace storage
@@ -222,7 +230,7 @@ export class MetricsCollector {
      * waiting longer than STALE_THRESHOLD_MS.
      */
     private cleanupStaleEntries(): void {
-        const now = Date.now();
+        const now = preciseNow();
         const threshold = MetricsCollector.STALE_THRESHOLD_MS;
 
         this.cleanupStaleMapEntries(
@@ -337,7 +345,7 @@ export class MetricsCollector {
         operationName: string,
         tags: Record<string, TagValue> = {}
     ): string {
-        const now = Date.now();
+        const now = preciseNow();
 
         // Check if trace already exists - if so, add a span instead
         const existingTrace = this.traces.get(traceId);
@@ -401,7 +409,7 @@ export class MetricsCollector {
             spanId,
             parentSpanId: parentSpanId || trace.rootSpan.spanId,
             operationName,
-            startTime: Date.now(),
+            startTime: preciseNow(),
             tags,
             logs: [],
             status: 'pending'
@@ -417,7 +425,7 @@ export class MetricsCollector {
         const span = this.pendingSpans.get(spanId);
         if (!span) return;
 
-        span.endTime = Date.now();
+        span.endTime = preciseNow();
         span.duration = span.endTime - span.startTime;
         span.status = status;
         this.pendingSpans.delete(spanId);
@@ -434,7 +442,7 @@ export class MetricsCollector {
             return;
         }
 
-        const now = Date.now();
+        const now = preciseNow();
 
         // Calculate actual end time based on the latest span end time
         // This ensures we capture async operations that complete after message processing
@@ -471,7 +479,7 @@ export class MetricsCollector {
     logToTrace(traceId: string, message: string): void {
         const trace = this.traces.get(traceId);
         if (trace) {
-            trace.rootSpan.logs.push({ timestamp: Date.now(), message });
+            trace.rootSpan.logs.push({ timestamp: preciseNow(), message });
         }
     }
 
@@ -488,7 +496,7 @@ export class MetricsCollector {
         if (!traceId) return undefined;
 
         const spanId = randomUUID();
-        const now = Date.now();
+        const now = preciseNow();
 
         // Only attach to active traces. Completed traces are never reopened:
         // scheduled actions reuse the same traceId every run, so reopening
@@ -559,7 +567,7 @@ export class MetricsCollector {
         for (let i = trace.spans.length - 1; i >= 0; i--) {
             const span = trace.spans[i];
             if (span.operationName === spanName && span.endTime === 0) {
-                const now = Date.now();
+                const now = preciseNow();
                 span.endTime = now;
                 span.duration = now - span.startTime;
                 span.status = status;
@@ -593,7 +601,7 @@ export class MetricsCollector {
         if (existingTrace) {
             // Add a new span to the existing trace
             const spanId = randomUUID();
-            const now = Date.now();
+            const now = preciseNow();
             const span: TraceSpan = {
                 traceId,
                 spanId,
@@ -614,7 +622,7 @@ export class MetricsCollector {
         } else {
             // Create new trace with this event as root
             const spanId = randomUUID();
-            const now = Date.now();
+            const now = preciseNow();
 
             const rootSpan: TraceSpan = {
                 traceId,
@@ -661,7 +669,7 @@ export class MetricsCollector {
 
         this.activeCaptures.set(
             this.getCaptureKey(botName, chatId, parentMessageId),
-            { botName, traceId, startTime: Date.now(), replies: 0 }
+            { botName, traceId, startTime: preciseNow(), replies: 0 }
         );
 
         // Mark the moment in the originating trace without keeping a span open.
@@ -686,7 +694,7 @@ export class MetricsCollector {
 
         this.activeCaptures.delete(key);
         this.completedCaptures.push({
-            duration: Date.now() - capture.startTime,
+            duration: preciseNow() - capture.startTime,
             replies: capture.replies
         });
     }
@@ -730,7 +738,7 @@ export class MetricsCollector {
     onMessageReceived(botName: string, messageId: number): void {
         this.messagesReceived.increment();
         const key = `${botName}:${messageId}`;
-        this.messageProcessingStart.set(key, Date.now());
+        this.messageProcessingStart.set(key, preciseNow());
     }
 
     onMessageProcessingFinished(
@@ -753,7 +761,7 @@ export class MetricsCollector {
     ): void {
         const key = `${botName}:${actionName}:${messageId}`;
         this.commandExecutionStart.set(key, {
-            timestamp: Date.now(),
+            timestamp: preciseNow(),
             actionName
         });
     }
@@ -766,7 +774,7 @@ export class MetricsCollector {
         const key = `${botName}:${actionName}:${messageId}`;
         const startInfo = this.commandExecutionStart.get(key);
         if (startInfo) {
-            const latency = Date.now() - startInfo.timestamp;
+            const latency = preciseNow() - startInfo.timestamp;
 
             if (!this.commandLatencies.has(actionName)) {
                 this.commandLatencies.set(actionName, new RingBuffer(100));
@@ -781,7 +789,7 @@ export class MetricsCollector {
     onInlineQueryReceived(botName: string, queryId: string): void {
         this.inlineQueriesProcessed.increment();
         const key = `${botName}:${queryId}`;
-        this.inlineProcessingStart.set(key, Date.now());
+        this.inlineProcessingStart.set(key, preciseNow());
     }
 
     onInlineQueryFinished(
@@ -792,7 +800,7 @@ export class MetricsCollector {
         const key = `${botName}:${queryId}`;
         const startTime = this.inlineProcessingStart.get(key);
         if (startTime) {
-            const latency = Date.now() - startTime;
+            const latency = preciseNow() - startTime;
             this.inlineLatencies.push(latency);
             this.inlineProcessingStart.delete(key);
         }
@@ -803,9 +811,9 @@ export class MetricsCollector {
     }
 
     onScheduledActionExecuting(botName: string, actionName: string): void {
-        const key = `${botName}:${actionName}:${Date.now()}`;
+        const key = `${botName}:${actionName}:${preciseNow()}`;
         this.scheduledExecutionStart.set(key, {
-            timestamp: Date.now(),
+            timestamp: preciseNow(),
             actionName
         });
     }
@@ -821,7 +829,7 @@ export class MetricsCollector {
                 key.startsWith(`${botName}:${actionName}:`) &&
                 info.actionName === actionName
             ) {
-                const latency = Date.now() - info.timestamp;
+                const latency = preciseNow() - info.timestamp;
 
                 if (!this.scheduledLatencies.has(actionName)) {
                     this.scheduledLatencies.set(
@@ -844,7 +852,7 @@ export class MetricsCollector {
 
     onApiRequestSending(traceId?: string): void {
         if (traceId) {
-            this.apiRequestStart.set(traceId, Date.now());
+            this.apiRequestStart.set(traceId, preciseNow());
         }
     }
 
@@ -852,7 +860,7 @@ export class MetricsCollector {
         if (traceId) {
             const startTime = this.apiRequestStart.get(traceId);
             if (startTime) {
-                const latency = Date.now() - startTime;
+                const latency = preciseNow() - startTime;
                 this.apiLatencies.push(latency);
                 this.apiRequestStart.delete(traceId);
             }
@@ -864,7 +872,7 @@ export class MetricsCollector {
     onError(message: string, name: string, traceId?: string): void {
         this.errorsCount.increment();
         this.recentErrors.push({
-            timestamp: Date.now(),
+            timestamp: preciseNow(),
             message,
             name,
             traceId
@@ -938,6 +946,10 @@ export class MetricsCollector {
 
     private buildLatencyHistogram(values: number[]): LatencyHistogramBucket[] {
         const buckets = [
+            0.5,
+            1,
+            2.5,
+            5,
             10,
             25,
             50,
@@ -966,7 +978,7 @@ export class MetricsCollector {
         const inlineLatencyValues = this.inlineLatencies.toArray();
 
         return {
-            uptime: Date.now() - this.startTime,
+            uptime: preciseNow() - this.startTime,
             totalMessagesReceived: this.messagesReceived.getTotal(),
             totalCommandsExecuted: this.commandsExecuted.getTotal(),
             totalInlineQueries: this.inlineQueriesProcessed.getTotal(),
@@ -1025,7 +1037,7 @@ export class MetricsCollector {
     }
 
     private getAvgLatencyPoints(): Array<{ timestamp: number; value: number }> {
-        const now = Date.now();
+        const now = preciseNow();
         const bucketSizeMs = 60000;
         const maxBuckets = 60;
         const result: Array<{ timestamp: number; value: number }> = [];
@@ -1037,7 +1049,6 @@ export class MetricsCollector {
 
         for (const trace of allTraces) {
             const duration = this.getTraceDuration(trace);
-            if (duration <= 0) continue;
 
             const bucketKey =
                 Math.floor(trace.startTime / bucketSizeMs) * bucketSizeMs;
@@ -1054,7 +1065,10 @@ export class MetricsCollector {
             const bucket = bucketData.get(bucketKey);
             const avg =
                 bucket && bucket.count > 0 ? bucket.sum / bucket.count : 0;
-            result.push({ timestamp: bucketKey, value: Math.round(avg) });
+            result.push({
+                timestamp: bucketKey,
+                value: Math.round(avg * 100) / 100
+            });
         }
 
         return result;
@@ -1267,11 +1281,7 @@ export class MetricsCollector {
             const hasPendingSpans = trace.spans.some(
                 (s) => s.status === 'pending'
             );
-            if (
-                !hasPendingSpans &&
-                trace.totalDuration &&
-                trace.totalDuration > 0
-            ) {
+            if (!hasPendingSpans && trace.endTime !== undefined) {
                 completed.add(trace);
             }
         }
@@ -1284,14 +1294,12 @@ export class MetricsCollector {
      */
     private getTraceBasedLatencies(): number[] {
         return this.getCompletedTraces()
-            .map((trace) => this.getTraceDuration(trace))
-            .filter((duration) => duration > 0);
+            .map((trace) => this.getTraceDuration(trace));
     }
 
     private getTraceBasedOwnLatencies(): number[] {
         return this.getCompletedTraces()
-            .map((trace) => this.getOwnTraceDuration(trace))
-            .filter((duration) => duration > 0);
+            .map((trace) => this.getOwnTraceDuration(trace));
     }
 
     getDashboardData(): DashboardData {

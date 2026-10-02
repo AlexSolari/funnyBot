@@ -1,4 +1,5 @@
 import type { TraceSpan } from '../types';
+import { formatLatency } from '../utils/formatters';
 
 interface WaterfallDiagramProps {
     readonly spans: TraceSpan[];
@@ -60,13 +61,14 @@ export function WaterfallDiagram({
     );
     // Always use the actual max extent so everything fits
     const actualDuration = maxEndTime - traceStartTime;
-    const effectiveDuration = Math.max(totalDuration ?? actualDuration, actualDuration, 1);
+    // Traces can be well under 1ms, so only guard against division by zero
+    const effectiveDuration = Math.max(totalDuration ?? actualDuration, actualDuration, 0.001);
 
     // Create time markers
     const markerCount = 5;
     const markers = Array.from({ length: markerCount + 1 }, (_, i) => ({
         position: (i / markerCount) * 100,
-        time: Math.round((i / markerCount) * effectiveDuration)
+        time: (i / markerCount) * effectiveDuration
     }));
 
     return (
@@ -79,11 +81,11 @@ export function WaterfallDiagram({
                 <div className="waterfall-timeline-header">
                     {markers.map((marker) => (
                         <div
-                            key={marker.time}
+                            key={marker.position}
                             className="waterfall-marker"
                             style={{ left: `${marker.position}%` }}
                         >
-                            {marker.time}ms
+                            {formatLatency(marker.time)}
                         </div>
                     ))}
                 </div>
@@ -138,7 +140,7 @@ export function WaterfallDiagram({
                                 <div className="waterfall-track">
                                     {markers.map((marker) => (
                                         <div
-                                            key={marker.time}
+                                            key={marker.position}
                                             className="waterfall-gridline"
                                             style={{ left: `${marker.position}%` }}
                                         />
@@ -150,7 +152,7 @@ export function WaterfallDiagram({
                                             width: `${widthPercent}%`,
                                             backgroundColor: barColor
                                         }}
-                                        title={`${span.operationName}: +${Math.round(spanStart)}ms${spanDuration > 0 ? ` (${spanDuration}ms)` : ''}`}
+                                        title={`${span.operationName}: +${formatLatency(spanStart)}${spanDuration > 0 ? ` (${formatLatency(spanDuration)})` : ''}`}
                                     >
                                         {overlapWidthPercent > 0 && (
                                             <span

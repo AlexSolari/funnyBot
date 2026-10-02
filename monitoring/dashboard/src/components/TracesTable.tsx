@@ -2,6 +2,7 @@ import { memo, useMemo, useState } from 'react';
 import type { Trace } from '../types';
 import {
     formatDateTime,
+    formatLatency,
     getLatencyClass,
     getOwnDuration,
     getTraceDuration
@@ -183,10 +184,10 @@ function TracesTableComponent({ traces, onTraceClick }: TracesTableProps) {
                                     </span>
                                 </td>
                                 <td className={getLatencyClass(duration)}>
-                                    <span className="latency-value">{`${duration}ms`}</span>
+                                    <span className="latency-value">{formatLatency(duration)}</span>
                                 </td>
                                 <td className={getLatencyClass(ownDuration)}>
-                                    <span className="latency-value">{`${ownDuration}ms`}</span>
+                                    <span className="latency-value">{formatLatency(ownDuration)}</span>
                                 </td>
                                 <td>{formatDateTime(trace.startTime)}</td>
                             </tr>
