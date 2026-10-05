@@ -136,6 +136,7 @@ export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
                 timer.refresh();
             } else {
                 clearTimeout(timer);
+                controller.abort();
             }
         };
 
