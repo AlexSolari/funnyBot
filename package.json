@@ -4,7 +4,7 @@
         "@mtcute/bun": "^0.32.4",
         "async-sema": "^3.1.1",
         "cheerio": "^1.2.0",
-        "chz-telegram-bot": "^0.8.2",
+        "chz-telegram-bot": "^0.8.3",
         "moment": "^2.31.0",
         "openai": "^6.49.0",
         "papaparse": "^5.7.0"
