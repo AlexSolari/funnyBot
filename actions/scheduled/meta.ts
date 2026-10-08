@@ -1,7 +1,7 @@
 import { load } from 'cheerio';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import moment from 'moment';
-import { ChatId } from '../../types/chatIds';
+import { ChatId } from '../../secrets/chatIds';
 import { Format } from '../../types/mtgFormats';
 import {
     ChatContext,

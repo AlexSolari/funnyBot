@@ -13,46 +13,23 @@ import {
     mtgCommands,
     testCommands
 } from './actions/actionGroups';
-import { ChatId } from './types/chatIds';
+import { ChatId } from './secrets/chatIds';
 import { cardSearch } from './actions/commands/cardSearch';
 import { inlineCardSearch } from './actions/inline/inline_cardSearch';
 import { featureProvider } from './services/featureProvider';
-import {
-    startDashboardServer,
-    createMonitoringEventHandler
-} from './monitoring';
+import { startDashboardServer } from './monitoring';
 import { readFile } from 'fs/promises';
 import { warmUpTelegramUserClient } from './services/telegramUserClient';
-
-function getEventHandler(botName: string) {
-    const monitoringHandler = createMonitoringEventHandler(botName);
-
-    return (e: string, timestamp: number, data: unknown) => {
-        // Feed events to monitoring system
-        monitoringHandler(e, timestamp, data);
-
-        if (e.startsWith('error'))
-            console.error(
-                `${botName} - ${new Date(timestamp).toISOString()} - ${e} - ${JSON.stringify(data)}`
-            );
-
-        if (
-            process.env.NODE_ENV != 'production' &&
-            !e.startsWith('storage') &&
-            !e.startsWith('task') &&
-            !e.startsWith('inline.processing')
-        )
-            console.log(
-                `${botName} - ${new Date(timestamp).toISOString()} - ${e} - ${JSON.stringify(data)}`
-            );
-    };
-}
+import { getEventHandler } from './helpers/getEventHandler';
+import { setTimeout } from 'timers/promises';
 
 // Subscribes before the bot starts, so events emitted during startup
 // (e.g. restored persistent captures) reach monitoring too
 function startBot(options: Parameters<typeof botOrchestrator.startBot>[0]) {
     const eventEmitter = new TypedEventEmitter();
-    eventEmitter.onEach(getEventHandler(options.name));
+    eventEmitter.onEach(
+        getEventHandler(options.name, eventEmitter, options.tokenProvider)
+    );
 
     return botOrchestrator.startBot({
         ...options,
@@ -86,7 +63,7 @@ if (process.env.NODE_ENV == 'production') {
     await Promise.all([
         startBot({
             name: 'kekruga',
-            tokenProvider: () => readFile('token.prod', 'utf-8'),
+            tokenProvider: () => readFile('secrets/token.prod', 'utf-8'),
             actions: fromGroup(mtgCommands),
             chats: {
                 ModernChat: ChatId.ModernChat,
@@ -100,7 +77,7 @@ if (process.env.NODE_ENV == 'production') {
         }),
         startBot({
             name: 'botseiju',
-            tokenProvider: () => readFile('token.lviv', 'utf-8'),
+            tokenProvider: () => readFile('secrets/token.lviv', 'utf-8'),
             actions: fromGroup(mtgCommands),
             chats: {
                 LvivChat: ChatId.LvivChat,
@@ -110,14 +87,14 @@ if (process.env.NODE_ENV == 'production') {
         }),
         startBot({
             name: 'xiao',
-            tokenProvider: () => readFile('token.genshit', 'utf-8'),
+            tokenProvider: () => readFile('secrets/token.genshit', 'utf-8'),
             actions: fromGroup(genshinCommands),
             chats: { GenshinChat: ChatId.GenshinChat },
             scheduledPeriod: (60 * 5) as Seconds
         }),
         startBot({
             name: 'zirda',
-            tokenProvider: () => readFile('token.zirda', 'utf-8'),
+            tokenProvider: () => readFile('secrets/token.zirda', 'utf-8'),
             actions: {
                 commands: [cardSearch],
                 scheduled: [],
@@ -131,7 +108,7 @@ if (process.env.NODE_ENV == 'production') {
 } else {
     await startBot({
         name: 'test',
-        tokenProvider: () => readFile('token.test', 'utf-8'),
+        tokenProvider: () => readFile('secrets/token.test', 'utf-8'),
         actions: {
             commands: testCommands.commands,
             scheduled: testCommands.scheduled,
@@ -152,6 +129,7 @@ async function shutdown() {
     isShuttingDown = true;
 
     await botOrchestrator.stopBots();
+    await setTimeout(1000);
     process.exit(0);
 }
 process.on('SIGINT', shutdown);

@@ -1,8 +1,8 @@
 import { BotApi, Hours, hoursToSeconds } from 'chz-telegram-bot';
 import OpenAI from 'openai';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
-import { ChatId } from '../../types/chatIds';
-import openAiToken from '../../openAiToken.json';
+import { ChatId } from '../../secrets/chatIds';
+import openAiToken from '../../secrets/openAiToken.json';
 import { CommandBuilder } from '../../helpers/commandBuilder';
 import { getObservability } from '../../helpers/getObservability';
 import { EventType } from '../../types/customEvents';

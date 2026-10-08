@@ -10,9 +10,9 @@ import {
 } from 'chz-telegram-bot';
 import OpenAI from 'openai';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
-import { ChatId } from '../../types/chatIds';
-import openAiToken from '../../openAiToken.json';
-import { chatAdmins } from '../../types/userIds';
+import { ChatId } from '../../secrets/chatIds';
+import openAiToken from '../../secrets/openAiToken.json';
+import { chatAdmins } from '../../secrets/userIds';
 import GptState from '../../state/gptState';
 import { getAbortControllerWithTimeout } from '../../helpers/abortControllerWithTimeout';
 import { CommandBuilderWithState } from '../../helpers/commandBuilder';

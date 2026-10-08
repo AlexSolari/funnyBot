@@ -2,7 +2,7 @@ import { MessageType, Seconds, secondsToMilliseconds } from 'chz-telegram-bot';
 import { randomInt } from '../../helpers/randomInt';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
 import { CommandBuilder } from '../../helpers/commandBuilder';
-import { SpecificUsers } from '../../types/userIds';
+import { SpecificUsers } from '../../secrets/userIds';
 
 export const ternopil = new CommandBuilder('Reaction.Ternopil')
     .on(MessageType.Any)

@@ -1,4 +1,4 @@
-import { ChatId } from '../../types/chatIds';
+import { ChatId } from '../../secrets/chatIds';
 import {
     BotEventType,
     ScheduledActionBuilderWithState

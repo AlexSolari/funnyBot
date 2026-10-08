@@ -1,16 +1,9 @@
-token.test
 node_modules/
 package-lock.json
 bun.lock
 .vscode/
-token.*
 storage/
 start.ps1
 build/
-types/chatIds.ts
-types/userIds.ts
-openAiToken.json
 monitoring/dashboard/dist/
-spellseekerDataIds.json
-dashboardPassword.json
-telegramApiCredentials.json
+secrets/

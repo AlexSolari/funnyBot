@@ -1,6 +1,6 @@
 import { ActionKey, Seconds } from 'chz-telegram-bot';
-import { ChatId } from './chatIds';
-import { SpecificUsers } from './userIds';
+import { ChatId } from '../secrets/chatIds';
+import { SpecificUsers } from '../secrets/userIds';
 
 export type BotFeatureSetsConfiguration = {
     version: number;

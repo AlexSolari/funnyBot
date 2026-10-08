@@ -1,4 +1,4 @@
-import { ChatId } from '../types/chatIds';
+import { ChatId } from '../secrets/chatIds';
 import {
     ActionKey,
     Hours,
@@ -7,7 +7,7 @@ import {
     Seconds
 } from 'chz-telegram-bot';
 import escapeMarkdown from './escapeMarkdown';
-import { SpecificUsers } from '../types/userIds';
+import { SpecificUsers } from '../secrets/userIds';
 import {
     ActionFeatureSet,
     BotFeatureSetsConfiguration

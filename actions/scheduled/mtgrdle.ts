@@ -1,4 +1,4 @@
-import { ChatId } from '../../types/chatIds';
+import { ChatId } from '../../secrets/chatIds';
 import { ScheduledActionBuilder } from 'chz-telegram-bot';
 import { Day } from '../../types/daysOfTheWeek';
 import moment from 'moment';

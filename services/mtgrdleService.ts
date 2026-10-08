@@ -11,7 +11,7 @@ import { potuzhno } from '../actions/commands/potuzhno';
 import escapeMarkdown from '../helpers/escapeMarkdown';
 import { getObservability } from '../helpers/getObservability';
 import { mtgrdleCapture } from '../actions/persistentCaptures/mtgrdleCapture';
-import { ChatId } from '../types/chatIds';
+import { ChatId } from '../secrets/chatIds';
 import { ObservabilityHelper } from '../types/observabilityHelper';
 import { ScryfallService } from './scryfallService';
 

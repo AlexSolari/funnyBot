@@ -1,5 +1,5 @@
 import { TelegramClient } from '@mtcute/bun';
-import credentials from '../telegramApiCredentials.json';
+import credentials from '../secrets/telegramApiCredentials.json';
 import { EventType } from '../types/customEvents';
 import { ObservabilityHelper } from '../types/observabilityHelper';
 

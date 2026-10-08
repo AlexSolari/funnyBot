@@ -1,5 +1,5 @@
 import { MessageType } from 'chz-telegram-bot';
-import { chatAdmins } from '../../types/userIds';
+import { chatAdmins } from '../../secrets/userIds';
 import { CommandBuilder } from '../../helpers/commandBuilder';
 
 export const long = new CommandBuilder('Reaction.Long')

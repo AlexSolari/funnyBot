@@ -4,7 +4,7 @@ import {
     IMWApiResponse,
     IMWEventDetail
 } from '../../types/externalApiDefinitions/mw';
-import { ChatId } from '../../types/chatIds';
+import { ChatId } from '../../secrets/chatIds';
 import { Day } from '../../types/daysOfTheWeek';
 import {
     Hours,

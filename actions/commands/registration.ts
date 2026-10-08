@@ -4,7 +4,7 @@ import {
     IMwApiResponseDateSlot,
     IMWEventDetail
 } from '../../types/externalApiDefinitions/mw';
-import { ChatId } from '../../types/chatIds';
+import { ChatId } from '../../secrets/chatIds';
 import { ChatInfo, secondsToMilliseconds } from 'chz-telegram-bot';
 import moment, { Moment } from 'moment';
 import { CommandBuilder } from '../../helpers/commandBuilder';
@@ -14,7 +14,7 @@ import { getObservability } from '../../helpers/getObservability';
 import { ObservabilityHelper } from '../../types/observabilityHelper';
 import { SpellseekerEventDto } from '../../types/externalApiDefinitions/event';
 import Papa from 'papaparse';
-import { gid, sheetId } from '../../spellseekerDataIds.json';
+import { gid, sheetId } from '../../secrets/spellseekerDataIds.json';
 import { traceTelegramUserCall } from '../../services/telegramUserClient';
 
 const daysMap = {

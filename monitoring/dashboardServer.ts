@@ -2,7 +2,7 @@ import { readFile } from 'fs/promises';
 import { join, extname } from 'path';
 import { metricsCollector } from './metricsCollector';
 import { TraceSearchQuery } from './types';
-import { dashboardPassword } from './../dashboardPassword.json';
+import { dashboardPassword } from '../secrets/dashboardPassword.json';
 
 const DASHBOARD_PORT = 3030;
 const DASHBOARD_PASSWORD = dashboardPassword;
