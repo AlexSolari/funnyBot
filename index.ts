@@ -3,8 +3,10 @@ import {
     CommandAction,
     InlineQueryAction,
     IActionState,
+    PersistentReplyCapture,
     ScheduledAction,
-    Seconds
+    Seconds,
+    TypedEventEmitter
 } from 'chz-telegram-bot';
 import {
     genshinCommands,
@@ -46,6 +48,18 @@ function getEventHandler(botName: string) {
     };
 }
 
+// Subscribes before the bot starts, so events emitted during startup
+// (e.g. restored persistent captures) reach monitoring too
+function startBot(options: Parameters<typeof botOrchestrator.startBot>[0]) {
+    const eventEmitter = new TypedEventEmitter();
+    eventEmitter.onEach(getEventHandler(options.name));
+
+    return botOrchestrator.startBot({
+        ...options,
+        services: { ...options.services, eventEmitter }
+    });
+}
+
 await featureProvider.load();
 
 // Connect the MTProto user client in the background so the first request doesn't pay for the handshake
@@ -61,14 +75,16 @@ if (process.env.NODE_ENV == 'production') {
         commands: CommandAction<IActionState>[];
         scheduled: ScheduledAction<IActionState>[];
         inline?: InlineQueryAction[];
+        persistentCaptures: PersistentReplyCapture<object>[];
     }) => ({
         commands: group.commands,
         scheduled: group.scheduled,
-        inlineQueries: group.inline ?? []
+        inlineQueries: group.inline ?? [],
+        persistentCaptures: group.persistentCaptures
     });
 
-    const bots = await Promise.all([
-        botOrchestrator.startBot({
+    await Promise.all([
+        startBot({
             name: 'kekruga',
             tokenProvider: () => readFile('token.prod', 'utf-8'),
             actions: fromGroup(mtgCommands),
@@ -82,7 +98,7 @@ if (process.env.NODE_ENV == 'production') {
             },
             scheduledPeriod: (60 * 5) as Seconds
         }),
-        botOrchestrator.startBot({
+        startBot({
             name: 'botseiju',
             tokenProvider: () => readFile('token.lviv', 'utf-8'),
             actions: fromGroup(mtgCommands),
@@ -92,14 +108,14 @@ if (process.env.NODE_ENV == 'production') {
             },
             scheduledPeriod: (60 * 5) as Seconds
         }),
-        botOrchestrator.startBot({
+        startBot({
             name: 'xiao',
             tokenProvider: () => readFile('token.genshit', 'utf-8'),
             actions: fromGroup(genshinCommands),
             chats: { GenshinChat: ChatId.GenshinChat },
             scheduledPeriod: (60 * 5) as Seconds
         }),
-        botOrchestrator.startBot({
+        startBot({
             name: 'zirda',
             tokenProvider: () => readFile('token.zirda', 'utf-8'),
             actions: {
@@ -112,24 +128,21 @@ if (process.env.NODE_ENV == 'production') {
             scheduledPeriod: (60 * 5) as Seconds
         })
     ]);
-
-    bots.forEach((bot) => bot.eventEmitter.onEach(getEventHandler(bot.name)));
 } else {
-    const bot = await botOrchestrator.startBot({
+    await startBot({
         name: 'test',
         tokenProvider: () => readFile('token.test', 'utf-8'),
         actions: {
             commands: testCommands.commands,
             scheduled: testCommands.scheduled,
-            inlineQueries: testCommands.inline
+            inlineQueries: testCommands.inline,
+            persistentCaptures: testCommands.persistentCaptures
         },
         chats: {
             TestChat: ChatId.TestChat
         },
         scheduledPeriod: 60 as Seconds
     });
-
-    bot.eventEmitter.onEach(getEventHandler(bot.name));
 }
 
 // Stay subscribed (not `once`) and ignore repeated signals, so a second Ctrl+C doesn't kill the process mid-shutdown

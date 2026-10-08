@@ -78,9 +78,20 @@ class RingBuffer<T> {
 
 interface ActiveCapture {
     botName: string;
-    traceId: string;
+    // Undefined for captures restored from storage, their trace is gone
+    traceId: string | undefined;
     startTime: number;
     replies: number;
+    // Restored after a restart, so its lifetime and earlier replies are unknown
+    restored: boolean;
+}
+
+// Reply handled by a persistent capture. Messages the handler adds to the
+// capture with `continueCapture` start in this trace after it has finished.
+interface PersistentCaptureReply {
+    captureKey: string;
+    tracksMessage: (messageId: number) => boolean;
+    timestamp: number;
 }
 
 interface CompletedCapture {
@@ -207,6 +218,10 @@ export class MetricsCollector {
     // instead of as spans - keeping them in traces inflates trace durations
     private readonly activeCaptures: Map<string, ActiveCapture> = new Map();
     private readonly completedCaptures = new RingBuffer<CompletedCapture>(500);
+    private readonly persistentCaptureReplies: Map<
+        string,
+        PersistentCaptureReply
+    > = new Map();
 
     // Cleanup configuration
     private static readonly STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
@@ -270,6 +285,12 @@ export class MetricsCollector {
             (ts) => ts
         );
         this.cleanupStaleTraces(now, threshold);
+        this.cleanupStaleMapEntries(
+            this.persistentCaptureReplies,
+            now,
+            threshold,
+            (reply) => reply.timestamp
+        );
         this.cleanupStaleMapEntries(
             this.activeCaptures,
             now,
@@ -667,20 +688,57 @@ export class MetricsCollector {
     ): void {
         if (!traceId) return;
 
-        this.activeCaptures.set(
-            this.getCaptureKey(botName, chatId, parentMessageId),
-            { botName, traceId, startTime: preciseNow(), replies: 0 }
-        );
+        // A persistent capture handler added this message to its own capture,
+        // so it continues an active capture instead of starting a new one
+        const persistentReply = this.persistentCaptureReplies.get(traceId);
+        const isContinuation =
+            persistentReply?.tracksMessage(parentMessageId) &&
+            this.activeCaptures.has(persistentReply.captureKey);
+
+        if (!isContinuation) {
+            this.activeCaptures.set(
+                this.getCaptureKey(botName, chatId, parentMessageId),
+                {
+                    botName,
+                    traceId,
+                    startTime: preciseNow(),
+                    replies: 0,
+                    restored: false
+                }
+            );
+        }
 
         // Mark the moment in the originating trace without keeping a span open.
         // Captures are registered while the trace is still being processed,
         // so a missing trace means there is nothing to annotate.
         if (this.traces.has(traceId)) {
-            this.onEvent(traceId, botName, 'command', 'command.capture.started', {
-                parentMessageId,
-                phase: 'capture'
-            });
+            this.onEvent(
+                traceId,
+                botName,
+                'command',
+                isContinuation
+                    ? 'command.capture.continued'
+                    : 'command.capture.started',
+                { parentMessageId, phase: 'capture' }
+            );
         }
+    }
+
+    onCaptureRestored(
+        botName: string,
+        chatId: number,
+        parentMessageId: number
+    ): void {
+        this.activeCaptures.set(
+            this.getCaptureKey(botName, chatId, parentMessageId),
+            {
+                botName,
+                traceId: undefined,
+                startTime: preciseNow(),
+                replies: 0,
+                restored: true
+            }
+        );
     }
 
     onCaptureEnded(
@@ -693,6 +751,11 @@ export class MetricsCollector {
         if (!capture) return;
 
         this.activeCaptures.delete(key);
+
+        // Lifetime and replies from before the restart are unknown,
+        // so restored captures would skew completed capture stats
+        if (capture.restored) return;
+
         this.completedCaptures.push({
             duration: preciseNow() - capture.startTime,
             replies: capture.replies
@@ -702,17 +765,27 @@ export class MetricsCollector {
     /**
      * Registers a reply handled by a capture.
      * Returns the traceId of the trace that started the capture, for linking.
+     * @param captureId Id of the message the capture was started on.
+     * @param tracksMessage Provided for persistent captures, which can track several messages.
      */
     onCaptureReply(
+        traceId: string | undefined,
         botName: string,
         chatId: number,
-        parentMessageId: number | undefined
+        captureId: number,
+        tracksMessage?: (messageId: number) => boolean
     ): string | undefined {
-        if (parentMessageId === undefined) return undefined;
+        const captureKey = this.getCaptureKey(botName, chatId, captureId);
 
-        const capture = this.activeCaptures.get(
-            this.getCaptureKey(botName, chatId, parentMessageId)
-        );
+        if (traceId && tracksMessage) {
+            this.persistentCaptureReplies.set(traceId, {
+                captureKey,
+                tracksMessage,
+                timestamp: preciseNow()
+            });
+        }
+
+        const capture = this.activeCaptures.get(captureKey);
         if (!capture) return undefined;
 
         capture.replies++;
@@ -725,6 +798,9 @@ export class MetricsCollector {
 
         return {
             active: this.activeCaptures.size,
+            restored: [...this.activeCaptures.values()].filter(
+                (c) => c.restored
+            ).length,
             completed: completed.length,
             answeredRate: completed.length > 0 ? answered / completed.length : 0,
             avgLifetime: this.calculateAverage(

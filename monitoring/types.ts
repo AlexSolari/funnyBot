@@ -116,6 +116,8 @@ export interface HeaviestCommand {
 
 export interface CaptureStats {
     active: number;
+    // Active captures restored from storage after a restart
+    restored: number;
     completed: number;
     // Share of completed captures that received at least one reply (0..1)
     answeredRate: number;

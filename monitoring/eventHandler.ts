@@ -1,4 +1,10 @@
-import { BotEventType, BotEventArgumentsMap } from 'chz-telegram-bot';
+import {
+    BotEventType,
+    BotEventArgumentsMap,
+    IActionState,
+    PersistentReplyCaptureAction,
+    ReplyCaptureAction
+} from 'chz-telegram-bot';
 import { metricsCollector } from './metricsCollector';
 import { EventType } from '../types/customEvents';
 
@@ -140,6 +146,17 @@ export function createMonitoringEventHandler(botName: string) {
                     break;
                 }
 
+                case BotEventType.commandActionCaptureRestored: {
+                    const captureData = data as CaptureEventData;
+
+                    metricsCollector.onCaptureRestored(
+                        botName,
+                        captureData.chatInfo.id,
+                        captureData.parentMessageId
+                    );
+                    break;
+                }
+
                 case BotEventType.commandActionCaptureAborted: {
                     const captureData = data as CaptureEventData;
 
@@ -155,10 +172,20 @@ export function createMonitoringEventHandler(botName: string) {
                     const replyData = data as ReplyEventData;
                     const actionName = replyData.action.key;
                     const messageId = replyData.ctx.messageInfo.id;
+                    // Captures are keyed by the message they were started on. A persistent
+                    // capture can also track messages added later, so the replied-to
+                    // message is not always the one the capture is keyed by.
+                    const capture = replyData.action as
+                        | ReplyCaptureAction<IActionState>
+                        | PersistentReplyCaptureAction<object>;
                     const capturedFromTraceId = metricsCollector.onCaptureReply(
+                        traceId,
                         botName,
                         replyData.ctx.chatInfo.id,
-                        replyData.ctx.replyMessageId
+                        capture.parentMessageId,
+                        'tracksMessage' in capture
+                            ? (id) => capture.tracksMessage(id)
+                            : undefined
                     );
 
                     metricsCollector.onSpanStart(

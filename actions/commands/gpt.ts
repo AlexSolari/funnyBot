@@ -128,11 +128,11 @@ export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
             );
 
             if (conversation.length < MAX_CONVERSATION_MESSAGES) {
-                postSendOperationController.captureReplies(
-                    [MessageType.Text],
-                    replyHandler,
-                    controller
-                );
+                postSendOperationController.captureReplies({
+                    trigger: [MessageType.Text],
+                    handler: replyHandler,
+                    abortController: controller
+                });
                 timer.refresh();
             } else {
                 clearTimeout(timer);
@@ -140,11 +140,11 @@ export const gpt = new CommandBuilderWithState('Reaction.Gpt', GptState)
             }
         };
 
-        postSendOperationController.captureReplies(
-            [MessageType.Text],
-            replyHandler,
-            controller
-        );
+        postSendOperationController.captureReplies({
+            trigger: [MessageType.Text],
+            handler: replyHandler,
+            abortController: controller
+        });
 
         if (ctx.chatInfo.id == ChatId.LvivChat)
             ctx.startCustomCooldown(hoursToSeconds(20 as Hours));

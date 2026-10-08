@@ -67,6 +67,8 @@ function StatsGridComponent({ stats, throughput, captureStats }: StatsGridProps)
                     {captureStats.completed > 0
                         ? `${Math.round(captureStats.answeredRate * 100)}% answered · avg ${formatUptime(captureStats.avgLifetime)}`
                         : 'none completed yet'}
+                    {captureStats.restored > 0 &&
+                        ` · ${formatNumber(captureStats.restored)} restored`}
                 </div>
             </div>
         </div>

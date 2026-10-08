@@ -1,4 +1,4 @@
-import { CommandAction, IActionState, ScheduledAction } from 'chz-telegram-bot';
+import { CommandAction, IActionState } from 'chz-telegram-bot';
 import { cardSearch } from './commands/cardSearch';
 import { dispute } from './commands/dispute';
 import { fang } from './commands/fang';
@@ -33,6 +33,7 @@ import { newsHelicopter } from './commands/newsHelicopter';
 import { randomizer } from './commands/randomizer';
 import { who } from './commands/who';
 import { newGame } from './commands/newGame';
+import { mtgrdleCapture } from './persistentCaptures/mtgrdleCapture';
 
 const commands = [
     cardSearch,
@@ -66,19 +67,25 @@ const commands = [
     newGame
 ] as CommandAction<IActionState>[];
 
+const persistentCaptures = [mtgrdleCapture];
+
 export const testCommands = {
     commands,
-    scheduled: [] as unknown as ScheduledAction<IActionState>[],
-    inline: [inlineCardSearch]
+    scheduled: [],
+    inline: [inlineCardSearch],
+    persistentCaptures
 };
 
 export const mtgCommands = {
     commands,
-    scheduled: [meta, lowCount, mtgrdle] as ScheduledAction<IActionState>[],
-    inline: [inlineCardSearch]
+    scheduled: [meta, lowCount, mtgrdle],
+    inline: [inlineCardSearch],
+    persistentCaptures
 };
 
 export const genshinCommands = {
     commands,
-    scheduled: [becker] as unknown as ScheduledAction<IActionState>[]
+    scheduled: [becker],
+    inline: [],
+    persistentCaptures: []
 };

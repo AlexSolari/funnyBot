@@ -1,8 +1,6 @@
 import {
     ChatContext,
     ChatInfo,
-    Hours,
-    hoursToMilliseconds,
     IActionState,
     MessageContext,
     ReplyContext,
@@ -12,10 +10,10 @@ import {
 import { potuzhno } from '../actions/commands/potuzhno';
 import escapeMarkdown from '../helpers/escapeMarkdown';
 import { getObservability } from '../helpers/getObservability';
+import { mtgrdleCapture } from '../actions/persistentCaptures/mtgrdleCapture';
 import { ChatId } from '../types/chatIds';
 import { ObservabilityHelper } from '../types/observabilityHelper';
 import { ScryfallService } from './scryfallService';
-import { getAbortControllerWithTimeout } from '../helpers/abortControllerWithTimeout';
 
 const DELETE_DELAY = secondsToMilliseconds(25 as Seconds);
 const WIN_BONUS_POINTS = 5;
@@ -28,7 +26,7 @@ const COLOR_NAMES = {
     G: 'Green'
 } as Record<string, string>;
 
-type CardInfo = {
+export type CardInfo = {
     name: string;
     cmc: number;
     colors: string[];
@@ -84,115 +82,105 @@ class MtgrdleService {
             return;
         }
 
-        const postSendOperationController = ctx.send.text(
-            `🃏 *Гра в вгадування MTG картки\\!* 🃏\n\n` +
-                `Нова карта вибрана: ${card.name.replaceAll(/./g, '?')}\n\n` +
-                `Напишіть назву карти англійською у відповідь на це повідомлення, щоб спробувати вгадати та отримати \\+${WIN_BONUS_POINTS} потужності\\!\n`
-        );
+        ctx.send
+            .text(
+                `🃏 *Гра в вгадування MTG картки\\!* 🃏\n\n` +
+                    `Нова карта вибрана: ${card.name.replaceAll(/./g, '?')}\n\n` +
+                    `Напишіть назву карти англійською у відповідь на це повідомлення, щоб спробувати вгадати та отримати \\+${WIN_BONUS_POINTS} потужності\\!\n`
+            )
+            .captureReplies({ persistent: mtgrdleCapture, data: { card } });
+    }
 
-        const abortController = getAbortControllerWithTimeout(
-            hoursToMilliseconds(20 as Hours)
-        ).controller;
+    async handleGuess(replyCtx: ReplyContext<IActionState>, card: CardInfo) {
+        const guess = replyCtx.messageInfo.text?.trim();
+        if (!guess) return;
 
-        const replyHandler = async (replyCtx: ReplyContext<IActionState>) => {
-            const guess = replyCtx.messageInfo.text?.trim();
-            if (!guess) return;
+        try {
+            const guessedCards = await ScryfallService.findWithQuery(
+                `${guess} game:paper is:firstprinting`,
+                AbortSignal.timeout(REQUEST_TIMEOUT),
+                getObservability(replyCtx)
+            );
 
-            try {
-                const guessedCards = await ScryfallService.findWithQuery(
-                    `${guess} game:paper is:firstprinting`,
-                    AbortSignal.timeout(REQUEST_TIMEOUT),
-                    getObservability(replyCtx)
-                );
-
-                if (guessedCards.length === 0) {
-                    replyCtx.reply
-                        .withText(
-                            escapeMarkdown(
-                                `Карта "${guess}" не знайдена. Спробуй іншу карту!`
-                            )
-                        )
-                        .deleteAfter(DELETE_DELAY);
-                    return;
-                }
-
-                const guessedCardFace =
-                    guessedCards.length > 1
-                        ? guessedCards.find(
-                              (x) =>
-                                  x.name.replaceAll(/\S/g, ' ').toLowerCase() ==
-                                  guess.replaceAll(/\S/g, ' ').toLowerCase()
-                          )
-                        : guessedCards[0];
-
-                if (!guessedCardFace) {
-                    replyCtx.reply
-                        .withText(
-                            escapeMarkdown(
-                                `Карта "${guess}" не знайдена. Спробуй іншу карту!`
-                            )
-                        )
-                        .deleteAfter(DELETE_DELAY);
-                    return;
-                }
-
-                const guessedCardCmc = guessedCardFace.cmc
-                    ? guessedCardFace.cmc
-                    : (guessedCardFace.mana_cost ?? '')
-                          .replaceAll(/[{}]/g, ' ')
-                          .split(' ')
-                          .filter(Boolean)
-                          .map((x) => Number.parseInt(x))
-                          .map((x) => (Number.isNaN(x) ? 1 : x))
-                          .reduce((x, y) => x + y, 0);
-
-                const guessCard: CardInfo = {
-                    name: guessedCardFace.name,
-                    cmc: guessedCardCmc,
-                    colors: guessedCardFace.colors,
-                    types: guessedCardFace.type_line
-                        .replace(' — ', ' ')
-                        .split(' '),
-                    setName: guessedCardFace.set_name,
-                    releasedAt: guessedCardFace.released_at,
-                    id: guessedCardFace.id,
-                    image_uris: {
-                        art_crop: '',
-                        normal: ''
-                    }
-                };
-
-                if (guessCard.name === card.name) {
-                    if (replyCtx.chatInfo.id == ChatId.PauperChat) {
-                        replyCtx.reply.withText(
-                            `🎉 *Правильно\\!* Ти вгадав карту: [${escapeMarkdown(card.name)}](${card.image_uris.normal ?? ScryfallService.cardBack})`
-                        );
-                    } else await rewardPotuzhnoPoints(replyCtx, card);
-
-                    abortController.abort();
-                } else {
-                    const clues = this.generateClues(card, guessCard);
-                    replyCtx.reply
-                        .withText(
-                            escapeMarkdown(
-                                `❔ ${card.name.replaceAll(/./g, '?')} ❔\n\n${clues}\n\nСпробуй ще раз!`
-                            )
-                        )
-                        .captureReplies([/.+/], replyHandler, abortController);
-                }
-            } catch (e) {
+            if (guessedCards.length === 0) {
                 replyCtx.reply
-                    .withText('Помилка перевірки карти')
+                    .withText(
+                        escapeMarkdown(
+                            `Карта "${guess}" не знайдена. Спробуй іншу карту!`
+                        )
+                    )
                     .deleteAfter(DELETE_DELAY);
-                console.error(e);
+                return;
             }
-        };
 
-        postSendOperationController.captureReplies(
-            [/.+/],
-            replyHandler,
-            abortController
-        );
+            const guessedCardFace =
+                guessedCards.length > 1
+                    ? guessedCards.find(
+                          (x) =>
+                              x.name.replaceAll(/\S/g, ' ').toLowerCase() ==
+                              guess.replaceAll(/\S/g, ' ').toLowerCase()
+                      )
+                    : guessedCards[0];
+
+            if (!guessedCardFace) {
+                replyCtx.reply
+                    .withText(
+                        escapeMarkdown(
+                            `Карта "${guess}" не знайдена. Спробуй іншу карту!`
+                        )
+                    )
+                    .deleteAfter(DELETE_DELAY);
+                return;
+            }
+
+            const guessedCardCmc = guessedCardFace.cmc
+                ? guessedCardFace.cmc
+                : (guessedCardFace.mana_cost ?? '')
+                      .replaceAll(/[{}]/g, ' ')
+                      .split(' ')
+                      .filter(Boolean)
+                      .map((x) => Number.parseInt(x))
+                      .map((x) => (Number.isNaN(x) ? 1 : x))
+                      .reduce((x, y) => x + y, 0);
+
+            const guessCard: CardInfo = {
+                name: guessedCardFace.name,
+                cmc: guessedCardCmc,
+                colors: guessedCardFace.colors,
+                types: guessedCardFace.type_line.replace(' — ', ' ').split(' '),
+                setName: guessedCardFace.set_name,
+                releasedAt: guessedCardFace.released_at,
+                id: guessedCardFace.id,
+                image_uris: {
+                    art_crop: '',
+                    normal: ''
+                }
+            };
+
+            if (guessCard.name === card.name) {
+                if (replyCtx.chatInfo.id == ChatId.PauperChat) {
+                    replyCtx.reply.withText(
+                        `🎉 *Правильно\\!* Ти вгадав карту: [${escapeMarkdown(card.name)}](${card.image_uris.normal ?? ScryfallService.cardBack})`
+                    );
+                } else await rewardPotuzhnoPoints(replyCtx, card);
+
+                replyCtx.stopCapture();
+            } else {
+                const clues = this.generateClues(card, guessCard);
+                replyCtx.reply
+                    .withText(
+                        escapeMarkdown(
+                            `❔ ${card.name.replaceAll(/./g, '?')} ❔\n\n${clues}\n\nСпробуй ще раз!`
+                        )
+                    )
+                    .captureReplies({ continueCapture: true });
+            }
+        } catch (e) {
+            replyCtx.reply
+                .withText('Помилка перевірки карти')
+                .deleteAfter(DELETE_DELAY);
+            console.error(e);
+        }
     }
 
     async fetchRandomCard(

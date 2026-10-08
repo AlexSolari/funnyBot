@@ -51,9 +51,9 @@ export const potuzhno = new CommandBuilderWithState<PotuzhnoState>(
 
         ctx.reply.withReaction('🎉');
 
-        sendMessage(superPotuzhno, ctx, scoredPoints, state).captureReplies(
-            [/дякую/gi],
-            async (replyCtx) => {
+        sendMessage(superPotuzhno, ctx, scoredPoints, state).captureReplies({
+            trigger: [/дякую/gi],
+            handler: async (replyCtx) => {
                 switch (randomInt(0, 4)) {
                     case 0:
                         replyCtx.reply.withText(
@@ -75,9 +75,10 @@ export const potuzhno = new CommandBuilderWithState<PotuzhnoState>(
                 }
                 replyCtx.stopCapture();
             },
-            getAbortControllerWithTimeout(secondsToMilliseconds(30 as Seconds))
-                .controller
-        );
+            abortController: getAbortControllerWithTimeout(
+                secondsToMilliseconds(30 as Seconds)
+            ).controller
+        });
     })
     .withRatelimit(1)
     .build();
