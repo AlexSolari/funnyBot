@@ -56,6 +56,7 @@ export const dvach = new CommandBuilder('Reaction.Dvach')
             hasVideo(ctx.messageInfo) ||
             hasEmoji(ctx.messageInfo)
     )
+    .withRatelimit(1)
     .do(async (ctx) => {
         ctx.reply.withImage('dvach');
     })
