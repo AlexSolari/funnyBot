@@ -6,8 +6,10 @@ import {
     PersistentReplyCapture,
     ScheduledAction,
     Seconds,
+    TraceId,
     TypedEventEmitter
 } from 'chz-telegram-bot';
+import { EventType } from './types/customEvents';
 import {
     genshinCommands,
     mtgCommands,
@@ -134,6 +136,18 @@ async function shutdown() {
 }
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
+
+// Sent by the network failover script after switching interfaces
+process.on('SIGUSR2', () => {
+    console.log('Received SIGUSR2, reconnecting bots');
+    botOrchestrator.reconnect();
+
+    for (const bot of botOrchestrator.bots) {
+        bot.eventEmitter.emit(EventType.botReconnecting, {
+            traceId: `SignalHandler:${bot.name}-reconnect` as TraceId
+        });
+    }
+});
 
 process.on('uncaughtException', (error: Error, origin: string) => {
     console.error('[uncaughtException]');

@@ -1,6 +1,7 @@
 export const EventType = {
     requestStart: 'api.custom.requestStart',
-    requestEnd: 'api.custom.requestEnd'
+    requestEnd: 'api.custom.requestEnd',
+    botReconnecting: 'bot.custom.reconnecting'
 } as const;
 
 export type EventMap = {

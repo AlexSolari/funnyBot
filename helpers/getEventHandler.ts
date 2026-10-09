@@ -1,6 +1,7 @@
 import { BotEventType, TraceId, TypedEventEmitter } from 'chz-telegram-bot';
 import { createMonitoringEventHandler } from '../monitoring';
 import { sendBotPing } from './sendBotPing';
+import { EventType } from '../types/customEvents';
 
 export function getEventHandler(
     botName: string,
@@ -12,7 +13,11 @@ export function getEventHandler(
     return async (e: string, timestamp: number, data: unknown) => {
         monitoringHandler(e, timestamp, data);
 
-        if (e == BotEventType.botStarting || e == BotEventType.botStopping) {
+        if (
+            e == BotEventType.botStarting ||
+            e == BotEventType.botStopping ||
+            e == EventType.botReconnecting
+        ) {
             const { traceId } = data as { traceId: TraceId };
             await sendBotPing(
                 tokenProvider,

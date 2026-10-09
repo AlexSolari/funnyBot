@@ -7,7 +7,10 @@ export async function sendBotPing(
     observability: ObservabilityHelper,
     data: {
         botName: string;
-        event: 'bot.starting' | 'bot.stopping';
+        event:
+            | 'bot.starting'
+            | 'bot.stopping'
+            | typeof EventType.botReconnecting;
         timestamp: number;
     }
 ) {
@@ -27,7 +30,9 @@ export async function sendBotPing(
                 body: JSON.stringify({
                     chat_id: SpecificUsers.chz,
                     text: `${data.botName} - ${data.event}`
-                })
+                }),
+                keepalive: false,
+                signal: AbortSignal.timeout(15_000)
             }
         );
 
