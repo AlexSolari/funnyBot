@@ -20,6 +20,12 @@ export const dispute = new CommandBuilder('Reaction.Dispute')
             rule.reply(ctx);
         } else if (randomInt(0, 1) == 0) {
             ctx.reply.withReaction('🍌');
+
+            if (randomInt(0, 2) == 0) {
+                ctx.reply.withText('дефолтна паупер шиза');
+            } else {
+                ctx.skipCooldown();
+            }
         }
     })
     .build();
@@ -113,12 +119,24 @@ const rules: Rule[] = [
         reply: text('будуємо стіну. мексика заплатить')
     },
     {
+        when: (has) => has('Baleful Strix'),
+        reply: text('baleful slop')
+    },
+    {
+        when: (has) => has('Sneaky Snacker'),
+        reply: text('5ц моноред. ідеально для тих, хто не вміє рахувати до 5')
+    },
+    {
+        when: (has) => has('Khalni Garden'),
+        reply: text('до таймера цьой хуйньой будете грати')
+    },
+    {
         when: (_, basics) => basics.length == 5,
         reply: text("п'ять кольорів і нуль плану")
     },
     {
-        when: (_, basics) => basics.length == 1,
-        reply: text('один колір, одна клітинка мозку')
+        when: (has) => has('Cast Down'),
+        reply: text('ремувал пайл хартьфу')
     }
 ];
 
