@@ -1,26 +1,26 @@
 {
     "type": "module",
     "dependencies": {
-        "@mtcute/bun": "^0.32.4",
+        "@mtcute/bun": "^0.32.7",
         "async-sema": "^3.1.1",
         "cheerio": "^1.2.0",
-        "chz-telegram-bot": "0.9.1",
+        "chz-telegram-bot": "^0.9.2",
         "moment": "^2.31.0",
         "openai": "^6.49.0",
         "papaparse": "^5.7.0"
     },
     "devDependencies": {
         "@eslint/js": "^9.39.5",
-        "@types/bun": "^1.4.2",
+        "@types/bun": "^1.4.4",
         "@types/papaparse": "^5.5.2",
         "@types/qrcode-terminal": "^0.12.2",
-        "eslint": "^10.12.0",
+        "eslint": "^10.13.0",
         "qrcode-terminal": "^0.12.0",
         "typescript": "^6.0.3",
-        "typescript-eslint": "^8.71.1"
+        "typescript-eslint": "^8.72.1"
     },
     "scripts": {
-        "lint": "bunx eslint . && bunx tsc --noEmit",
+        "lint": "bunx eslint . && bunx tsc --noEmit && bun check",
         "build": "cd monitoring/dashboard && bun run build",
         "start": "bun index.ts"
     }
