@@ -11,7 +11,8 @@ import { UI_CONSTANTS } from '../utils/constants';
 
 interface TracesTableProps {
     readonly traces: Trace[];
-    readonly onTraceClick: (traceId: string) => void;
+    // Passes the trace itself: scheduled runs share a traceId, so it can't be looked up by id
+    readonly onTraceClick: (trace: Trace) => void;
 }
 
 type SortColumn = 'preview' | 'botName' | 'operationType' | 'duration' | 'ownDuration' | 'time';
@@ -167,12 +168,12 @@ function TracesTableComponent({ traces, onTraceClick }: TracesTableProps) {
                         const duration = getTraceDuration(trace);
                         const ownDuration = getOwnDuration(trace);
                         return (
-                            <tr key={trace.traceId}>
+                            <tr key={`${trace.traceId}-${trace.startTime}`}>
                                 <td>
                                     <button
                                         type="button"
                                         className="trace-id-button"
-                                        onClick={() => onTraceClick(trace.traceId)}
+                                        onClick={() => onTraceClick(trace)}
                                     >
                                         {getTracePreview(trace)}
                                     </button>

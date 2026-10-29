@@ -176,14 +176,9 @@ export default function App() {
                                 </button>
                             </div>
                         )}
-                        {isLoadingTrace && (
-                            <div className="loading-overlay">
-                                <div className="spinner"></div>
-                            </div>
-                        )}
                         <TracesTable
                             traces={tracesToDisplay}
-                            onTraceClick={handleTraceClick}
+                            onTraceClick={setSelectedTrace}
                         />
                     </div>
                 )}
@@ -194,6 +189,12 @@ export default function App() {
                             errors={data.recentErrors}
                             onTraceClick={handleTraceClick}
                         />
+                    </div>
+                )}
+
+                {isLoadingTrace && (
+                    <div className="loading-overlay">
+                        <div className="spinner"></div>
                     </div>
                 )}
             </div>

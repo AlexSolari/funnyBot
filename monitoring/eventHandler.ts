@@ -402,7 +402,9 @@ export function createMonitoringEventHandler(botName: string) {
                             {
                                 errorName: errData.error.name,
                                 errorMessage: errData.error.message
-                            }
+                            },
+                            undefined,
+                            'error'
                         );
                     }
                     metricsCollector.onError(

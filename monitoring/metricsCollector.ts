@@ -10,10 +10,16 @@ import {
     TraceSearchQuery,
     HeaviestCommand,
     CaptureStats,
-    TagValue
+    TagValue,
+    NullableMetricPoint
 } from './types';
 
-// Ring buffer for efficient fixed-size storage
+// Traces started by an incoming message, used for message latency stats
+const MESSAGE_OPERATION_TYPES: ReadonlySet<Trace['operationType']> = new Set([
+    'message',
+    'command'
+]);
+
 /**
  * Current time as epoch milliseconds with sub-millisecond precision.
  * `Date.now()` has 1 ms resolution, which rounds most message traces down to 0 ms.
@@ -22,6 +28,7 @@ function preciseNow(): number {
     return performance.timeOrigin + performance.now();
 }
 
+// Ring buffer for efficient fixed-size storage
 class RingBuffer<T> {
     private buffer: T[];
     private head = 0;
@@ -110,6 +117,8 @@ class TimeSeriesCounter {
     private readonly bucketSizeMs: number;
     private readonly maxBuckets: number;
     private lastCleanup = 0;
+    // Buckets only cover the last maxBuckets, so the lifetime total is kept separately
+    private total = 0;
     private static readonly CLEANUP_INTERVAL_MS = 100000;
 
     constructor(bucketSizeMs = 60000, maxBuckets = 60) {
@@ -121,6 +130,7 @@ class TimeSeriesCounter {
         const bucketKey =
             Math.floor(timestamp / this.bucketSizeMs) * this.bucketSizeMs;
         this.buckets.set(bucketKey, (this.buckets.get(bucketKey) || 0) + 1);
+        this.total++;
 
         // Throttle cleanup to avoid running on every increment
         if (
@@ -159,11 +169,7 @@ class TimeSeriesCounter {
     }
 
     getTotal(): number {
-        let total = 0;
-        for (const count of this.buckets.values()) {
-            total += count;
-        }
-        return total;
+        return this.total;
     }
 }
 
@@ -532,11 +538,9 @@ export class MetricsCollector {
                 parentSpanId: existingTrace.rootSpan.spanId,
                 operationName: spanName,
                 startTime: now,
-                endTime: 0,
-                duration: 0,
                 tags: { botName, ...tags },
                 logs: [],
-                status: 'pending' as TraceSpan['status']
+                status: 'pending'
             };
             existingTrace.spans.push(span);
             if (messagePreview && !existingTrace.messagePreview) {
@@ -549,11 +553,9 @@ export class MetricsCollector {
                 spanId,
                 operationName: spanName,
                 startTime: now,
-                endTime: 0,
-                duration: 0,
                 tags: { botName, ...tags },
                 logs: [],
-                status: 'pending' as TraceSpan['status']
+                status: 'pending'
             };
 
             const trace: Trace = {
@@ -587,7 +589,7 @@ export class MetricsCollector {
         // Find the most recent span with matching name that hasn't been completed
         for (let i = trace.spans.length - 1; i >= 0; i--) {
             const span = trace.spans[i];
-            if (span.operationName === spanName && span.endTime === 0) {
+            if (span.operationName === spanName && span.status === 'pending') {
                 const now = preciseNow();
                 span.endTime = now;
                 span.duration = now - span.startTime;
@@ -613,7 +615,8 @@ export class MetricsCollector {
         operationType: Trace['operationType'],
         eventName: string,
         tags: Record<string, TagValue> = {},
-        messagePreview?: string
+        messagePreview?: string,
+        status: TraceSpan['status'] = 'success'
     ): void {
         if (!traceId) return;
 
@@ -633,7 +636,7 @@ export class MetricsCollector {
                 duration: 0,
                 tags: { botName, ...tags },
                 logs: [],
-                status: 'success'
+                status
             };
             existingTrace.spans.push(span);
             // Update messagePreview if provided and not already set
@@ -654,7 +657,7 @@ export class MetricsCollector {
                 duration: 0,
                 tags: { botName, ...tags },
                 logs: [],
-                status: 'success'
+                status
             };
 
             const trace: Trace = {
@@ -1061,7 +1064,10 @@ export class MetricsCollector {
             totalScheduledTasks: this.scheduledTasksRun.getTotal(),
             totalApiRequests: this.apiRequestsSent.getTotal(),
             totalErrors: this.errorsCount.getTotal(),
-            activeTraces: this.traces.size,
+            // Ended traces stay in this.traces for a while for lookups
+            activeTraces: [...this.traces.values()].filter(
+                (t) => t.endTime === undefined
+            ).length,
             avgMessageLatency: this.calculateAverage(messageLatencyValues),
             avgCommandLatency: this.calculateAverage(commandLatencyValues),
             avgInlineLatency: this.calculateAverage(inlineLatencyValues),
@@ -1112,11 +1118,11 @@ export class MetricsCollector {
         };
     }
 
-    private getAvgLatencyPoints(): Array<{ timestamp: number; value: number }> {
+    private getAvgLatencyPoints(): NullableMetricPoint[] {
         const now = preciseNow();
         const bucketSizeMs = 60000;
         const maxBuckets = 60;
-        const result: Array<{ timestamp: number; value: number }> = [];
+        const result: NullableMetricPoint[] = [];
 
         // Group completed traces by time bucket and calculate avg latency per bucket
         const allTraces = this.traceRing.toArray();
@@ -1139,12 +1145,12 @@ export class MetricsCollector {
                 Math.floor((now - i * bucketSizeMs) / bucketSizeMs) *
                 bucketSizeMs;
             const bucket = bucketData.get(bucketKey);
-            const avg =
-                bucket && bucket.count > 0 ? bucket.sum / bucket.count : 0;
-            result.push({
-                timestamp: bucketKey,
-                value: Math.round(avg * 100) / 100
-            });
+            // Minutes without traces have no latency; null leaves a gap in the chart
+            const value =
+                bucket && bucket.count > 0
+                    ? Math.round((bucket.sum / bucket.count) * 100) / 100
+                    : null;
+            result.push({ timestamp: bucketKey, value });
         }
 
         return result;
@@ -1348,33 +1354,31 @@ export class MetricsCollector {
     }
 
     /**
-     * Completed traces: everything in the ring buffer plus active traces whose
-     * spans are all done, each counted once (see getAllTraces).
+     * Completed message traces. endTrace pushes every ended trace to the ring,
+     * which also holds stale traces that never ended - those are skipped, as
+     * are inline and scheduled traces, so they don't skew message latency.
      */
-    private getCompletedTraces(): Trace[] {
-        const completed = new Set(this.traceRing.toArray());
-        for (const trace of this.traces.values()) {
-            const hasPendingSpans = trace.spans.some(
-                (s) => s.status === 'pending'
+    private getCompletedMessageTraces(): Trace[] {
+        return this.traceRing
+            .toArray()
+            .filter(
+                (trace) =>
+                    trace.endTime !== undefined &&
+                    MESSAGE_OPERATION_TYPES.has(trace.operationType)
             );
-            if (!hasPendingSpans && trace.endTime !== undefined) {
-                completed.add(trace);
-            }
-        }
-        return [...completed];
     }
 
     /**
-     * Get latencies from completed traces for histogram.
+     * Get latencies from completed message traces for histogram.
      * Uses the same duration calculation as the frontend.
      */
     private getTraceBasedLatencies(): number[] {
-        return this.getCompletedTraces()
+        return this.getCompletedMessageTraces()
             .map((trace) => this.getTraceDuration(trace));
     }
 
     private getTraceBasedOwnLatencies(): number[] {
-        return this.getCompletedTraces()
+        return this.getCompletedMessageTraces()
             .map((trace) => this.getOwnTraceDuration(trace));
     }
 

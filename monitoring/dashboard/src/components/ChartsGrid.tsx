@@ -105,7 +105,8 @@ const logBarChartOptions: ChartOptions<'bar'> = {
                     formatLogTickLabel(value, (v) => v.toLocaleString())
             },
             grid: gridStyle,
-            min: 1
+            // Bars grow from the scale minimum, so at min: 1 a count of 1 would be invisible
+            min: 0.5
         }
     }
 };
@@ -171,7 +172,9 @@ export function ChartsGrid({
         datasets: [
             {
                 label: 'Avg Latency (ms)',
+                // null for minutes without traces, drawn as gaps
                 data: throughput.avgLatency?.map((p) => p.value) || [],
+                spanGaps: false,
                 borderColor: CHART_COLORS.latency,
                 backgroundColor: 'rgba(210,153,34,0.1)',
                 fill: true,
@@ -244,7 +247,7 @@ export function ChartsGrid({
                 </div>
             </div>
             <div className="chart-card">
-                <h3>Average Latency (rolling 1 min)</h3>
+                <h3>Average Latency (per minute)</h3>
                 <div className="chart-container">
                     <Line data={latencyData} options={logLatencyChartOptions} />
                 </div>

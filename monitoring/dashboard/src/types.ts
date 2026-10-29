@@ -28,6 +28,12 @@ export interface MetricPoint {
     value: number;
 }
 
+// value is null where there is no data for the bucket
+export interface NullableMetricPoint {
+    timestamp: number;
+    value: number | null;
+}
+
 export interface LatencyHistogramBucket {
     le: number;
     count: number;
@@ -40,7 +46,7 @@ export interface ThroughputMetrics {
     scheduledTasksRun: MetricPoint[];
     apiRequestsSent: MetricPoint[];
     errors: MetricPoint[];
-    avgLatency: MetricPoint[];
+    avgLatency: NullableMetricPoint[];
 }
 
 export interface CurrentStats {

@@ -93,7 +93,11 @@ export function WaterfallDiagram({
             <div className="waterfall-body">
                 {sortedSpans.map((span, index) => {
                     const spanStart = span.startTime - traceStartTime;
-                    const spanDuration = span.duration ?? 0;
+                    const isPending = span.status === 'pending';
+                    // Pending spans have no duration yet, draw them to the end of the timeline
+                    const spanDuration = isPending
+                        ? Math.max(effectiveDuration - spanStart, 0)
+                        : (span.duration ?? 0);
                     const spanEnd = span.startTime + spanDuration;
                     const leftPercent = Math.min((spanStart / effectiveDuration) * 100, 100);
                     const widthPercent = Math.min(
@@ -152,7 +156,7 @@ export function WaterfallDiagram({
                                             width: `${widthPercent}%`,
                                             backgroundColor: barColor
                                         }}
-                                        title={`${span.operationName}: +${formatLatency(spanStart)}${spanDuration > 0 ? ` (${formatLatency(spanDuration)})` : ''}`}
+                                        title={`${span.operationName}: +${formatLatency(spanStart)}${isPending ? ' (pending)' : ''}${!isPending && spanDuration > 0 ? ` (${formatLatency(spanDuration)})` : ''}`}
                                     >
                                         {overlapWidthPercent > 0 && (
                                             <span
@@ -165,7 +169,7 @@ export function WaterfallDiagram({
                                         )}
                                         {widthPercent > 8 && spanDuration > 0 && (
                                             <span className="waterfall-bar-label">
-                                                {spanDuration}ms
+                                                {isPending ? 'pending' : formatLatency(spanDuration)}
                                             </span>
                                         )}
                                     </div>
