@@ -14,7 +14,42 @@ import escapeMarkdown from '../helpers/escapeMarkdown';
 import { ObservabilityHelper } from '../types/observabilityHelper';
 import { EventType } from '../types/customEvents';
 
-const SCRYFALL_RATELIMIT_DELAY = 50 as Milliseconds;
+// https://scryfall.com/docs/api/rate-limits
+// search, named, random, collection: 2 req/s; everything else: 10 req/s.
+// manifest: 10 req/min — not used; needs its own bucket if added.
+// Exceeding the limit (HTTP 429) locks the client out for 30 seconds.
+const SCRYFALL_SEARCH_RATELIMIT_DELAY = 500 as Milliseconds;
+const SCRYFALL_DEFAULT_RATELIMIT_DELAY = 100 as Milliseconds;
+const SCRYFALL_LOCKOUT_DELAY = 30_000 as Milliseconds;
+const SCRYFALL_SEARCH_ENDPOINTS = ['search', 'named', 'random', 'collection'];
+
+const SCRYFALL_HEADERS = {
+    'User-Agent': 'funnyBot/1.0',
+    Accept: 'application/json'
+};
+
+class RateLimitBucket {
+    private readonly semaphore = new Sema(1);
+    private lockedOut = false;
+
+    constructor(private readonly delay: Milliseconds) {}
+
+    acquire() {
+        return this.semaphore.acquire();
+    }
+
+    lockOut() {
+        this.lockedOut = true;
+    }
+
+    async release() {
+        await setTimeout(
+            this.lockedOut ? SCRYFALL_LOCKOUT_DELAY : this.delay
+        );
+        this.lockedOut = false;
+        this.semaphore.release();
+    }
+}
 
 function getCardFaces(card: IScryfallCard) {
     return card.card_faces && card.card_faces[0].image_uris
@@ -46,7 +81,12 @@ function formatRules(rules: IScryfallRules) {
 
 class ScryfallSearchService {
     private readonly baseUrl = 'https://api.scryfall.com/cards/';
-    private readonly ratelimitSemaphore = new Sema(1);
+    private readonly searchBucket = new RateLimitBucket(
+        SCRYFALL_SEARCH_RATELIMIT_DELAY
+    );
+    private readonly defaultBucket = new RateLimitBucket(
+        SCRYFALL_DEFAULT_RATELIMIT_DELAY
+    );
     readonly cardBack =
         'https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg';
 
@@ -56,7 +96,13 @@ class ScryfallSearchService {
         signal: AbortSignal,
         observability: ObservabilityHelper
     ) {
-        await this.ratelimitSemaphore.acquire();
+        const bucket = SCRYFALL_SEARCH_ENDPOINTS.some((x) =>
+            endpoint.startsWith(x)
+        )
+            ? this.searchBucket
+            : this.defaultBucket;
+
+        await bucket.acquire();
 
         observability.emitter.emit(EventType.requestStart, {
             traceId: observability.traceId,
@@ -65,8 +111,16 @@ class ScryfallSearchService {
 
         try {
             const response = await fetch(`${this.baseUrl}${endpoint}`, {
-                signal
+                signal,
+                headers: SCRYFALL_HEADERS
             });
+
+            if (response.status == 429) {
+                bucket.lockOut();
+                throw new Error(
+                    'Scryfall API rate limit exceeded, locked out for 30 seconds'
+                );
+            }
 
             const data = (await response.json()) as TResponse;
 
@@ -80,8 +134,7 @@ class ScryfallSearchService {
 
             return transformer(data as Exclude<TResponse, IScryfallError>);
         } finally {
-            await setTimeout(SCRYFALL_RATELIMIT_DELAY);
-            this.ratelimitSemaphore.release();
+            await bucket.release();
             observability.emitter.emit(EventType.requestEnd, {
                 traceId: observability.traceId,
                 endpoint
