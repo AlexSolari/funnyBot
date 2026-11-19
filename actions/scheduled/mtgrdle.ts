@@ -1,7 +1,6 @@
 import { ChatId } from '../../secrets/chatIds';
 import { ScheduledActionBuilder } from 'chz-telegram-bot';
 import { Day } from '../../types/daysOfTheWeek';
-import moment from 'moment';
 import { mtgrdleService } from '../../services/mtgrdleService';
 
 export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
@@ -13,7 +12,7 @@ export const mtgrdle = new ScheduledActionBuilder('Scheduled.Mtgrdle')
         ChatId.PauperChat
     ])
     .do(async (ctx) => {
-        const today = moment().day();
+        const today = Temporal.Now.plainDateISO().dayOfWeek;
         const isWeekend = today == Day.Sunday || today == Day.Saturday;
         if (ctx.chatInfo.id == ChatId.LvivChat && !isWeekend) {
             return;

@@ -1,8 +1,7 @@
-import moment from 'moment';
-
 export default function getCurrentWeek() {
-    const firstDay = moment().startOf('isoWeek').format('YYYY-MM-DD');
-    const lastDay = moment().endOf('isoWeek').format('YYYY-MM-DD');
+    const today = Temporal.Now.plainDateISO();
+    const firstDay = today.subtract({ days: today.dayOfWeek - 1 });
+    const lastDay = firstDay.add({ days: today.daysInWeek - 1 });
 
-    return { firstDay, lastDay };
+    return { firstDay: firstDay.toString(), lastDay: lastDay.toString() };
 }

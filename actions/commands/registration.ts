@@ -5,8 +5,7 @@ import {
     IMWEventDetail
 } from '../../types/externalApiDefinitions/mw';
 import { ChatId } from '../../secrets/chatIds';
-import { ChatInfo, secondsToMilliseconds } from 'chz-telegram-bot';
-import moment, { Moment } from 'moment';
+import { ChatInfo } from 'chz-telegram-bot';
 import { CommandBuilder } from '../../helpers/commandBuilder';
 import { Format } from '../../types/mtgFormats';
 import { traceFetch } from '../../helpers/fetchWithObservability';
@@ -28,7 +27,7 @@ const daysMap = {
 } as Record<string, string>;
 
 type EventInfo = {
-    date: Moment;
+    date: Temporal.ZonedDateTime;
     dateString: string | null;
     name: string;
     id: number;
@@ -38,11 +37,10 @@ type EventInfo = {
     link: string;
 };
 
-const weekdayNameRegex =
-    /неділя|понеділок|вівторок|середа|четвер|п’ятниця|субота/;
+const eventTimeZone = 'Europe/Kyiv';
 
-const spellseekerDateFormatter = new Intl.DateTimeFormat('uk-UA', {
-    timeZone: 'Europe/Kyiv',
+const eventDateFormatter = new Intl.DateTimeFormat('uk-UA', {
+    timeZone: eventTimeZone,
     weekday: 'long',
     day: '2-digit',
     month: 'long',
@@ -99,6 +97,38 @@ export const registration = new CommandBuilder('Reaction.Registration')
     })
     .build();
 
+/** Formats as e.g. `пʼятницю, 21 листопада, 18:00` (accusative weekday). */
+function formatEventDate(date: Temporal.ZonedDateTime): string {
+    const dateParts = Object.fromEntries(
+        eventDateFormatter
+            .formatToParts(date.toInstant())
+            .map(({ type, value }) => [type, value])
+    );
+    const weekday = dateParts.weekday.replace(/[’ʼ']/g, '’');
+
+    return `${daysMap[weekday] ?? weekday}, ${dateParts.day} ${dateParts.month}, ${dateParts.hour}:${dateParts.minute}`;
+}
+
+/**
+ * Sheet values are expected to carry an offset; values without one are read
+ * as UTC wall-clock time. Returns null for unparseable values.
+ */
+function parseSpellseekerDate(value: string): Temporal.ZonedDateTime | null {
+    try {
+        return Temporal.Instant.from(value).toZonedDateTimeISO(eventTimeZone);
+    } catch {
+        // No offset in the value, fall through.
+    }
+
+    try {
+        return Temporal.PlainDateTime.from(value)
+            .toZonedDateTime('UTC')
+            .withTimeZone(eventTimeZone);
+    } catch {
+        return null;
+    }
+}
+
 function buildUsedSpacesText(event: EventInfo): string {
     if (event.usedSpaces == -1) return '';
 
@@ -130,7 +160,7 @@ async function loadEvents(format: Format, observability: ObservabilityHelper) {
         showRetryLaterMessage = true;
     }
 
-    eventInfos.sort((a, b) => a.date.valueOf() - b.date.valueOf());
+    eventInfos.sort((a, b) => Temporal.ZonedDateTime.compare(a.date, b.date));
 
     return { eventInfos, showRetryLaterMessage };
 }
@@ -175,42 +205,32 @@ async function fetchEventsFromMagicWorld(
         return [];
     }
 
-    const today = moment().startOf('day').format('YYYY-MM-DD');
-    const month = moment().add(1, 'months').startOf('day').format('YYYY-MM-DD');
+    const today = Temporal.Now.plainDateISO();
+    const start = today.toString();
+    const end = today.add({ months: 1 }).toString();
 
     const response = await traceFetch(
-        `https://api.wlaunch.net/v1/company/7ea091e0-359a-11eb-86df-9f45a44f29bd/branch/7ea10724-359a-11eb-86df-9f45a44f29bd/slot/gt/resource?start=${today}&end=${month}&source=WIDGET&withDiscounts=true&preventBookingEnabled=true`,
+        `https://api.wlaunch.net/v1/company/7ea091e0-359a-11eb-86df-9f45a44f29bd/branch/7ea10724-359a-11eb-86df-9f45a44f29bd/slot/gt/resource?start=${start}&end=${end}&source=WIDGET&withDiscounts=true&preventBookingEnabled=true`,
         observability
     );
     const data = (await response.json()) as IMWApiResponse;
-    const slots = data.slots.flatMap((x) =>
-        x.date_slots.map<IMwApiResponseDateSlot>((ds) => ({
-            date: moment.utc(ds.date),
-            slots: ds.slots
-        }))
-    );
 
-    return slots
-        .filter((x) => x.slots.length > 0)
-        .sort((a, b) => a.date.valueOf() - b.date.valueOf())
-        .flatMap(({ date, slots }) =>
-            slots.map((x) => {
-                const result = x as IMWEventDetail & { dateObject: Moment };
-
-                result.dateObject = moment.utc(
-                    date.valueOf() + secondsToMilliseconds(x.time.start_time)
-                );
-                result.date = result.dateObject
-                    .locale('uk')
-                    .format('dddd, DD MMMM, HH:mm')
-                    .replace(weekdayNameRegex, (day) => daysMap[day]);
-                return result;
-            })
+    return data.slots
+        .flatMap((x) => x.date_slots)
+        .flatMap(({ date, slots }: IMwApiResponseDateSlot) =>
+            slots.map((x: IMWEventDetail) => ({
+                ...x,
+                // MW reports local wall-clock time: a date plus seconds since midnight.
+                dateObject: Temporal.PlainDate.from(date)
+                    .toPlainDateTime()
+                    .add({ seconds: x.time.start_time })
+                    .toZonedDateTime(eventTimeZone)
+            }))
         )
         .filter((x) => x.gt.service?.name?.includes(serviceName))
         .map<EventInfo>((x) => ({
             date: x.dateObject,
-            dateString: x.date,
+            dateString: formatEventDate(x.dateObject),
             name:
                 '[Magic World] ' +
                 (x.gt.name ?? x.gt.service?.name ?? serviceName),
@@ -236,7 +256,8 @@ async function loadSpellseekerEvents(
     const { data, errors } = Papa.parse<SpellseekerEventDto>(csv, {
         header: true,
         skipEmptyLines: true,
-        dynamicTyping: true,
+        // Papa turns ISO date strings into `Date`s; keep them as strings for Temporal.
+        dynamicTyping: (field) => field !== 'startDatetime',
         transformHeader: (header) => spellseekerHeaderMap[header] ?? header
     });
 
@@ -249,30 +270,29 @@ async function loadSpellseekerEvents(
         });
     }
 
+    const now = Temporal.Now.instant();
+
     return await Promise.all(
         data
             .filter(
                 (x) =>
                     x.registration == 'open' &&
                     x.startDatetime &&
-                    moment.utc(x.startDatetime).isAfter(moment.utc()) &&
                     x.tags
                         ?.toLowerCase()
                         .split(/\s+/)
                         .includes(`#${formatName}`)
             )
+            .map((x) => ({
+                ...x,
+                date: parseSpellseekerDate(x.startDatetime)
+            }))
+            .filter(
+                (x): x is typeof x & { date: Temporal.ZonedDateTime } =>
+                    x.date != null &&
+                    Temporal.Instant.compare(x.date.toInstant(), now) > 0
+            )
             .map<Promise<EventInfo>>(async (x) => {
-                const date = moment.utc(x.startDatetime);
-                const dateParts = Object.fromEntries(
-                    spellseekerDateFormatter
-                        .formatToParts(date.toDate())
-                        .map(({ type, value }) => [type, value])
-                );
-                const weekday = dateParts.weekday.replace(
-                    /[\u2019\u02bc']/g,
-                    '’'
-                );
-
                 const poll = await traceTelegramUserCall(
                     'getPollResults',
                     observability,
@@ -284,8 +304,8 @@ async function loadSpellseekerEvents(
                 );
 
                 return {
-                    date: date,
-                    dateString: `${daysMap[weekday] ?? weekday}, ${dateParts.day} ${dateParts.month}, ${dateParts.hour}:${dateParts.minute}`,
+                    date: x.date,
+                    dateString: formatEventDate(x.date),
                     name: '[SpellSeeker] ' + x.title,
                     id: x.id,
                     spaces: 0,

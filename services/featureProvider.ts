@@ -11,7 +11,7 @@ class FeatureProvider {
     private readonly filePath: string;
     private readonly storagePath: string;
     private config!: BotFeatureSetsConfiguration;
-    private lastModifiedDate!: Date;
+    private lastModified!: Temporal.Instant;
 
     private readonly disabledFeature: ActionFeatureSet = {
         description: '',
@@ -81,14 +81,15 @@ class FeatureProvider {
             await this.useDefaultConfig(defaultConfig);
         }
 
-        this.lastModifiedDate = new Date();
+        this.lastModified = Temporal.Now.instant();
 
         setInterval(
             async () => {
-                const stats = await stat(this.filePath);
+                const stats = await stat(this.filePath, { bigint: true });
+                const modified = new Temporal.Instant(stats.mtimeNs);
 
-                if (stats.mtime > this.lastModifiedDate) {
-                    this.lastModifiedDate = stats.mtime;
+                if (Temporal.Instant.compare(modified, this.lastModified) > 0) {
+                    this.lastModified = modified;
 
                     const fileContent = await readFile(this.filePath, {
                         encoding: 'utf-8',

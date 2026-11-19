@@ -1,6 +1,5 @@
 import { load } from 'cheerio';
 import escapeMarkdown from '../../helpers/escapeMarkdown';
-import moment from 'moment';
 import { ChatId } from '../../secrets/chatIds';
 import { Format } from '../../types/mtgFormats';
 import {
@@ -9,9 +8,17 @@ import {
     ScheduledActionBuilder
 } from 'chz-telegram-bot';
 
+function toUsDateString(date: Temporal.PlainDate) {
+    const month = String(date.month).padStart(2, '0');
+    const day = String(date.day).padStart(2, '0');
+
+    return `${month}/${day}/${date.year}`;
+}
+
 async function loadTournaments(formatName: Format): Promise<string> {
-    const today = moment().format('MM/DD/YYYY');
-    const yesterday = moment().subtract(1, 'day').format('MM/DD/YYYY');
+    const now = Temporal.Now.plainDateISO();
+    const today = toUsDateString(now);
+    const yesterday = toUsDateString(now.subtract({ days: 1 }));
 
     const response = await fetch(
         `https://www.mtggoldfish.com/tournament_searches/create?utf8=%E2%9C%93&tournament_search%5Bname%5D=&tournament_search%5Bformat%5D=${formatName}&tournament_search%5Bdate_range%5D=${yesterday}+-+${today}&commit=Search`

@@ -1,5 +1,4 @@
 import getCurrentWeek from '../../helpers/getWeek';
-import moment from 'moment';
 import {
     IMWApiResponse,
     IMWEventDetail
@@ -19,9 +18,9 @@ export const lowCount = new ScheduledActionBuilder('Scheduled.LowCount')
     .in([ChatId.PioneerChat, ChatId.ModernChat])
     .do(async (ctx) => {
         const currentWeek = getCurrentWeek();
-        const today = moment().day();
+        const today = Temporal.Now.plainDateISO().dayOfWeek;
 
-        if (today >= Day.Friday || today == Day.Sunday) {
+        if (today >= Day.Friday) {
             const response = await traceFetch(
                 `https://api.wlaunch.net/v1/company/7ea091e0-359a-11eb-86df-9f45a44f29bd/branch/7ea10724-359a-11eb-86df-9f45a44f29bd/slot/gt/resource?start=${currentWeek.firstDay}&end=${currentWeek.lastDay}&source=WIDGET&withDiscounts=true&preventBookingEnabled=true`,
                 getObservability(ctx)

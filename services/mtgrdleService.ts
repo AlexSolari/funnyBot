@@ -272,8 +272,8 @@ class MtgrdleService {
             return `🟩 Сет: ${targetCard.setName}`;
         }
 
-        const targetYear = new Date(targetCard.releasedAt).getFullYear();
-        const guessYear = new Date(guessCard.releasedAt).getFullYear();
+        const targetYear = Temporal.PlainDate.from(targetCard.releasedAt).year;
+        const guessYear = Temporal.PlainDate.from(guessCard.releasedAt).year;
 
         let arrow = '';
         if (targetYear > guessYear) {

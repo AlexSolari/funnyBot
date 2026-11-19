@@ -1,8 +1,6 @@
 import { Seconds } from 'chz-telegram-bot';
-import { Moment } from 'moment';
 
 export interface IMWEventDetail {
-    date: string;
     id: number;
     gt: {
         name: string | null;
@@ -10,11 +8,13 @@ export interface IMWEventDetail {
         used_space: number;
         service?: { name: string | null };
     };
+    /** Seconds since local midnight of the parent date slot. */
     time: { start_time: Seconds };
 }
 
 export interface IMwApiResponseDateSlot {
-    date: Moment;
+    /** Local calendar date, `YYYY-MM-DD`. */
+    date: string;
     slots: IMWEventDetail[];
 }
 

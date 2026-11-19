@@ -3,6 +3,12 @@ import { createMonitoringEventHandler } from '../monitoring';
 import { sendBotPing } from './sendBotPing';
 import { EventType } from '../types/customEvents';
 
+function formatTimestamp(epochMilliseconds: number) {
+    return Temporal.Instant.fromEpochMilliseconds(epochMilliseconds).toString({
+        fractionalSecondDigits: 3
+    });
+}
+
 export function getEventHandler(
     botName: string,
     eventEmitter: TypedEventEmitter,
@@ -31,7 +37,7 @@ export function getEventHandler(
 
         if (e.startsWith('error'))
             console.error(
-                `${botName} - ${new Date(timestamp).toISOString()} - ${e} - ${JSON.stringify(data)}`
+                `${botName} - ${formatTimestamp(timestamp)} - ${e} - ${JSON.stringify(data)}`
             );
 
         if (
@@ -41,7 +47,7 @@ export function getEventHandler(
             !e.startsWith('inline.processing')
         )
             console.log(
-                `${botName} - ${new Date(timestamp).toISOString()} - ${e} - ${JSON.stringify(data)}`
+                `${botName} - ${formatTimestamp(timestamp)} - ${e} - ${JSON.stringify(data)}`
             );
     };
 }
