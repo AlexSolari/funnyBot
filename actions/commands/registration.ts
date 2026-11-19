@@ -254,7 +254,12 @@ async function loadSpellseekerEvents(
             .filter(
                 (x) =>
                     x.registration == 'open' &&
-                    x.tags.toLowerCase().split(/\s+/).includes(`#${formatName}`)
+                    x.startDatetime &&
+                    moment.utc(x.startDatetime).isAfter(moment.utc()) &&
+                    x.tags
+                        ?.toLowerCase()
+                        .split(/\s+/)
+                        .includes(`#${formatName}`)
             )
             .map<Promise<EventInfo>>(async (x) => {
                 const date = moment.utc(x.startDatetime);

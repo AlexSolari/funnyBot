@@ -3,6 +3,6 @@ export type SpellseekerEventDto = {
     title: string;
     startDatetime: string;
     registration: string;
-    tags: string;
+    tags: string | null;
     link: string;
 };
