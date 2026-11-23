@@ -1,6 +1,6 @@
 import { EventType } from '../types/customEvents';
 import { ObservabilityHelper } from '../types/observabilityHelper';
-import { emitError } from './emitError';
+import { wrapError } from './emitError';
 
 export function traceFetch(
     url: string,
@@ -15,9 +15,7 @@ export function traceFetch(
 
     return fetch(url, options)
         .catch((error) => {
-            emitError(observability, `Failed to fetch ${url}`, error);
-
-            throw error;
+            throw wrapError(`Failed to fetch ${url}`, error);
         })
         .finally(() => {
             observability.emitter.emit(EventType.requestEnd, {
