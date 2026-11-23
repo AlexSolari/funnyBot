@@ -2,6 +2,7 @@ import { TelegramClient } from '@mtcute/bun';
 import credentials from '../secrets/telegramApiCredentials.json';
 import { EventType } from '../types/customEvents';
 import { ObservabilityHelper } from '../types/observabilityHelper';
+import { emitError } from '../helpers/emitError';
 
 /**
  * Options for the MTProto user client, shared with `scripts/telegramLogin.ts` so both use the same session.
@@ -93,12 +94,7 @@ export async function traceTelegramUserCall<T>(
     try {
         return await call(client);
     } catch (error) {
-        observability.emitter.emit('error.generic', {
-            traceId: observability.traceId,
-            error: new Error(
-                `Failed to call ${endpoint}: ${(error as Error).message}`
-            )
-        });
+        emitError(observability, `Failed to call ${endpoint}`, error);
 
         throw error;
     } finally {

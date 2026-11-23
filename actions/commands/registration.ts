@@ -10,6 +10,7 @@ import { CommandBuilder } from '../../helpers/commandBuilder';
 import { Format } from '../../types/mtgFormats';
 import { traceFetch } from '../../helpers/fetchWithObservability';
 import { getObservability } from '../../helpers/getObservability';
+import { emitError } from '../../helpers/emitError';
 import { ObservabilityHelper } from '../../types/observabilityHelper';
 import { SpellseekerEventDto } from '../../types/externalApiDefinitions/event';
 import Papa from 'papaparse';
@@ -149,14 +150,36 @@ async function loadEvents(format: Format, observability: ObservabilityHelper) {
     if (magicWorldResult.status === 'fulfilled') {
         eventInfos.push(...magicWorldResult.value);
     } else {
-        console.error(magicWorldResult.reason);
+        emitError(
+            observability,
+            'Failed to load Magic World events',
+            magicWorldResult.reason
+        );
         showRetryLaterMessage = true;
     }
 
     if (spellseekerResult.status === 'fulfilled') {
-        eventInfos.push(...spellseekerResult.value);
+        // Each event loads on its own, so one failed poll lookup drops only that event.
+        for (const eventResult of await Promise.allSettled(
+            spellseekerResult.value
+        )) {
+            if (eventResult.status === 'fulfilled') {
+                eventInfos.push(eventResult.value);
+            } else {
+                emitError(
+                    observability,
+                    'Failed to load a Spellseeker event',
+                    eventResult.reason
+                );
+                showRetryLaterMessage = true;
+            }
+        }
     } else {
-        console.error(spellseekerResult.reason);
+        emitError(
+            observability,
+            'Failed to load Spellseeker events',
+            spellseekerResult.reason
+        );
         showRetryLaterMessage = true;
     }
 
@@ -244,7 +267,7 @@ async function fetchEventsFromMagicWorld(
 async function loadSpellseekerEvents(
     formatName: Format,
     observability: ObservabilityHelper
-): Promise<EventInfo[]> {
+): Promise<Promise<EventInfo>[]> {
     if (formatName != Format.Pioneer && formatName != Format.Pauper) {
         return [];
     }
@@ -262,60 +285,53 @@ async function loadSpellseekerEvents(
     });
 
     if (errors.length > 0) {
-        observability.emitter.emit('error.generic', {
-            traceId: observability.traceId,
-            error: new Error(
-                `Failed to parse CSV from Google Sheets: ${errors.map((e) => e.message).join('; ')}`
-            )
-        });
+        emitError(
+            observability,
+            `Failed to parse CSV from Google Sheets: ${errors.map((e) => e.message).join('; ')}`
+        );
     }
 
     const now = Temporal.Now.instant();
 
-    return await Promise.all(
-        data
-            .filter(
-                (x) =>
-                    x.registration == 'open' &&
-                    x.startDatetime &&
-                    x.tags
-                        ?.toLowerCase()
-                        .split(/\s+/)
-                        .includes(`#${formatName}`)
-            )
-            .map((x) => ({
-                ...x,
-                date: parseSpellseekerDate(x.startDatetime)
-            }))
-            .filter(
-                (x): x is typeof x & { date: Temporal.ZonedDateTime } =>
-                    x.date != null &&
-                    Temporal.Instant.compare(x.date.toInstant(), now) > 0
-            )
-            .map<Promise<EventInfo>>(async (x) => {
-                const poll = await traceTelegramUserCall(
-                    'getPollResults',
-                    observability,
-                    (client) =>
-                        client.getPollResults({
-                            chatId: -1003151970401,
-                            message: parseInt(x.link.split('/').pop() ?? '0')
-                        })
-                );
+    return data
+        .filter(
+            (x) =>
+                x.registration == 'open' &&
+                x.startDatetime &&
+                x.tags?.toLowerCase().split(/\s+/).includes(`#${formatName}`)
+        )
+        .map((x) => ({
+            ...x,
+            date: parseSpellseekerDate(x.startDatetime)
+        }))
+        .filter(
+            (x): x is typeof x & { date: Temporal.ZonedDateTime } =>
+                x.date != null &&
+                Temporal.Instant.compare(x.date.toInstant(), now) > 0
+        )
+        .map<Promise<EventInfo>>(async (x) => {
+            const poll = await traceTelegramUserCall(
+                'getPollResults',
+                observability,
+                (client) =>
+                    client.getPollResults({
+                        chatId: -1003151970401,
+                        message: parseInt(x.link.split('/').pop() ?? '0')
+                    })
+            );
 
-                return {
-                    date: x.date,
-                    dateString: formatEventDate(x.date),
-                    name: '[SpellSeeker] ' + x.title,
-                    id: x.id,
-                    spaces: 0,
-                    usedSpaces: poll.answers.filter((a) => a.text == 'Буду')[0]
-                        .voters,
-                    potentialSpaces: poll.answers.filter(
-                        (a) => a.text == 'Думаю'
-                    )[0].voters,
-                    link: x.link.replace('c/3151970401', 'skyhobbyshop/2')
-                };
-            })
-    );
+            return {
+                date: x.date,
+                dateString: formatEventDate(x.date),
+                name: '[SpellSeeker] ' + x.title,
+                id: x.id,
+                spaces: 0,
+                usedSpaces: poll.answers.filter((a) => a.text == 'Буду')[0]
+                    .voters,
+                potentialSpaces: poll.answers.filter(
+                    (a) => a.text == 'Думаю'
+                )[0].voters,
+                link: x.link.replace('c/3151970401', 'skyhobbyshop/2')
+            };
+        });
 }

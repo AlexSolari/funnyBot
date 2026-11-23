@@ -10,6 +10,7 @@ import {
 import { potuzhno } from '../actions/commands/potuzhno';
 import escapeMarkdown from '../helpers/escapeMarkdown';
 import { getObservability } from '../helpers/getObservability';
+import { emitError } from '../helpers/emitError';
 import { mtgrdleCapture } from '../actions/persistentCaptures/mtgrdleCapture';
 import { ChatId } from '../secrets/chatIds';
 import { ObservabilityHelper } from '../types/observabilityHelper';
@@ -179,7 +180,11 @@ class MtgrdleService {
             replyCtx.reply
                 .withText('Помилка перевірки карти')
                 .deleteAfter(DELETE_DELAY);
-            console.error(e);
+            emitError(
+                getObservability(replyCtx),
+                'Failed to check mtgrdle guess',
+                e
+            );
         }
     }
 

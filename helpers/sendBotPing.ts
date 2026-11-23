@@ -1,6 +1,7 @@
 import { EventType } from '../types/customEvents';
 import { ObservabilityHelper } from '../types/observabilityHelper';
 import { SpecificUsers } from '../secrets/userIds';
+import { emitError } from './emitError';
 
 export async function sendBotPing(
     tokenProvider: () => Promise<string>,
@@ -8,9 +9,7 @@ export async function sendBotPing(
     data: {
         botName: string;
         event:
-            | 'bot.starting'
-            | 'bot.stopping'
-            | typeof EventType.botReconnecting;
+            'bot.starting' | 'bot.stopping' | typeof EventType.botReconnecting;
         timestamp: number;
     }
 ) {
@@ -39,12 +38,12 @@ export async function sendBotPing(
         if (!response.ok)
             throw new Error(`${response.status} ${await response.text()}`);
     } catch (error) {
-        observability.emitter.emit('error.generic', {
-            traceId: observability.traceId,
-            error: new Error(
-                `Failed to call ${endpoint}: ${(error as Error).message}`
-            )
-        });
+        // Don't pass `error` as the cause: Bun puts the request URL (which holds the bot token)
+        // on fetch errors as `path`, and the error log writes out every field of a cause.
+        emitError(
+            observability,
+            `Failed to call ${endpoint}: ${(error as Error).message}`
+        );
     } finally {
         observability.emitter.emit(EventType.requestEnd, {
             traceId: observability.traceId,
